@@ -1,0 +1,171 @@
+body {
+  margin: 0;
+  font-family: 'Open Sans', sans-serif;
+  background-color: #2e2e2e;
+  color: white;
+  scroll-behavior: smooth;
+}
+
+/* HERO */
+.hero {
+  background: url('chalkboard-bg.jpg') center/cover no-repeat;
+  text-align: center;
+  padding: 100px 20px;
+}
+.logo {
+  width: 120px;
+}
+.hero h1 {
+  font-family: 'Pacifico', cursive;
+  font-size: 3rem;
+  margin: 20px 0 10px;
+}
+.tagline {
+  font-size: 1.3rem;
+  margin-bottom: 25px;
+}
+.btn {
+  background-color: #00b874;
+  color: white;
+  text-decoration: none;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+.btn:hover {
+  background-color: #00d58a;
+}
+
+/* PROBLEM */
+.problem {
+  background-color: #333;
+  text-align: center;
+  padding: 80px 20px;
+}
+.problem h2 {
+  font-family: 'Pacifico', cursive;
+  font-size: 2rem;
+}
+.problem p {
+  font-size: 1.1rem;
+  margin-top: 10px;
+}
+.sub {
+  font-style: italic;
+  color: #ccc;
+}
+
+/* FEATURES */
+.features {
+  background-color: #444;
+  text-align: center;
+  padding: 80px 20px;
+}
+.features h2 {
+  font-family: 'Pacifico', cursive;
+  margin-bottom: 40px;
+}
+.feature-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+}
+.card {
+  background-color: #555;
+  padding: 25px;
+  border-radius: 12px;
+  width: 280px;
+  transition: transform 0.3s;
+}
+.card:hover {
+  transform: translateY(-8px);
+}
+.card h3 {
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+}
+
+/* SURVEY */
+.survey {
+  background-color: #383838;
+  text-align: center;
+  padding: 80px 20px;
+}
+.pie {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: conic-gradient(#00b874 0% 100%, #333 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 auto 20px;
+  flex-direction: column;
+}
+.pie span {
+  font-size: 1rem;
+  color: #fff;
+}
+
+/* QUOTE SECTION */
+.quote-section {
+  background-color: #2e2e2e;
+  padding: 70px 20px;
+  text-align: center;
+}
+blockquote {
+  font-family: 'Pacifico', cursive;
+  font-size: 1.6rem;
+  color: #fff;
+}
+blockquote span {
+  display: block;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1rem;
+  color: #ccc;
+  margin-top: 10px;
+}
+
+/* FUN FACTS */
+.fun-facts {
+  background-color: #444;
+  padding: 80px 20px;
+  text-align: center;
+}
+.facts-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 30px;
+}
+.fact {
+  background-color: #555;
+  padding: 25px;
+  border-radius: 10px;
+  width: 280px;
+}
+.fact h3 {
+  margin-bottom: 10px;
+}
+
+/* FOOTER */
+footer {
+  background-color: #222;
+  text-align: center;
+  padding: 20px;
+  font-size: 0.9rem;
+  color: #bbb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .feature-grid, .facts-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+}
