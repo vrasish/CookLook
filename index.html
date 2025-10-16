@@ -287,25 +287,91 @@
     // ✅ Analyze image using a working food model
     async function analyzeImage(file) {
       try {
-        // Convert image to binary (the model accepts raw image bytes)
-        const imageBytes = await file.arrayBuffer();
+        // Check if API key is set
+        if (HF_API_KEY === "hf_YourKeyHere" || !HF_API_KEY) {
+          alert("⚠️ Please set your Hugging Face API key in config.json to use ingredient detection.");
+          // Fallback: simulate detection for demo
+          const mockIngredients = ["carrot", "onion", "tomato"];
+          showDetectedIngredients(mockIngredients);
+          await getRecipes(mockIngredients);
+          return;
+        }
 
-        const response = await fetch(
+        // Test API key validity
+        if (!HF_API_KEY.startsWith('hf_')) {
+          alert("⚠️ Invalid API key format. Please check your Hugging Face API key in config.json");
+          const mockIngredients = ["carrot", "onion", "tomato"];
+          showDetectedIngredients(mockIngredients);
+          await getRecipes(mockIngredients);
+          return;
+        }
+
+        // Convert image to base64 for better compatibility
+        const base64Image = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.readAsDataURL(file);
+        });
+
+        // Try the primary model first
+        let response = await fetch(
           "https://api-inference.huggingface.co/models/keremberke/food-image-classification",
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${HF_API_KEY}`,
-              "Content-Type": "image/jpeg"
+              "Authorization": `Bearer ${HF_API_KEY}`,
+              "Content-Type": "application/json"
             },
-            body: imageBytes
+            body: JSON.stringify({
+              inputs: base64Image
+            })
           }
         );
+
+        // If primary model fails, try alternative model
+        if (!response.ok) {
+          console.log("Primary model failed, trying alternative...");
+          response = await fetch(
+            "https://api-inference.huggingface.co/models/google/vit-base-patch16-224",
+            {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${HF_API_KEY}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                inputs: base64Image
+              })
+            }
+          );
+        }
 
         if (!response.ok) {
           const errText = await response.text();
           console.error("Model error:", errText);
-          alert("⚠️ Model error: " + errText);
+          
+          // Check if response is HTML (error page)
+          if (errText.includes('<!doctype html>') || errText.includes('<html')) {
+            alert("⚠️ API Error: The model service is temporarily unavailable. Please try again later or use the demo mode.");
+            // Fallback to demo mode
+            const mockIngredients = ["carrot", "onion", "tomato"];
+            showDetectedIngredients(mockIngredients);
+            await getRecipes(mockIngredients);
+            return;
+          }
+          
+          alert("⚠️ Model error: " + errText.substring(0, 100) + "...");
+          return;
+        }
+
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.error("Non-JSON response:", await response.text());
+          alert("⚠️ API returned unexpected format. Using demo mode.");
+          const mockIngredients = ["carrot", "onion", "tomato"];
+          showDetectedIngredients(mockIngredients);
+          await getRecipes(mockIngredients);
           return;
         }
 
