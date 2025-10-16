@@ -129,9 +129,29 @@
         .then(() => console.log("Service Worker registered!"));
     }
 
-    // ✅ API Keys
-    const HF_API_KEY = "YOUR_HF_API_KEY";  // your Hugging Face key
-    const SPOON_KEY = "d774b10f22674128a2db72604dd1d5ed";        // your Spoonacular key
+    // ✅ API Keys - Load from config
+    let HF_API_KEY = "";
+    let SPOON_KEY = "d774b10f22674128a2db72604dd1d5ed";
+    
+    // Load API keys from config file
+    async function loadConfig() {
+      try {
+        const response = await fetch('config.json');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const config = await response.json();
+        HF_API_KEY = config.HF_API_KEY || "";
+        SPOON_KEY = config.SPOON_KEY || SPOON_KEY;
+        console.log("✅ Config loaded successfully");
+      } catch (err) {
+        console.warn("⚠️ Config file not found, using demo mode");
+        // No fallback key - will use demo mode instead
+      }
+    }
+    
+    // Initialize config
+    loadConfig();
 
     // ✅ Elements
     const scanBtn = document.getElementById("scanBtn");
@@ -287,8 +307,11 @@
     // ✅ Analyze image using a working food model
     async function analyzeImage(file) {
       try {
+        // Ensure config is loaded
+        await loadConfig();
+        
         // Check if API key is set
-        if (HF_API_KEY === "hf_YourKeyHere" || !HF_API_KEY) {
+        if (!HF_API_KEY || HF_API_KEY === "") {
           alert("⚠️ Please set your Hugging Face API key in config.json to use ingredient detection.");
           // Fallback: simulate detection for demo
           const mockIngredients = ["carrot", "onion", "tomato"];
