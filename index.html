@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CookLook - Scan Your Fridge, Cook Great Meals</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/png" href="icon-192.png">
-    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="/CookLook/icon-192.png">
+    <link rel="manifest" href="/CookLook/manifest.json">
     <meta name="theme-color" content="#f9b234">
     
     <!-- iOS PWA support -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="CookLook">
-    <link rel="apple-touch-icon" href="icon-512.png">
+    <link rel="apple-touch-icon" href="/CookLook/icon-512.png">
 </head>
 <body>
     <!-- Hero Section -->
@@ -400,7 +400,7 @@
         // ✅ Service Worker Registration
         if ('serviceWorker' in navigator) {
           window.addEventListener('load', () => {
-            navigator.serviceWorker.register('service-worker.js')
+            navigator.serviceWorker.register('/CookLook/service-worker.js')
               .then(registration => console.log('SW registered'))
               .catch(error => console.log('SW registration failed'));
           });
