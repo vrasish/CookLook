@@ -923,9 +923,13 @@
     // ✅ Fetch recipes from Spoonacular
     async function getRecipes(ingredients) {
       try {
-        const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=10&apiKey=${SPOON_KEY}`;
+        console.log("🔍 Searching for recipes with ingredients:", ingredients);
+        const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=20&ranking=2&apiKey=${SPOON_KEY}`;
         const res = await fetch(url);
         const recipes = await res.json();
+        
+        console.log("📋 Raw API response:", recipes);
+        console.log("📊 Number of recipes found:", recipes.length);
 
         console.log("Recipes:", recipes);
 
@@ -934,22 +938,68 @@
           return;
         }
 
-        // Filter recipes to only show those with minimal missing ingredients
+        // Filter recipes to show those with reasonable missing ingredients
         const filteredRecipes = recipes
           .filter(recipe => {
-            // Only show recipes with 0-1 missing ingredients (or very few)
+            // Show recipes with up to 3 missing ingredients (more flexible)
             const missingCount = recipe.missedIngredients ? recipe.missedIngredients.length : 0;
-            return missingCount <= 1;
+            const usedCount = recipe.usedIngredients ? recipe.usedIngredients.length : 0;
+            
+            // Prioritize recipes that use more of our ingredients
+            // Show if: missing <= 3 AND used >= 2
+            return missingCount <= 3 && usedCount >= 2;
           })
-          .slice(0, 3); // Show top 3 recipes
+          .sort((a, b) => {
+            // Sort by: 1) Fewer missing ingredients, 2) More used ingredients
+            const aMissing = a.missedIngredients ? a.missedIngredients.length : 0;
+            const bMissing = b.missedIngredients ? b.missedIngredients.length : 0;
+            const aUsed = a.usedIngredients ? a.usedIngredients.length : 0;
+            const bUsed = b.usedIngredients ? b.usedIngredients.length : 0;
+            
+            if (aMissing !== bMissing) {
+              return aMissing - bMissing; // Fewer missing first
+            }
+            return bUsed - aUsed; // More used first
+          })
+          .slice(0, 5); // Show top 5 recipes
 
         if (filteredRecipes.length === 0) {
+          console.log("⚠️ No filtered recipes found, trying individual ingredient searches...");
+          
+          // Try searching with individual ingredients as fallback
+          const individualSearches = [];
+          for (const ingredient of ingredients) {
+            try {
+              const individualUrl = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredient}&number=5&ranking=2&apiKey=${SPOON_KEY}`;
+              const individualRes = await fetch(individualUrl);
+              const individualRecipes = await individualRes.json();
+              
+              if (individualRecipes && individualRecipes.length > 0) {
+                individualSearches.push(...individualRecipes);
+                console.log(`✅ Found ${individualRecipes.length} recipes for ${ingredient}`);
+              }
+            } catch (err) {
+              console.log(`❌ Individual search failed for ${ingredient}:`, err);
+            }
+          }
+          
+          if (individualSearches.length > 0) {
+            // Remove duplicates and show individual results
+            const uniqueRecipes = individualSearches.filter((recipe, index, self) => 
+              index === self.findIndex(r => r.id === recipe.id)
+            );
+            
+            console.log("🔄 Using individual search results:", uniqueRecipes.length);
+            displayRecipes(uniqueRecipes.slice(0, 3));
+            return;
+          }
+          
           alert("🍽️ No recipes found that can be made with your available ingredients. Try adding more ingredients to your fridge!");
           return;
         }
 
         // Display recipes in UI
-        displayRecipes(ingredients, filteredRecipes);
+        displayRecipes(filteredRecipes);
       } catch (err) {
         console.error("Error fetching recipes:", err);
         alert("⚠️ Error fetching recipes. Try again later.");
