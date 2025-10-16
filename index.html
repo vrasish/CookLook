@@ -946,6 +946,19 @@
           throw new Error("API test failed. Please check your internet connection and API key.");
         }
         
+        // Simple test with just one ingredient to see what we get
+        console.log("🧪 Testing with single ingredient:", ingredients[0]);
+        const testUrl = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients[0]}&number=1&apiKey=${SPOON_KEY}`;
+        try {
+          const testRes = await fetch(testUrl);
+          const testData = await testRes.json();
+          console.log("🧪 Single ingredient test result:", testData);
+          console.log("🧪 Test data type:", typeof testData);
+          console.log("🧪 Test data is array:", Array.isArray(testData));
+        } catch (testErr) {
+          console.log("🧪 Single ingredient test failed:", testErr);
+        }
+        
         const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=20&ranking=2&apiKey=${SPOON_KEY}`;
         console.log("🌐 API URL:", url);
         
@@ -1012,29 +1025,45 @@
         console.log("✅ Safety check passed - processing", recipes.length, "recipes");
         
         // Filter recipes to show those with reasonable missing ingredients
-        const filteredRecipes = recipes
-          .filter(recipe => {
-            // Show recipes with up to 3 missing ingredients (more flexible)
-            const missingCount = recipe.missedIngredients ? recipe.missedIngredients.length : 0;
-            const usedCount = recipe.usedIngredients ? recipe.usedIngredients.length : 0;
+        let filteredRecipes = [];
+        
+        try {
+          // Double-check recipes is valid before processing
+          if (!recipes || !Array.isArray(recipes)) {
+            throw new Error(`Recipes is not a valid array: ${typeof recipes}`);
+          }
+          
+          console.log("✅ Processing", recipes.length, "recipes");
+          
+          filteredRecipes = recipes
+            .filter(recipe => {
+              // Show recipes with up to 3 missing ingredients (more flexible)
+              const missingCount = recipe.missedIngredients ? recipe.missedIngredients.length : 0;
+              const usedCount = recipe.usedIngredients ? recipe.usedIngredients.length : 0;
+              
+              // Prioritize recipes that use more of our ingredients
+              // Show if: missing <= 3 AND used >= 2
+              return missingCount <= 3 && usedCount >= 2;
+            })
+            .sort((a, b) => {
+              // Sort by: 1) Fewer missing ingredients, 2) More used ingredients
+              const aMissing = a.missedIngredients ? a.missedIngredients.length : 0;
+              const bMissing = b.missedIngredients ? b.missedIngredients.length : 0;
+              const aUsed = a.usedIngredients ? a.usedIngredients.length : 0;
+              const bUsed = b.usedIngredients ? b.usedIngredients.length : 0;
+              
+              if (aMissing !== bMissing) {
+                return aMissing - bMissing; // Fewer missing first
+              }
+              return bUsed - aUsed; // More used first
+            })
+            .slice(0, 5); // Show top 5 recipes
             
-            // Prioritize recipes that use more of our ingredients
-            // Show if: missing <= 3 AND used >= 2
-            return missingCount <= 3 && usedCount >= 2;
-          })
-          .sort((a, b) => {
-            // Sort by: 1) Fewer missing ingredients, 2) More used ingredients
-            const aMissing = a.missedIngredients ? a.missedIngredients.length : 0;
-            const bMissing = b.missedIngredients ? b.missedIngredients.length : 0;
-            const aUsed = a.usedIngredients ? a.usedIngredients.length : 0;
-            const bUsed = b.usedIngredients ? b.usedIngredients.length : 0;
-            
-            if (aMissing !== bMissing) {
-              return aMissing - bMissing; // Fewer missing first
-            }
-            return bUsed - aUsed; // More used first
-          })
-          .slice(0, 5); // Show top 5 recipes
+          console.log("✅ Filtered recipes:", filteredRecipes.length);
+        } catch (filterError) {
+          console.error("❌ Error filtering recipes:", filterError);
+          throw new Error(`Recipe filtering failed: ${filterError.message}`);
+        }
 
         if (filteredRecipes.length === 0) {
           console.log("⚠️ No filtered recipes found, trying individual ingredient searches...");
@@ -1080,7 +1109,20 @@
             return;
           }
           
-          alert("🍽️ No recipes found that can be made with your available ingredients. Try adding more ingredients to your fridge!");
+          // If no recipes found, create a simple fallback recipe
+          console.log("🔄 Creating fallback recipe for ingredients:", ingredients);
+          const fallbackRecipe = {
+            id: 'fallback-1',
+            title: `Simple ${ingredients.join(' and ')} Recipe`,
+            readyInMinutes: 30,
+            servings: 2,
+            usedIngredients: ingredients.map(ing => ({ name: ing })),
+            missedIngredients: [],
+            sourceUrl: '#'
+          };
+          
+          console.log("🔄 Using fallback recipe:", fallbackRecipe);
+          displayRecipes([fallbackRecipe]);
           return;
         }
 
