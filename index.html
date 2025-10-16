@@ -402,15 +402,25 @@
         console.log("🍽️ AI Result:", result);
 
         // The model returns label + score (e.g. "carrot": 0.98)
-        const ingredients = result
+        // Sort by confidence score to prioritize most confident detections
+        const sortedResults = result
           .filter(item => item.score > 0.1)  // Lower threshold for better detection
+          .sort((a, b) => b.score - a.score);  // Sort by confidence descending
+
+        const ingredients = sortedResults
           .map(item => item.label.toLowerCase())
-          .slice(0, 5);  // Get more ingredients
+          .slice(0, 5);  // Get top 5 most confident detections
+
+        console.log("🔍 Raw detected ingredients:", ingredients);
 
         // Enhanced ingredient mapping for better accuracy
         const ingredientMap = {
           'cauliflower': 'cauliflower',
           'broccoli': 'broccoli',
+          'broccoli florets': 'broccoli',
+          'broccoli head': 'broccoli',
+          'cauliflower florets': 'cauliflower',
+          'cauliflower head': 'cauliflower',
           'carrot': 'carrot',
           'onion': 'onion',
           'tomato': 'tomato',
@@ -574,16 +584,33 @@
           'hemp oil': 'hemp oil'
         };
 
-        // Map detected ingredients to standardized names
+        // Map detected ingredients to standardized names with better precision
         const mappedIngredients = ingredients
           .map(ingredient => {
-            const key = Object.keys(ingredientMap).find(k => 
-              ingredient.includes(k) || k.includes(ingredient)
-            );
+            // First try exact match
+            if (ingredientMap[ingredient]) {
+              return ingredientMap[ingredient];
+            }
+            
+            // Then try partial match with priority for specific vegetables
+            const key = Object.keys(ingredientMap).find(k => {
+              // For broccoli and cauliflower, be more specific
+              if (ingredient.includes('broccoli') || k.includes('broccoli')) {
+                return ingredient.includes('broccoli') && k.includes('broccoli');
+              }
+              if (ingredient.includes('cauliflower') || k.includes('cauliflower')) {
+                return ingredient.includes('cauliflower') && k.includes('cauliflower');
+              }
+              // For other ingredients, use general matching
+              return ingredient.includes(k) || k.includes(ingredient);
+            });
+            
             return key ? ingredientMap[key] : ingredient;
           })
           .filter((ingredient, index, arr) => arr.indexOf(ingredient) === index) // Remove duplicates
           .slice(0, 5);
+
+        console.log("🎯 Mapped ingredients:", mappedIngredients);
 
         if (mappedIngredients.length === 0) {
           // More flexible fallback - try with lower confidence or use demo
