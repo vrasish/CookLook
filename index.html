@@ -20,8 +20,12 @@
     <p class="tagline">Scan your food. Cook a great meal.</p>
     <div class="scan-container">
       <button id="scanBtn">📸 Scan Your Fridge</button>
+      <button id="uploadBtnMobile" class="btn secondary-btn" style="margin-top: 10px;">📁 Upload Photo</button>
       <input type="file" id="imageInput" accept="image/*" capture="environment" style="display:none;">
       <img id="preview" style="max-width:90%; margin-top:20px;">
+      <p id="mobileNote" style="font-size: 0.9rem; color: #ccc; margin-top: 10px; text-align: center; display: none;">
+        📱 <strong>Mobile tip:</strong> If camera doesn't work, use "Upload Photo" instead
+      </p>
     </div>
   </section>
   <!-- SCANNING INTERFACE -->
@@ -131,6 +135,7 @@
 
     // ✅ Elements
     const scanBtn = document.getElementById("scanBtn");
+    const uploadBtnMobile = document.getElementById("uploadBtnMobile");
     const imageInput = document.getElementById("imageInput");
     const preview = document.getElementById("preview");
     const scanningSection = document.getElementById("scanning");
@@ -141,6 +146,7 @@
     const closeCameraBtn = document.getElementById("closeCameraBtn");
     const loadingSection = document.getElementById("loading");
     const resultsSection = document.getElementById("results");
+    const mobileNote = document.getElementById("mobileNote");
 
     let stream = null;
 
@@ -150,20 +156,56 @@
         scanningSection.style.display = "block";
         document.body.style.overflow = "hidden";
         
-        // Request camera access
-        stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          } 
-        });
+        // Check if we're on mobile and if camera is available
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+          // For mobile, try different camera constraints
+          const constraints = {
+            video: {
+              facingMode: { ideal: 'environment' },
+              width: { ideal: 640, max: 1280 },
+              height: { ideal: 480, max: 720 }
+            }
+          };
+          
+          // Try to get camera access with mobile-optimized settings
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+        } else {
+          // For desktop, use higher resolution
+          stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+              facingMode: 'environment',
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            } 
+          });
+        }
         
         camera.srcObject = stream;
-        camera.play();
+        await camera.play();
+        
+        // Show success message
+        console.log("📸 Camera access granted!");
+        
       } catch (err) {
-        console.error("Camera access denied:", err);
-        alert("⚠️ Camera access denied. Please allow camera access to scan ingredients.");
+        console.error("Camera access error:", err);
+        
+        let errorMessage = "⚠️ Camera access denied. ";
+        
+        if (err.name === 'NotAllowedError') {
+          errorMessage += "Please allow camera access in your browser settings and try again.";
+        } else if (err.name === 'NotFoundError') {
+          errorMessage += "No camera found on this device.";
+        } else if (err.name === 'NotSupportedError') {
+          errorMessage += "Camera not supported. Please use a different browser.";
+        } else if (err.name === 'NotReadableError') {
+          errorMessage += "Camera is already in use by another application.";
+        } else {
+          errorMessage += "Error: " + err.message;
+        }
+        
+        alert(errorMessage);
         scanningSection.style.display = "none";
         document.body.style.overflow = "auto";
       }
@@ -194,8 +236,11 @@
       }
     });
 
-    // ✅ Upload from gallery
+    // ✅ Upload from gallery (camera interface)
     uploadBtn.addEventListener("click", () => imageInput.click());
+    
+    // ✅ Upload from gallery (mobile fallback)
+    uploadBtnMobile.addEventListener("click", () => imageInput.click());
 
     // ✅ Close camera
     closeCameraBtn.addEventListener("click", () => {
@@ -312,6 +357,33 @@
         alert("⚠️ Error fetching recipes. Try again later.");
       }
     }
+
+    // ✅ Check if running on HTTPS (required for camera on mobile)
+    function checkHTTPS() {
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        console.warn("⚠️ Camera access requires HTTPS on mobile devices");
+        return false;
+      }
+      return true;
+    }
+
+    // ✅ Initialize app with mobile considerations
+    document.addEventListener('DOMContentLoaded', () => {
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        console.log("📱 Mobile device detected");
+        
+        // Check HTTPS requirement
+        if (!checkHTTPS()) {
+          console.warn("⚠️ For camera access on mobile, please use HTTPS");
+          mobileNote.style.display = "block";
+        } else {
+          // Show mobile tip
+          mobileNote.style.display = "block";
+        }
+      }
+    });
   </script>
   </body>
   </html>
