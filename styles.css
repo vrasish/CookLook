@@ -382,6 +382,17 @@ footer {
   transform: translateY(-2px);
 }
 
+.recipe-link-disabled {
+  background: #ccc;
+  color: #666;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-block;
+  cursor: default;
+}
+
 /* RECIPE RESULTS */
 .results-section {
   background-color: #444;

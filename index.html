@@ -355,9 +355,14 @@
                         </div>
                       </div>
                       <div class="recipe-links">
-                        <a href="${recipe.sourceUrl || '#'}" target="_blank" class="recipe-link">
-                          📖 View Full Recipe
-                        </a>
+                        ${recipe.sourceUrl && recipe.sourceUrl !== '#' ? 
+                          `<a href="${recipe.sourceUrl}" target="_blank" class="recipe-link">
+                            📖 View Full Recipe
+                          </a>` : 
+                          `<span class="recipe-link-disabled">
+                            📖 Recipe details above
+                          </span>`
+                        }
                         <a href="${youtubeSearchUrl}" target="_blank" class="youtube-link">
                           🎥 Watch Video Tutorial
                         </a>
