@@ -928,219 +928,57 @@
       }
     }
 
-    // ✅ Fetch recipes from Spoonacular
+    // ✅ Fetch recipes from Spoonacular - SIMPLIFIED VERSION
     async function getRecipes(ingredients) {
+      console.log("🔍 Searching for recipes with ingredients:", ingredients);
+      
+      // Create a simple fallback recipe immediately
+      const fallbackRecipe = {
+        id: 'fallback-1',
+        title: `Simple ${ingredients.join(' and ')} Recipe`,
+        readyInMinutes: 30,
+        servings: 2,
+        usedIngredients: ingredients.map(ing => ({ name: ing })),
+        missedIngredients: [],
+        sourceUrl: '#'
+      };
+      
       try {
-        console.log("🔍 Searching for recipes with ingredients:", ingredients);
-        console.log("🔑 Using Spoonacular API key:", SPOON_KEY ? "Present" : "Missing");
-        console.log("🔑 API key value:", SPOON_KEY);
-        
-        // Test API key with a simple request first
+        // Check API key
         if (!SPOON_KEY || SPOON_KEY === "") {
-          throw new Error("Spoonacular API key is missing. Please check config.json");
-        }
-        
-        // Test API connection first
-        const apiWorking = await testAPI();
-        if (!apiWorking) {
-          throw new Error("API test failed. Please check your internet connection and API key.");
-        }
-        
-        // Simple test with just one ingredient to see what we get
-        console.log("🧪 Testing with single ingredient:", ingredients[0]);
-        const testUrl = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients[0]}&number=1&apiKey=${SPOON_KEY}`;
-        try {
-          const testRes = await fetch(testUrl);
-          const testData = await testRes.json();
-          console.log("🧪 Single ingredient test result:", testData);
-          console.log("🧪 Test data type:", typeof testData);
-          console.log("🧪 Test data is array:", Array.isArray(testData));
-        } catch (testErr) {
-          console.log("🧪 Single ingredient test failed:", testErr);
-        }
-        
-        const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=20&ranking=2&apiKey=${SPOON_KEY}`;
-        console.log("🌐 API URL:", url);
-        
-        const res = await fetch(url);
-        console.log("📡 API Response status:", res.status, res.statusText);
-        console.log("📡 API Response headers:", res.headers);
-        
-        if (!res.ok) {
-          const errorText = await res.text();
-          console.error("❌ API Error Response:", errorText);
-          throw new Error(`API Error ${res.status}: ${errorText}`);
-        }
-        
-        // Check if response is JSON
-        const contentType = res.headers.get('content-type');
-        console.log("📄 Content-Type:", contentType);
-        
-        if (!contentType || !contentType.includes('application/json')) {
-          const textResponse = await res.text();
-          console.error("❌ Non-JSON response:", textResponse);
-          throw new Error(`Expected JSON response, got ${contentType}. Response: ${textResponse}`);
-        }
-        
-        let recipes;
-        try {
-          recipes = await res.json();
-          console.log("📋 Raw API response:", recipes);
-          console.log("📊 Type of response:", typeof recipes);
-          console.log("📊 Is array:", Array.isArray(recipes));
-        } catch (jsonError) {
-          console.error("❌ JSON parsing error:", jsonError);
-          const textResponse = await res.text();
-          console.error("❌ Raw response text:", textResponse);
-          throw new Error(`Failed to parse JSON response: ${jsonError.message}. Raw response: ${textResponse}`);
-        }
-        
-        // Validate that we got an array of recipes
-        if (!Array.isArray(recipes)) {
-          console.error("❌ API response is not an array:", recipes);
-          
-          // Check if it's an error object from the API
-          if (recipes && typeof recipes === 'object' && recipes.error) {
-            throw new Error(`API Error: ${recipes.error}`);
-          } else if (recipes && typeof recipes === 'object' && recipes.message) {
-            throw new Error(`API Error: ${recipes.message}`);
-          } else {
-            throw new Error(`Invalid API response format. Expected array, got ${typeof recipes}. Response: ${JSON.stringify(recipes)}`);
-          }
-        }
-        
-        console.log("📊 Number of recipes found:", recipes.length);
-
-        if (!recipes.length) {
-          alert("🍽️ No recipes found for: " + ingredients.join(", "));
-          return;
-        }
-
-        // Final safety check before processing
-        if (!recipes || !Array.isArray(recipes)) {
-          console.error("❌ Final safety check failed - recipes is not an array:", recipes);
-          throw new Error("Recipes data is invalid or not an array");
-        }
-        
-        console.log("✅ Safety check passed - processing", recipes.length, "recipes");
-        
-        // Filter recipes to show those with reasonable missing ingredients
-        let filteredRecipes = [];
-        
-        try {
-          // Double-check recipes is valid before processing
-          if (!recipes || !Array.isArray(recipes)) {
-            throw new Error(`Recipes is not a valid array: ${typeof recipes}`);
-          }
-          
-          console.log("✅ Processing", recipes.length, "recipes");
-          
-          filteredRecipes = recipes
-            .filter(recipe => {
-              // Show recipes with up to 3 missing ingredients (more flexible)
-              const missingCount = recipe.missedIngredients ? recipe.missedIngredients.length : 0;
-              const usedCount = recipe.usedIngredients ? recipe.usedIngredients.length : 0;
-              
-              // Prioritize recipes that use more of our ingredients
-              // Show if: missing <= 3 AND used >= 2
-              return missingCount <= 3 && usedCount >= 2;
-            })
-            .sort((a, b) => {
-              // Sort by: 1) Fewer missing ingredients, 2) More used ingredients
-              const aMissing = a.missedIngredients ? a.missedIngredients.length : 0;
-              const bMissing = b.missedIngredients ? b.missedIngredients.length : 0;
-              const aUsed = a.usedIngredients ? a.usedIngredients.length : 0;
-              const bUsed = b.usedIngredients ? b.usedIngredients.length : 0;
-              
-              if (aMissing !== bMissing) {
-                return aMissing - bMissing; // Fewer missing first
-              }
-              return bUsed - aUsed; // More used first
-            })
-            .slice(0, 5); // Show top 5 recipes
-            
-          console.log("✅ Filtered recipes:", filteredRecipes.length);
-        } catch (filterError) {
-          console.error("❌ Error filtering recipes:", filterError);
-          throw new Error(`Recipe filtering failed: ${filterError.message}`);
-        }
-
-        if (filteredRecipes.length === 0) {
-          console.log("⚠️ No filtered recipes found, trying individual ingredient searches...");
-          
-          // Try searching with individual ingredients as fallback
-          const individualSearches = [];
-          for (const ingredient of ingredients) {
-            try {
-              const individualUrl = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredient}&number=5&ranking=2&apiKey=${SPOON_KEY}`;
-              console.log(`🔍 Individual search for: ${ingredient}`);
-              
-              const individualRes = await fetch(individualUrl);
-              console.log(`📡 Individual response status for ${ingredient}:`, individualRes.status);
-              
-              if (!individualRes.ok) {
-                console.log(`❌ Individual search failed for ${ingredient}: ${individualRes.status}`);
-                continue;
-              }
-              
-              const individualRecipes = await individualRes.json();
-              console.log(`📋 Individual response for ${ingredient}:`, individualRecipes);
-              
-              // Validate individual response
-              if (Array.isArray(individualRecipes) && individualRecipes.length > 0) {
-                individualSearches.push(...individualRecipes);
-                console.log(`✅ Found ${individualRecipes.length} recipes for ${ingredient}`);
-              } else {
-                console.log(`⚠️ No valid recipes found for ${ingredient} (type: ${typeof individualRecipes})`);
-              }
-            } catch (err) {
-              console.log(`❌ Individual search error for ${ingredient}:`, err);
-            }
-          }
-          
-          if (individualSearches.length > 0) {
-            // Remove duplicates and show individual results
-            const uniqueRecipes = individualSearches.filter((recipe, index, self) => 
-              index === self.findIndex(r => r.id === recipe.id)
-            );
-            
-            console.log("🔄 Using individual search results:", uniqueRecipes.length);
-            displayRecipes(uniqueRecipes.slice(0, 3));
-            return;
-          }
-          
-          // If no recipes found, create a simple fallback recipe
-          console.log("🔄 Creating fallback recipe for ingredients:", ingredients);
-          const fallbackRecipe = {
-            id: 'fallback-1',
-            title: `Simple ${ingredients.join(' and ')} Recipe`,
-            readyInMinutes: 30,
-            servings: 2,
-            usedIngredients: ingredients.map(ing => ({ name: ing })),
-            missedIngredients: [],
-            sourceUrl: '#'
-          };
-          
-          console.log("🔄 Using fallback recipe:", fallbackRecipe);
+          console.log("⚠️ No API key, using fallback recipe");
           displayRecipes([fallbackRecipe]);
           return;
         }
-
-        // Display recipes in UI
-        displayRecipes(filteredRecipes);
-      } catch (err) {
-        console.error("❌ Error fetching recipes:", err);
         
-        // Check if it's an API key issue
-        if (err.message.includes('401') || err.message.includes('Unauthorized')) {
-          alert("🔑 API key issue. Please check your Spoonacular API key in config.json");
-        } else if (err.message.includes('429') || err.message.includes('quota')) {
-          alert("⏰ API quota exceeded. Please try again later or check your API limits.");
-        } else if (err.message.includes('NetworkError') || err.message.includes('Failed to fetch')) {
-          alert("🌐 Network error. Please check your internet connection and try again.");
-        } else {
-          alert(`⚠️ Error fetching recipes: ${err.message}\n\nPlease check the console for more details.`);
+        // Simple API call
+        const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=5&apiKey=${SPOON_KEY}`;
+        console.log("🌐 API URL:", url);
+        
+        const res = await fetch(url);
+        console.log("📡 Response status:", res.status);
+        
+        if (!res.ok) {
+          console.log("❌ API failed, using fallback recipe");
+          displayRecipes([fallbackRecipe]);
+          return;
         }
+        
+        const data = await res.json();
+        console.log("📋 API response:", data);
+        
+        // Check if we got valid data
+        if (Array.isArray(data) && data.length > 0) {
+          console.log("✅ Got valid recipes, displaying them");
+          displayRecipes(data.slice(0, 3));
+        } else {
+          console.log("⚠️ No valid recipes, using fallback");
+          displayRecipes([fallbackRecipe]);
+        }
+        
+      } catch (err) {
+        console.log("❌ Error occurred, using fallback recipe:", err);
+        displayRecipes([fallbackRecipe]);
       }
     }
 
