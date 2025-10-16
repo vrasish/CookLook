@@ -381,3 +381,134 @@ footer {
   background-color: #cc0000;
   transform: translateY(-2px);
 }
+
+/* RECIPE RESULTS */
+.results-section {
+  background-color: #444;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.results-container h2 {
+  font-family: 'Pacifico', cursive;
+  margin-bottom: 40px;
+  color: #fff;
+}
+
+.ingredients-detected {
+  background-color: #555;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 30px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ingredients-detected h3 {
+  color: #00b874;
+  margin-bottom: 15px;
+}
+
+.ingredients-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.ingredient-tag {
+  background-color: #00b874;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.recipes-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.recipe-card {
+  background-color: #555;
+  padding: 25px;
+  border-radius: 15px;
+  text-align: left;
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.recipe-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.recipe-card h3 {
+  color: #fff;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+  line-height: 1.3;
+}
+
+.recipe-meta {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.recipe-ingredients {
+  margin-bottom: 15px;
+}
+
+.recipe-ingredients strong {
+  color: #00b874;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.used-ingredients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.used-ingredient {
+  background-color: #28a745;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+}
+
+.recipe-link {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: 0.3s;
+  margin-top: 15px;
+}
+
+.recipe-link:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+#scanAgainBtn {
+  background-color: #6c757d;
+  margin-top: 30px;
+}
+
+#scanAgainBtn:hover {
+  background-color: #5a6268;
+}

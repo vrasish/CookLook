@@ -634,7 +634,7 @@
     // ✅ Fetch recipes from Spoonacular
     async function getRecipes(ingredients) {
       try {
-        const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=3&apiKey=${SPOON_KEY}`;
+        const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=10&apiKey=${SPOON_KEY}`;
         const res = await fetch(url);
         const recipes = await res.json();
 
@@ -645,8 +645,22 @@
           return;
         }
 
+        // Filter recipes to only show those with minimal missing ingredients
+        const filteredRecipes = recipes
+          .filter(recipe => {
+            // Only show recipes with 0-1 missing ingredients (or very few)
+            const missingCount = recipe.missedIngredients ? recipe.missedIngredients.length : 0;
+            return missingCount <= 1;
+          })
+          .slice(0, 3); // Show top 3 recipes
+
+        if (filteredRecipes.length === 0) {
+          alert("🍽️ No recipes found that can be made with your available ingredients. Try adding more ingredients to your fridge!");
+          return;
+        }
+
         // Display recipes in UI
-        displayRecipes(ingredients, recipes);
+        displayRecipes(ingredients, filteredRecipes);
       } catch (err) {
         console.error("Error fetching recipes:", err);
         alert("⚠️ Error fetching recipes. Try again later.");
@@ -685,19 +699,11 @@
                 <span class="recipe-servings">👥 ${recipe.servings || 'N/A'} servings</span>
               </div>
               <div class="recipe-ingredients">
-                <strong>Missing ingredients:</strong>
-                <div class="missing-ingredients">
-                  ${recipe.missedIngredients ? recipe.missedIngredients.map(ing => 
-                    `<span class="missing-ingredient">${ing.name}</span>`
-                  ).join('') : 'None!'}
-                </div>
-              </div>
-              <div class="recipe-used">
-                <strong>Using your ingredients:</strong>
+                <strong>Made with your ingredients:</strong>
                 <div class="used-ingredients">
                   ${recipe.usedIngredients ? recipe.usedIngredients.map(ing => 
                     `<span class="used-ingredient">${ing.name}</span>`
-                  ).join('') : 'All ingredients!'}
+                  ).join('') : 'All available ingredients!'}
                 </div>
               </div>
               <div class="recipe-links">
