@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CookLook | Scan Your Food, Cook a Great Meal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f9b234">
+</head>
+<body>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <img src="IMG_0460.jpg" alt="CookLook Logo" class="logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+    <div class="logo-fallback" style="display:none; width:120px; height:120px; background:#00b874; border-radius:10px; margin:0 auto; display:flex; align-items:center; justify-content:center; color:white; font-size:2rem;">🍳</div>
+    <h1>CookLook</h1>
+    <p class="tagline">Scan your food. Cook a great meal.</p>
+    <div class="scan-container">
+      <button id="scanBtn">📸 Scan Your Fridge</button>
+      <input type="file" id="imageInput" accept="image/*" capture="environment" style="display:none;">
+      <img id="preview" style="max-width:90%; margin-top:20px;">
+    </div>
+    <a href="#problem" class="btn secondary-btn">See How It Works</a>
+  </section>
+  <!-- SCANNING INTERFACE -->
+  <section id="scanning" class="scanning-section" style="display: none;">
+    <div class="scanning-container">
+      <h2>📸 Scan Your Ingredients</h2>
+      <div class="camera-container">
+        <video id="camera" autoplay playsinline></video>
+        <canvas id="canvas" style="display: none;"></canvas>
+        <div class="camera-overlay">
+          <div class="scan-frame"></div>
+          <p>Position your ingredients within the frame</p>
+        </div>
+      </div>
+      <div class="camera-controls">
+        <button id="captureBtn" class="btn">Capture Photo</button>
+        <button id="uploadBtn" class="btn secondary-btn">Upload from Gallery</button>
+        <button id="closeCameraBtn" class="btn close-btn">Close Camera</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOADING SECTION -->
+  <section id="loading" class="loading-section" style="display: none;">
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <h2>Analyzing your ingredients...</h2>
+      <p>Our AI is identifying what's in your fridge</p>
+    </div>
+  </section>
+
+  <!-- RECIPE RESULTS -->
+  <section id="results" class="results-section" style="display: none;">
+    <div class="results-container">
+      <h2>🍳 Your Custom Recipes</h2>
+      <div class="ingredients-detected">
+        <h3>Ingredients Found:</h3>
+        <div id="ingredientsList" class="ingredients-list"></div>
+      </div>
+      <div id="recipesContainer" class="recipes-container"></div>
+      <button id="scanAgainBtn" class="btn">Scan Again</button>
+    </div>
+  </section>
+
+  <!-- PROBLEM SECTION -->
+  <section id="problem" class="problem">
+    <div class="content">
+      <h2>Have you ever stared into your fridge...</h2>
+      <p>...overflowing with food, and still felt like you had nothing to eat?</p>
+      <p class="sub">We solve that common frustration with a creative AI-powered solution!</p>
+    </div>
+  </section>
+
+  <!-- FEATURES SECTION -->
+  <section class="features">
+    <h2>Why CookLook?</h2>
+    <div class="feature-grid">
+      <div class="card">
+        <h3>📸 Scan Instantly</h3>
+        <p>One tap and our app recognizes your ingredients in seconds.</p>
+      </div>
+      <div class="card">
+        <h3>🍳 Smart Recipes</h3>
+        <p>Get fun, simple, and creative dishes from what’s already in your fridge.</p>
+      </div>
+      <div class="card">
+        <h3>♻️ Reduce Waste</h3>
+        <p>Use up ingredients before they expire and save money effortlessly.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SURVEY SECTION -->
+  <section class="survey">
+    <h2>What Our Customers Say</h2>
+    <div class="survey-container">
+      <div class="pie">100%<br><span>Yes!</span></div>
+      <p>Everyone we surveyed said CookLook makes cooking fun, easy, and stress-free.</p>
+    </div>
+  </section>
+
+  <!-- QUOTE SECTION -->
+  <section class="quote-section">
+    <blockquote>
+      “One cannot think well, love well, sleep well, if one has not dined well.”  
+      <span>– Virginia Woolf</span>
+    </blockquote>
+  </section>
+
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 CookLook | Created by Vaishnavi, James, Kara & Melody</p>
+  </footer>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script>
+    // ✅ Service Worker Registration
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(() => console.log("Service Worker registered!"));
+    }
+
+    // ✅ API Keys
+    const HF_API_KEY = "YOUR_HF_API_KEY";  // your Hugging Face key
+    const SPOON_KEY = "d774b10f22674128a2db72604dd1d5ed";        // your Spoonacular key
+
+    // ✅ Elements
+    const scanBtn = document.getElementById("scanBtn");
+    const imageInput = document.getElementById("imageInput");
+    const preview = document.getElementById("preview");
+
+    scanBtn.addEventListener("click", () => imageInput.click());
+
+    imageInput.addEventListener("change", async () => {
+      const file = imageInput.files[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        console.log("📸 Image selected:", file.name);
+        await analyzeImage(file);
+      } else {
+        alert("⚠️ No image selected.");
+      }
+    });
+
+    // ✅ Analyze image using a working food model
+    async function analyzeImage(file) {
+      try {
+        // Convert image to binary (the model accepts raw image bytes)
+        const imageBytes = await file.arrayBuffer();
+
+        const response = await fetch(
+          "https://api-inference.huggingface.co/models/keremberke/food-image-classification",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${HF_API_KEY}`,
+              "Content-Type": "image/jpeg"
+            },
+            body: imageBytes
+          }
+        );
+
+        if (!response.ok) {
+          const errText = await response.text();
+          console.error("Model error:", errText);
+          alert("⚠️ Model error: " + errText);
+          return;
+        }
+
+        const result = await response.json();
+        console.log("🍽️ AI Result:", result);
+
+        // The model returns label + score (e.g. "carrot": 0.98)
+        const ingredients = result
+          .filter(item => item.score > 0.2)
+          .map(item => item.label.toLowerCase())
+          .slice(0, 3);
+
+        if (ingredients.length === 0) {
+          alert("😕 Couldn't recognize ingredients. Try again with a clearer photo.");
+          return;
+        }
+
+        alert("✅ Detected ingredients: " + ingredients.join(", "));
+        await getRecipes(ingredients);
+
+      } catch (err) {
+        console.error("Error analyzing image:", err);
+        alert("⚠️ Error analyzing image. Try again later.");
+      }
+    }
+
+    // ✅ Fetch recipes from Spoonacular
+    async function getRecipes(ingredients) {
+      try {
+        const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=3&apiKey=${SPOON_KEY}`;
+        const res = await fetch(url);
+        const recipes = await res.json();
+
+        console.log("Recipes:", recipes);
+
+        if (!recipes.length) {
+          alert("🍽️ No recipes found for: " + ingredients.join(", "));
+          return;
+        }
+
+        let output = "🍲 Recipes you can make:\n\n";
+        recipes.forEach(r => {
+          output += `• ${r.title}\n`;
+        });
+
+        alert(output);
+      } catch (err) {
+        console.error("Error fetching recipes:", err);
+        alert("⚠️ Error fetching recipes. Try again later.");
+      }
+    }
+  </script>
+  </body>
+  </html>
