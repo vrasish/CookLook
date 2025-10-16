@@ -23,7 +23,6 @@
       <input type="file" id="imageInput" accept="image/*" capture="environment" style="display:none;">
       <img id="preview" style="max-width:90%; margin-top:20px;">
     </div>
-    <a href="#problem" class="btn secondary-btn">See How It Works</a>
   </section>
   <!-- SCANNING INTERFACE -->
   <section id="scanning" class="scanning-section" style="display: none;">
@@ -127,26 +126,118 @@
     }
 
     // ✅ API Keys
-    const HF_API_KEY = "YOUR_HF_API_KEY;  // your Hugging Face key
+    const HF_API_KEY = "YOUR_HF_API_KEY";  // your Hugging Face key
     const SPOON_KEY = "d774b10f22674128a2db72604dd1d5ed";        // your Spoonacular key
 
     // ✅ Elements
     const scanBtn = document.getElementById("scanBtn");
     const imageInput = document.getElementById("imageInput");
     const preview = document.getElementById("preview");
+    const scanningSection = document.getElementById("scanning");
+    const camera = document.getElementById("camera");
+    const canvas = document.getElementById("canvas");
+    const captureBtn = document.getElementById("captureBtn");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const closeCameraBtn = document.getElementById("closeCameraBtn");
+    const loadingSection = document.getElementById("loading");
+    const resultsSection = document.getElementById("results");
 
-    scanBtn.addEventListener("click", () => imageInput.click());
+    let stream = null;
 
+    // ✅ Scan button - show camera interface
+    scanBtn.addEventListener("click", async () => {
+      try {
+        scanningSection.style.display = "block";
+        document.body.style.overflow = "hidden";
+        
+        // Request camera access
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
+        });
+        
+        camera.srcObject = stream;
+        camera.play();
+      } catch (err) {
+        console.error("Camera access denied:", err);
+        alert("⚠️ Camera access denied. Please allow camera access to scan ingredients.");
+        scanningSection.style.display = "none";
+        document.body.style.overflow = "auto";
+      }
+    });
+
+    // ✅ Capture photo from camera
+    captureBtn.addEventListener("click", async () => {
+      try {
+        const context = canvas.getContext('2d');
+        canvas.width = camera.videoWidth;
+        canvas.height = camera.videoHeight;
+        context.drawImage(camera, 0, 0);
+        
+        canvas.toBlob(async (blob) => {
+          const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
+          await processImage(file);
+        }, "image/jpeg", 0.8);
+        
+        // Stop camera and hide scanning section
+        if (stream) {
+          stream.getTracks().forEach(track => track.stop());
+        }
+        scanningSection.style.display = "none";
+        document.body.style.overflow = "auto";
+      } catch (err) {
+        console.error("Error capturing photo:", err);
+        alert("⚠️ Error capturing photo. Please try again.");
+      }
+    });
+
+    // ✅ Upload from gallery
+    uploadBtn.addEventListener("click", () => imageInput.click());
+
+    // ✅ Close camera
+    closeCameraBtn.addEventListener("click", () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      scanningSection.style.display = "none";
+      document.body.style.overflow = "auto";
+    });
+
+    // ✅ File input change
     imageInput.addEventListener("change", async () => {
       const file = imageInput.files[0];
       if (file) {
-        preview.src = URL.createObjectURL(file);
-        console.log("📸 Image selected:", file.name);
-        await analyzeImage(file);
+        await processImage(file);
       } else {
         alert("⚠️ No image selected.");
       }
     });
+
+    // ✅ Process image (camera or file)
+    async function processImage(file) {
+      try {
+        preview.src = URL.createObjectURL(file);
+        console.log("📸 Image selected:", file.name);
+        
+        // Show loading
+        loadingSection.style.display = "block";
+        document.body.style.overflow = "hidden";
+        
+        await analyzeImage(file);
+        
+        // Hide loading
+        loadingSection.style.display = "none";
+        document.body.style.overflow = "auto";
+      } catch (err) {
+        console.error("Error processing image:", err);
+        loadingSection.style.display = "none";
+        document.body.style.overflow = "auto";
+        alert("⚠️ Error processing image. Please try again.");
+      }
+    }
 
     // ✅ Analyze image using a working food model
     async function analyzeImage(file) {

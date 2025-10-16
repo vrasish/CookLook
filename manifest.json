@@ -1,0 +1,23 @@
+{
+  "name": "CookLook",
+  "short_name": "CookLook",
+  "description": "Scan your food. Cook a great meal.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2e2e2e",
+  "theme_color": "#f9b234",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
