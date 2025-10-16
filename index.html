@@ -336,37 +336,49 @@
           reader.readAsDataURL(file);
         });
 
-        // Try the primary model first
-        let response = await fetch(
-          "https://api-inference.huggingface.co/models/keremberke/food-image-classification",
-          {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${HF_API_KEY}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              inputs: base64Image
-            })
-          }
-        );
-
-        // If primary model fails, try alternative model
-        if (!response.ok) {
-          console.log("Primary model failed, trying alternative...");
-          response = await fetch(
-            "https://api-inference.huggingface.co/models/google/vit-base-patch16-224",
-            {
-              method: "POST",
-              headers: {
-                "Authorization": `Bearer ${HF_API_KEY}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({
-                inputs: base64Image
-              })
+        // Try multiple food classification models for better detection
+        const models = [
+          'keremberke/food-image-classification',
+          'google/vit-base-patch16-224',
+          'facebook/deit-base-patch16-224',
+          'microsoft/beit-base-patch16-224'
+        ];
+        
+        let response = null;
+        let modelUsed = '';
+        
+        for (const model of models) {
+          try {
+            console.log(`🔍 Trying model: ${model}`);
+            response = await fetch(
+              `https://api-inference.huggingface.co/models/${model}`,
+              {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${HF_API_KEY}`,
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  inputs: base64Image
+                })
+              }
+            );
+            
+            if (response.ok) {
+              modelUsed = model;
+              console.log(`✅ Success with model: ${model}`);
+              break;
+            } else {
+              console.log(`❌ Model ${model} failed with status: ${response.status}`);
             }
-          );
+          } catch (err) {
+            console.log(`❌ Model ${model} error:`, err);
+            continue;
+          }
+        }
+        
+        if (!response || !response.ok) {
+          throw new Error(`All models failed. Last status: ${response?.status}`);
         }
 
         if (!response.ok) {
@@ -415,12 +427,193 @@
 
         // Enhanced ingredient mapping for better accuracy
         const ingredientMap = {
+          // Cruciferous vegetables
           'cauliflower': 'cauliflower',
           'broccoli': 'broccoli',
           'broccoli florets': 'broccoli',
           'broccoli head': 'broccoli',
           'cauliflower florets': 'cauliflower',
           'cauliflower head': 'cauliflower',
+          'cabbage': 'cabbage',
+          'brussels sprouts': 'brussels sprouts',
+          'kale': 'kale',
+          'collard greens': 'collard greens',
+          'bok choy': 'bok choy',
+          'arugula': 'arugula',
+          'watercress': 'watercress',
+          
+          // Root vegetables
+          'carrot': 'carrot',
+          'potato': 'potato',
+          'sweet potato': 'sweet potato',
+          'onion': 'onion',
+          'garlic': 'garlic',
+          'ginger': 'ginger',
+          'beet': 'beetroot',
+          'beetroot': 'beetroot',
+          'radish': 'radish',
+          'turnip': 'turnip',
+          'parsnip': 'parsnip',
+          'rutabaga': 'rutabaga',
+          'daikon': 'daikon',
+          'horseradish': 'horseradish',
+          'turmeric': 'turmeric',
+          
+          // Leafy greens
+          'lettuce': 'lettuce',
+          'spinach': 'spinach',
+          'arugula': 'arugula',
+          'watercress': 'watercress',
+          'endive': 'endive',
+          'chicory': 'chicory',
+          'frisee': 'frisee',
+          'mizuna': 'mizuna',
+          'tatsoi': 'tatsoi',
+          'mustard greens': 'mustard greens',
+          'dandelion greens': 'dandelion greens',
+          
+          // Nightshades
+          'tomato': 'tomato',
+          'eggplant': 'eggplant',
+          'bell pepper': 'bell pepper',
+          'pepper': 'bell pepper',
+          'chili pepper': 'chili pepper',
+          'jalapeno': 'jalapeno',
+          'habanero': 'habanero',
+          'poblano': 'poblano',
+          'anaheim': 'anaheim',
+          'serrano': 'serrano',
+          'cayenne': 'cayenne',
+          'paprika': 'paprika',
+          
+          // Squash family
+          'zucchini': 'zucchini',
+          'yellow squash': 'yellow squash',
+          'butternut squash': 'butternut squash',
+          'acorn squash': 'acorn squash',
+          'spaghetti squash': 'spaghetti squash',
+          'pumpkin': 'pumpkin',
+          'cucumber': 'cucumber',
+          'pickle': 'pickle',
+          
+          // Legumes
+          'green beans': 'green beans',
+          'beans': 'green beans',
+          'snap peas': 'snap peas',
+          'snow peas': 'snow peas',
+          'peas': 'peas',
+          'edamame': 'edamame',
+          'lentils': 'lentils',
+          'chickpeas': 'chickpeas',
+          'black beans': 'black beans',
+          'kidney beans': 'kidney beans',
+          'pinto beans': 'pinto beans',
+          'navy beans': 'navy beans',
+          'lima beans': 'lima beans',
+          'fava beans': 'fava beans',
+          
+          // Alliums
+          'leek': 'leek',
+          'scallion': 'scallion',
+          'green onion': 'scallion',
+          'shallot': 'shallot',
+          'chive': 'chive',
+          
+          // Mushrooms
+          'mushroom': 'mushroom',
+          'button mushroom': 'mushroom',
+          'cremini': 'cremini',
+          'portobello': 'portobello',
+          'shiitake': 'shiitake',
+          'oyster mushroom': 'oyster mushroom',
+          'enoki': 'enoki',
+          'maitake': 'maitake',
+          'chanterelle': 'chanterelle',
+          'morel': 'morel',
+          'porcini': 'porcini',
+          
+          // Herbs
+          'basil': 'basil',
+          'parsley': 'parsley',
+          'cilantro': 'cilantro',
+          'dill': 'dill',
+          'oregano': 'oregano',
+          'thyme': 'thyme',
+          'rosemary': 'rosemary',
+          'sage': 'sage',
+          'mint': 'mint',
+          'tarragon': 'tarragon',
+          'chives': 'chives',
+          'cilantro': 'cilantro',
+          'coriander': 'coriander',
+          
+          // Citrus fruits
+          'lemon': 'lemon',
+          'lime': 'lime',
+          'orange': 'orange',
+          'grapefruit': 'grapefruit',
+          'tangerine': 'tangerine',
+          'mandarin': 'mandarin',
+          'clementine': 'clementine',
+          'kumquat': 'kumquat',
+          'pomelo': 'pomelo',
+          
+          // Stone fruits
+          'peach': 'peach',
+          'nectarine': 'nectarine',
+          'plum': 'plum',
+          'apricot': 'apricot',
+          'cherry': 'cherry',
+          'mango': 'mango',
+          'avocado': 'avocado',
+          
+          // Berries
+          'strawberry': 'strawberry',
+          'blueberry': 'blueberry',
+          'raspberry': 'raspberry',
+          'blackberry': 'blackberry',
+          'cranberry': 'cranberry',
+          'gooseberry': 'gooseberry',
+          'elderberry': 'elderberry',
+          'mulberry': 'mulberry',
+          'boysenberry': 'boysenberry',
+          'loganberry': 'loganberry',
+          
+          // Tropical fruits
+          'pineapple': 'pineapple',
+          'banana': 'banana',
+          'plantain': 'plantain',
+          'coconut': 'coconut',
+          'papaya': 'papaya',
+          'passion fruit': 'passion fruit',
+          'dragon fruit': 'dragon fruit',
+          'lychee': 'lychee',
+          'rambutan': 'rambutan',
+          'durian': 'durian',
+          'jackfruit': 'jackfruit',
+          'star fruit': 'star fruit',
+          'kiwi': 'kiwi',
+          
+          // Pome fruits
+          'apple': 'apple',
+          'pear': 'pear',
+          'quince': 'quince',
+          
+          // Melons
+          'watermelon': 'watermelon',
+          'cantaloupe': 'cantaloupe',
+          'honeydew': 'honeydew',
+          'crenshaw': 'crenshaw',
+          'casaba': 'casaba',
+          
+          // Other fruits
+          'grape': 'grape',
+          'fig': 'fig',
+          'date': 'date',
+          'pomegranate': 'pomegranate',
+          'persimmon': 'persimmon',
+          'prickly pear': 'prickly pear',
+          'cactus pear': 'cactus pear',
           'carrot': 'carrot',
           'onion': 'onion',
           'tomato': 'tomato',
@@ -584,38 +777,134 @@
           'hemp oil': 'hemp oil'
         };
 
+        // Helper function for fuzzy string matching
+        function calculateSimilarity(str1, str2) {
+          const longer = str1.length > str2.length ? str1 : str2;
+          const shorter = str1.length > str2.length ? str2 : str1;
+          if (longer.length === 0) return 1.0;
+          const editDistance = levenshteinDistance(longer, shorter);
+          return (longer.length - editDistance) / longer.length;
+        }
+        
+        function levenshteinDistance(str1, str2) {
+          const matrix = [];
+          for (let i = 0; i <= str2.length; i++) {
+            matrix[i] = [i];
+          }
+          for (let j = 0; j <= str1.length; j++) {
+            matrix[0][j] = j;
+          }
+          for (let i = 1; i <= str2.length; i++) {
+            for (let j = 1; j <= str1.length; j++) {
+              if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+              } else {
+                matrix[i][j] = Math.min(
+                  matrix[i - 1][j - 1] + 1,
+                  matrix[i][j - 1] + 1,
+                  matrix[i - 1][j] + 1
+                );
+              }
+            }
+          }
+          return matrix[str2.length][str1.length];
+        }
+
         // Map detected ingredients to standardized names with better precision
         const mappedIngredients = ingredients
           .map(ingredient => {
+            const cleanIngredient = ingredient.toLowerCase().trim();
+            
             // First try exact match
-            if (ingredientMap[ingredient]) {
-              return ingredientMap[ingredient];
+            if (ingredientMap[cleanIngredient]) {
+              return ingredientMap[cleanIngredient];
             }
             
             // Then try partial match with priority for specific vegetables
             const key = Object.keys(ingredientMap).find(k => {
               // For broccoli and cauliflower, be more specific
-              if (ingredient.includes('broccoli') || k.includes('broccoli')) {
-                return ingredient.includes('broccoli') && k.includes('broccoli');
+              if (cleanIngredient.includes('broccoli') || k.includes('broccoli')) {
+                return cleanIngredient.includes('broccoli') && k.includes('broccoli');
               }
-              if (ingredient.includes('cauliflower') || k.includes('cauliflower')) {
-                return ingredient.includes('cauliflower') && k.includes('cauliflower');
+              if (cleanIngredient.includes('cauliflower') || k.includes('cauliflower')) {
+                return cleanIngredient.includes('cauliflower') && k.includes('cauliflower');
               }
               // For other ingredients, use general matching
-              return ingredient.includes(k) || k.includes(ingredient);
+              return cleanIngredient.includes(k) || k.includes(cleanIngredient);
             });
             
-            return key ? ingredientMap[key] : ingredient;
+            if (key) {
+              return ingredientMap[key];
+            }
+            
+            // Try fuzzy matching for common variations
+            const fuzzyMatches = Object.keys(ingredientMap).filter(k => {
+              const similarity = calculateSimilarity(cleanIngredient, k);
+              return similarity > 0.7; // 70% similarity threshold
+            });
+            
+            if (fuzzyMatches.length > 0) {
+              return ingredientMap[fuzzyMatches[0]];
+            }
+            
+            return cleanIngredient;
           })
           .filter((ingredient, index, arr) => arr.indexOf(ingredient) === index) // Remove duplicates
-          .slice(0, 5);
+          .slice(0, 8); // Increased to 8 ingredients
 
         console.log("🎯 Mapped ingredients:", mappedIngredients);
 
         if (mappedIngredients.length === 0) {
-          // More flexible fallback - try with lower confidence or use demo
-          console.log("No ingredients detected, using demo mode");
-          const mockIngredients = ["carrot", "onion", "tomato"];
+          // Try fallback detection with a different model
+          console.log("No ingredients detected, trying fallback model...");
+          try {
+            const fallbackResponse = await fetch(
+              `https://api-inference.huggingface.co/models/google/vit-base-patch16-224`,
+              {
+                headers: { Authorization: `Bearer ${HF_API_KEY}` },
+                method: "POST",
+                body: JSON.stringify({ inputs: base64Data }),
+              }
+            );
+            
+            if (fallbackResponse.ok) {
+              const fallbackData = await fallbackResponse.json();
+              console.log("🔄 Fallback model response:", fallbackData);
+              
+              if (Array.isArray(fallbackData) && fallbackData.length > 0) {
+                const fallbackIngredients = fallbackData
+                  .sort((a, b) => b.score - a.score)
+                  .map(item => item.label.toLowerCase())
+                  .slice(0, 5);
+                
+                const fallbackMapped = fallbackIngredients
+                  .map(ingredient => {
+                    const cleanIngredient = ingredient.toLowerCase().trim();
+                    if (ingredientMap[cleanIngredient]) {
+                      return ingredientMap[cleanIngredient];
+                    }
+                    const key = Object.keys(ingredientMap).find(k => 
+                      cleanIngredient.includes(k) || k.includes(cleanIngredient)
+                    );
+                    return key ? ingredientMap[key] : cleanIngredient;
+                  })
+                  .filter((ingredient, index, arr) => arr.indexOf(ingredient) === index);
+                
+                if (fallbackMapped.length > 0) {
+                  console.log("✅ Fallback ingredients detected:", fallbackMapped);
+                  showDetectedIngredients(fallbackMapped);
+                  await getRecipes(fallbackMapped);
+                  return;
+                }
+              }
+            }
+          } catch (fallbackErr) {
+            console.log("Fallback model also failed:", fallbackErr);
+          }
+          
+          // Final fallback - use demo mode
+          console.log("Using demo mode with common ingredients");
+          const mockIngredients = ["carrot", "onion", "tomato", "potato", "bell pepper"];
           showDetectedIngredients(mockIngredients);
           await getRecipes(mockIngredients);
           return;
