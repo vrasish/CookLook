@@ -357,3 +357,27 @@ footer {
     width: 200px;
   }
 }
+
+/* YOUTUBE LINKS */
+.recipe-links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.youtube-link {
+  display: inline-block;
+  background-color: #ff0000;
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.youtube-link:hover {
+  background-color: #cc0000;
+  transform: translateY(-2px);
+}
