@@ -311,6 +311,25 @@ footer {
   box-shadow: 0 6px 20px rgba(0, 184, 116, 0.4);
 }
 
+#uploadBtnMobile {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 3px 10px rgba(108, 117, 125, 0.3);
+}
+
+#uploadBtnMobile:hover {
+  background-color: #5a6268;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+}
+
 #preview {
   border-radius: 15px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
