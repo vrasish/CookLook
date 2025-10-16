@@ -313,19 +313,12 @@
         // Check if API key is set
         if (!HF_API_KEY || HF_API_KEY === "") {
           alert("⚠️ Please set your Hugging Face API key in config.json to use ingredient detection.");
-          // Fallback: simulate detection for demo
-          const mockIngredients = ["carrot", "onion", "tomato"];
-          showDetectedIngredients(mockIngredients);
-          await getRecipes(mockIngredients);
           return;
         }
 
         // Test API key validity
         if (!HF_API_KEY.startsWith('hf_')) {
           alert("⚠️ Invalid API key format. Please check your Hugging Face API key in config.json");
-          const mockIngredients = ["carrot", "onion", "tomato"];
-          showDetectedIngredients(mockIngredients);
-          await getRecipes(mockIngredients);
           return;
         }
 
@@ -387,11 +380,7 @@
           
           // Check if response is HTML (error page)
           if (errText.includes('<!doctype html>') || errText.includes('<html')) {
-            alert("⚠️ API Error: The model service is temporarily unavailable. Please try again later or use the demo mode.");
-            // Fallback to demo mode
-            const mockIngredients = ["carrot", "onion", "tomato"];
-            showDetectedIngredients(mockIngredients);
-            await getRecipes(mockIngredients);
+            alert("⚠️ API Error: The model service is temporarily unavailable. Please try again later.");
             return;
           }
           
@@ -403,10 +392,7 @@
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
           console.error("Non-JSON response:", await response.text());
-          alert("⚠️ API returned unexpected format. Using demo mode.");
-          const mockIngredients = ["carrot", "onion", "tomato"];
-          showDetectedIngredients(mockIngredients);
-          await getRecipes(mockIngredients);
+          alert("⚠️ API returned unexpected format. Please try again later.");
           return;
         }
 
@@ -416,12 +402,12 @@
         // The model returns label + score (e.g. "carrot": 0.98)
         // Sort by confidence score to prioritize most confident detections
         const sortedResults = result
-          .filter(item => item.score > 0.1)  // Lower threshold for better detection
+          .filter(item => item.score > 0.4)  // Higher threshold for more accurate detection
           .sort((a, b) => b.score - a.score);  // Sort by confidence descending
 
         const ingredients = sortedResults
           .map(item => item.label.toLowerCase())
-          .slice(0, 5);  // Get top 5 most confident detections
+          .slice(0, 3);  // Get top 3 most confident detections only
 
         console.log("🔍 Raw detected ingredients:", ingredients);
 
@@ -873,9 +859,10 @@
               
               if (Array.isArray(fallbackData) && fallbackData.length > 0) {
                 const fallbackIngredients = fallbackData
+                  .filter(item => item.score > 0.4)  // Higher confidence threshold
                   .sort((a, b) => b.score - a.score)
                   .map(item => item.label.toLowerCase())
-                  .slice(0, 5);
+                  .slice(0, 3);  // Only top 3 most confident
                 
                 const fallbackMapped = fallbackIngredients
                   .map(ingredient => {
@@ -902,11 +889,9 @@
             console.log("Fallback model also failed:", fallbackErr);
           }
           
-          // Final fallback - use demo mode
-          console.log("Using demo mode with common ingredients");
-          const mockIngredients = ["carrot", "onion", "tomato", "potato", "bell pepper"];
-          showDetectedIngredients(mockIngredients);
-          await getRecipes(mockIngredients);
+          // Final fallback - show error instead of adding fake ingredients
+          console.log("No ingredients detected and fallback failed");
+          alert("🔍 Could not detect any ingredients in the image. Please try:\n• Taking a clearer photo\n• Ensuring good lighting\n• Making sure ingredients are visible\n• Trying a different angle");
           return;
         }
 
