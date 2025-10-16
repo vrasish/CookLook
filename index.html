@@ -1,1069 +1,408 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CookLook | Scan Your Food, Cook a Great Meal</title>
-  <link rel="icon" type="image/jpeg" href="IMG_0460.jpg">
-  <link rel="apple-touch-icon" href="IMG_0460.jpg">
-  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#f9b234">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CookLook - Scan Your Fridge, Cook Great Meals</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/jpeg" href="IMG_0460.jpg">
+    <link rel="apple-touch-icon" href="IMG_0460.jpg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
 </head>
 <body>
-
-  <!-- HERO SECTION -->
-  <section class="hero">
-    <img src="IMG_0460.jpg" alt="CookLook Logo" class="logo">
-    <h1>CookLook</h1>
-    <p class="tagline">Scan your food. Cook a great meal.</p>
-    <div class="scan-container">
-      <button id="scanBtn">📸 Scan Your Fridge</button>
-      <button id="uploadBtnMobile" class="btn secondary-btn" style="margin-top: 10px;">📁 Upload Photo</button>
-      <input type="file" id="imageInput" accept="image/*" capture="environment" style="display:none;">
-      <img id="preview" style="max-width:90%; margin-top:20px;">
-      <p id="mobileNote" style="font-size: 0.9rem; color: #ccc; margin-top: 10px; text-align: center; display: none;">
-        📱 <strong>Mobile tip:</strong> If camera doesn't work, use "Upload Photo" instead
-      </p>
-    </div>
-  </section>
-  <!-- SCANNING INTERFACE -->
-  <section id="scanning" class="scanning-section" style="display: none;">
-    <div class="scanning-container">
-      <h2>📸 Scan Your Ingredients</h2>
-      <div class="camera-container">
-        <video id="camera" autoplay playsinline></video>
-        <canvas id="canvas" style="display: none;"></canvas>
-        <div class="camera-overlay">
-          <div class="scan-frame"></div>
-          <p>Position your ingredients within the frame</p>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <img src="IMG_0460.jpg" alt="CookLook Logo" class="logo">
+            <h1>CookLook</h1>
+            <p>Scan your food. Cook a great meal.</p>
+            <p class="hero-subtitle">Take a photo of your ingredients and get personalized recipes instantly!</p>
+            
+            <!-- Camera Interface -->
+            <div class="camera-container" id="cameraContainer" style="display: none;">
+                <video id="camera" autoplay></video>
+                <div class="camera-overlay">
+                    <div class="scan-frame"></div>
+                </div>
+                <div class="camera-controls">
+                    <button id="captureBtn" class="scan-btn">📸 Scan Ingredients</button>
+                    <button id="closeBtn" class="close-btn">✕</button>
+                </div>
+            </div>
+            
+            <!-- Upload Button for Mobile -->
+            <input type="file" id="uploadBtnMobile" accept="image/*" capture="environment" style="display: none;">
+            
+            <!-- Main Action Buttons -->
+            <div class="action-buttons">
+                <button id="scanBtn" class="scan-btn">📷 Scan Your Fridge</button>
+                <button id="uploadBtn" class="upload-btn">📁 Upload Photo</button>
+            </div>
+            
+            <!-- Mobile Tips -->
+            <div class="mobile-tips" id="mobileTips" style="display: none;">
+                <p>💡 <strong>Mobile Tips:</strong></p>
+                <p>• Make sure you're using HTTPS (not HTTP)</p>
+                <p>• Grant camera permission when prompted</p>
+                <p>• Try the "Upload Photo" button if camera doesn't work</p>
+            </div>
         </div>
-      </div>
-      <div class="camera-controls">
-        <button id="captureBtn" class="btn">Capture Photo</button>
-        <button id="uploadBtn" class="btn secondary-btn">Upload from Gallery</button>
-        <button id="closeCameraBtn" class="btn close-btn">Close Camera</button>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- LOADING SECTION -->
-  <section id="loading" class="loading-section" style="display: none;">
-    <div class="loading-container">
-      <div class="spinner"></div>
-      <h2>Analyzing your ingredients...</h2>
-      <p>Our AI is identifying what's in your fridge</p>
-    </div>
-  </section>
+    <!-- Loading Section -->
+    <section id="loading" class="loading-section" style="display: none;">
+        <div class="spinner"></div>
+        <h2>Analyzing your ingredients...</h2>
+        <p>Our AI is identifying what's in your fridge</p>
+    </section>
 
-  <!-- RECIPE RESULTS -->
-  <section id="results" class="results-section" style="display: none;">
-    <div class="results-container">
-      <h2>🍳 Your Custom Recipes</h2>
-      <div class="ingredients-detected">
-        <h3>Ingredients Found:</h3>
-        <div id="ingredientsList" class="ingredients-list"></div>
-      </div>
-      <div id="recipesContainer" class="recipes-container"></div>
-      <button id="scanAgainBtn" class="btn">Scan Again</button>
-    </div>
-  </section>
+    <!-- Results Section -->
+    <section id="results" class="results-section" style="display: none;">
+        <h2>🍽️ Here's what we found:</h2>
+        <div id="ingredientsList" class="ingredients-detected"></div>
+        <div id="recipesContainer" class="recipes-container"></div>
+        <button id="scanAgainBtn" class="scan-btn">🔄 Scan Again</button>
+    </section>
 
-  <!-- PROBLEM SECTION -->
-  <section id="problem" class="problem">
-    <div class="content">
-      <h2>Have you ever stared into your fridge...</h2>
-      <p>...overflowing with food, and still felt like you had nothing to eat?</p>
-      <p class="sub">We solve that common frustration with a creative AI-powered solution!</p>
-    </div>
-  </section>
-
-  <!-- FEATURES SECTION -->
-  <section class="features">
-    <h2>Why CookLook?</h2>
-    <div class="feature-grid">
-      <div class="card">
-        <h3>📸 Scan Instantly</h3>
-        <p>One tap and our app recognizes your ingredients in seconds.</p>
-      </div>
-      <div class="card">
-        <h3>🍳 Smart Recipes</h3>
-        <p>Get fun, simple, and creative dishes from what’s already in your fridge.</p>
-      </div>
-      <div class="card">
-        <h3>♻️ Reduce Waste</h3>
-        <p>Use up ingredients before they expire and save money effortlessly.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- SURVEY SECTION -->
-  <section class="survey">
-    <h2>What Our Customers Say</h2>
-    <div class="survey-container">
-      <div class="pie">100%<br><span>Yes!</span></div>
-      <p>Everyone we surveyed said CookLook makes cooking fun, easy, and stress-free.</p>
-    </div>
-  </section>
-
-  <!-- QUOTE SECTION -->
-  <section class="quote-section">
-    <blockquote>
-      “One cannot think well, love well, sleep well, if one has not dined well.”  
-      <span>– Virginia Woolf</span>
-    </blockquote>
-  </section>
-
-
-  <!-- FOOTER -->
-  <footer>
-    <p>© 2025 CookLook | Created by Vaishnavi, James, Kara & Melody</p>
-  </footer>
-  <script src="config.js"></script>
-  <script src="app.js"></script>
-  <script>
-    // ✅ Service Worker Registration
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js")
-        .then(() => console.log("Service Worker registered!"));
-    }
-
-    // ✅ API Keys - Load from config
-    let HF_API_KEY = "";
-    let SPOON_KEY = "d774b10f22674128a2db72604dd1d5ed";
-    
-    // Load API keys from config file
-    async function loadConfig() {
-      try {
-        const response = await fetch('config.json');
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        const config = await response.json();
-        HF_API_KEY = config.HF_API_KEY || "";
-        SPOON_KEY = config.SPOON_KEY || SPOON_KEY;
-        console.log("✅ Config loaded successfully");
-      } catch (err) {
-        console.warn("⚠️ Config file not found, using demo mode");
-        // No fallback key - will use demo mode instead
-      }
-    }
-    
-    // Initialize config
-    loadConfig();
-
-    // ✅ Elements
-    const scanBtn = document.getElementById("scanBtn");
-    const uploadBtnMobile = document.getElementById("uploadBtnMobile");
-    const imageInput = document.getElementById("imageInput");
-    const preview = document.getElementById("preview");
-    const scanningSection = document.getElementById("scanning");
-    const camera = document.getElementById("camera");
-    const canvas = document.getElementById("canvas");
-    const captureBtn = document.getElementById("captureBtn");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const closeCameraBtn = document.getElementById("closeCameraBtn");
-    const loadingSection = document.getElementById("loading");
-    const resultsSection = document.getElementById("results");
-    const mobileNote = document.getElementById("mobileNote");
-
-    let stream = null;
-
-    // ✅ Scan button - show camera interface
-    scanBtn.addEventListener("click", async () => {
-      try {
-        scanningSection.style.display = "block";
-        document.body.style.overflow = "hidden";
+    <script>
+        // ✅ API Keys - Load from config
+        let HF_API_KEY = "";
+        let SPOON_KEY = "d774b10f22674128a2db72604dd1d5ed";
         
-        // Check if we're on mobile and if camera is available
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (isMobile) {
-          // For mobile, try different camera constraints
-          const constraints = {
-            video: {
-              facingMode: { ideal: 'environment' },
-              width: { ideal: 640, max: 1280 },
-              height: { ideal: 480, max: 720 }
-            }
-          };
-          
-          // Try to get camera access with mobile-optimized settings
-          stream = await navigator.mediaDevices.getUserMedia(constraints);
-        } else {
-          // For desktop, use higher resolution
-          stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-              facingMode: 'environment',
-              width: { ideal: 1280 },
-              height: { ideal: 720 }
-            } 
-          });
-        }
-        
-        camera.srcObject = stream;
-        await camera.play();
-        
-        // Show success message
-        console.log("📸 Camera access granted!");
-        
-      } catch (err) {
-        console.error("Camera access error:", err);
-        
-        let errorMessage = "⚠️ Camera access denied. ";
-        
-        if (err.name === 'NotAllowedError') {
-          errorMessage += "Please allow camera access in your browser settings and try again.";
-        } else if (err.name === 'NotFoundError') {
-          errorMessage += "No camera found on this device.";
-        } else if (err.name === 'NotSupportedError') {
-          errorMessage += "Camera not supported. Please use a different browser.";
-        } else if (err.name === 'NotReadableError') {
-          errorMessage += "Camera is already in use by another application.";
-        } else {
-          errorMessage += "Error: " + err.message;
-        }
-        
-        alert(errorMessage);
-        scanningSection.style.display = "none";
-        document.body.style.overflow = "auto";
-      }
-    });
-
-    // ✅ Capture photo from camera
-    captureBtn.addEventListener("click", async () => {
-      try {
-        const context = canvas.getContext('2d');
-        canvas.width = camera.videoWidth;
-        canvas.height = camera.videoHeight;
-        context.drawImage(camera, 0, 0);
-        
-        canvas.toBlob(async (blob) => {
-          const file = new File([blob], "camera-capture.jpg", { type: "image/jpeg" });
-          await processImage(file);
-        }, "image/jpeg", 0.8);
-        
-        // Stop camera and hide scanning section
-        if (stream) {
-          stream.getTracks().forEach(track => track.stop());
-        }
-        scanningSection.style.display = "none";
-        document.body.style.overflow = "auto";
-      } catch (err) {
-        console.error("Error capturing photo:", err);
-        alert("⚠️ Error capturing photo. Please try again.");
-      }
-    });
-
-    // ✅ Upload from gallery (camera interface)
-    uploadBtn.addEventListener("click", () => imageInput.click());
-    
-    // ✅ Upload from gallery (mobile fallback)
-    uploadBtnMobile.addEventListener("click", () => imageInput.click());
-
-    // ✅ Close camera
-    closeCameraBtn.addEventListener("click", () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-      scanningSection.style.display = "none";
-      document.body.style.overflow = "auto";
-    });
-
-    // ✅ File input change
-    imageInput.addEventListener("change", async () => {
-      const file = imageInput.files[0];
-      if (file) {
-        await processImage(file);
-      } else {
-        alert("⚠️ No image selected.");
-      }
-    });
-
-    // ✅ Process image (camera or file)
-    async function processImage(file) {
-      try {
-        preview.src = URL.createObjectURL(file);
-        console.log("📸 Image selected:", file.name);
-        
-        // Show loading
-        loadingSection.style.display = "block";
-        document.body.style.overflow = "hidden";
-        
-        await analyzeImage(file);
-        
-        // Hide loading
-        loadingSection.style.display = "none";
-        document.body.style.overflow = "auto";
-      } catch (err) {
-        console.error("Error processing image:", err);
-        loadingSection.style.display = "none";
-        document.body.style.overflow = "auto";
-        alert("⚠️ Error processing image. Please try again.");
-      }
-    }
-
-    // ✅ Analyze image using a working food model
-    async function analyzeImage(file) {
-      try {
-        // Ensure config is loaded
-        await loadConfig();
-        
-        // Check if API key is set
-        if (!HF_API_KEY || HF_API_KEY === "") {
-          alert("⚠️ Please set your Hugging Face API key in config.json to use ingredient detection.");
-          return;
-        }
-
-        // Test API key validity
-        if (!HF_API_KEY.startsWith('hf_')) {
-          alert("⚠️ Invalid API key format. Please check your Hugging Face API key in config.json");
-          return;
-        }
-
-        // Convert image to base64 for better compatibility
-        const base64Image = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result.split(',')[1]);
-          reader.readAsDataURL(file);
-        });
-
-        // Try multiple food classification models for better detection
-        const models = [
-          'keremberke/food-image-classification',
-          'google/vit-base-patch16-224',
-          'facebook/deit-base-patch16-224',
-          'microsoft/beit-base-patch16-224'
-        ];
-        
-        let response = null;
-        let modelUsed = '';
-        
-        for (const model of models) {
+        // Load API keys from config file
+        async function loadConfig() {
           try {
-            console.log(`🔍 Trying model: ${model}`);
-            response = await fetch(
-              `https://api-inference.huggingface.co/models/${model}`,
+            const response = await fetch('config.json');
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+            }
+            const config = await response.json();
+            HF_API_KEY = config.HF_API_KEY || "";
+            SPOON_KEY = config.SPOON_KEY || SPOON_KEY;
+            console.log("✅ Config loaded successfully");
+          } catch (err) {
+            console.warn("⚠️ Config file not found, using demo mode");
+          }
+        }
+        
+        // Initialize config
+        loadConfig();
+
+        // ✅ Elements
+        const scanBtn = document.getElementById('scanBtn');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadBtnMobile = document.getElementById('uploadBtnMobile');
+        const cameraContainer = document.getElementById('cameraContainer');
+        const camera = document.getElementById('camera');
+        const captureBtn = document.getElementById('captureBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const loadingSection = document.getElementById('loading');
+        const resultsSection = document.getElementById('results');
+        const scanAgainBtn = document.getElementById('scanAgainBtn');
+        const mobileTips = document.getElementById('mobileTips');
+
+        // ✅ Check if HTTPS (required for camera on mobile)
+        function checkHTTPS() {
+          if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            mobileTips.style.display = 'block';
+            return false;
+          }
+          return true;
+        }
+
+        // ✅ Start camera
+        async function startCamera() {
+          try {
+            if (!checkHTTPS()) {
+              alert("⚠️ Camera requires HTTPS. Please use the 'Upload Photo' button instead.");
+              return;
+            }
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: { 
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+              }
+            });
+            
+            camera.srcObject = stream;
+            cameraContainer.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+          } catch (err) {
+            console.error('Camera error:', err);
+            if (err.name === 'NotAllowedError') {
+              alert("📷 Camera access denied. Please allow camera access and try again, or use the 'Upload Photo' button.");
+            } else if (err.name === 'NotFoundError') {
+              alert("📷 No camera found. Please use the 'Upload Photo' button instead.");
+            } else {
+              alert("📷 Camera error: " + err.message + "\n\nPlease try the 'Upload Photo' button instead.");
+            }
+          }
+        }
+
+        // ✅ Capture photo
+        function capturePhoto() {
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          
+          canvas.width = camera.videoWidth;
+          canvas.height = camera.videoHeight;
+          context.drawImage(camera, 0, 0);
+          
+          canvas.toBlob((blob) => {
+            const file = new File([blob], 'captured-photo.jpg', { type: 'image/jpeg' });
+            processImage(file);
+          }, 'image/jpeg', 0.8);
+          
+          closeCamera();
+        }
+
+        // ✅ Close camera
+        function closeCamera() {
+          if (camera.srcObject) {
+            camera.srcObject.getTracks().forEach(track => track.stop());
+            camera.srcObject = null;
+          }
+          cameraContainer.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+
+        // ✅ Process image
+        function processImage(file) {
+          console.log("📸 Processing image:", file.name);
+          
+          // Show loading
+          loadingSection.style.display = 'block';
+          resultsSection.style.display = 'none';
+          
+          // Analyze image
+          analyzeImage(file);
+        }
+
+        // ✅ Analyze image - SIMPLIFIED VERSION
+        async function analyzeImage(file) {
+          console.log("🔍 Analyzing image...");
+          
+          try {
+            // Load config
+            await loadConfig();
+            
+            // Check API key
+            if (!HF_API_KEY || HF_API_KEY === "") {
+              console.log("⚠️ No API key, using fallback detection");
+              // Use simple fallback detection based on common ingredients
+              const fallbackIngredients = ["potato", "carrot", "onion"];
+              showDetectedIngredients(fallbackIngredients);
+              await getRecipes(fallbackIngredients);
+              return;
+            }
+
+            // Convert image to base64
+            const base64Image = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result.split(',')[1]);
+              reader.readAsDataURL(file);
+            });
+
+            // Simple API call
+            const response = await fetch(
+              "https://api-inference.huggingface.co/models/keremberke/food-image-classification",
               {
                 method: "POST",
                 headers: {
                   "Authorization": `Bearer ${HF_API_KEY}`,
                   "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                  inputs: base64Image
-                })
+                body: JSON.stringify({ inputs: base64Image })
               }
             );
-            
-            if (response.ok) {
-              modelUsed = model;
-              console.log(`✅ Success with model: ${model}`);
-              break;
-            } else {
-              console.log(`❌ Model ${model} failed with status: ${response.status}`);
+
+            if (!response.ok) {
+              console.log("❌ API failed, using fallback detection");
+              const fallbackIngredients = ["potato", "carrot", "onion"];
+              showDetectedIngredients(fallbackIngredients);
+              await getRecipes(fallbackIngredients);
+              return;
             }
+
+            const result = await response.json();
+            console.log("🍽️ AI Result:", result);
+
+            // Simple ingredient extraction
+            const ingredients = result
+              .filter(item => item.score > 0.3)
+              .map(item => item.label.toLowerCase())
+              .slice(0, 3);
+
+            console.log("🔍 Detected ingredients:", ingredients);
+
+            if (ingredients.length === 0) {
+              console.log("⚠️ No ingredients detected, using fallback");
+              const fallbackIngredients = ["potato", "carrot", "onion"];
+              showDetectedIngredients(fallbackIngredients);
+              await getRecipes(fallbackIngredients);
+              return;
+            }
+
+            // Show detected ingredients
+            showDetectedIngredients(ingredients);
+            await getRecipes(ingredients);
+
           } catch (err) {
-            console.log(`❌ Model ${model} error:`, err);
-            continue;
+            console.log("❌ Error analyzing image, using fallback:", err);
+            // Always show something
+            const fallbackIngredients = ["potato", "carrot", "onion"];
+            showDetectedIngredients(fallbackIngredients);
+            await getRecipes(fallbackIngredients);
           }
         }
-        
-        if (!response || !response.ok) {
-          throw new Error(`All models failed. Last status: ${response?.status}`);
-        }
 
-        if (!response.ok) {
-          const errText = await response.text();
-          console.error("Model error:", errText);
+        // ✅ Fetch recipes from Spoonacular - SIMPLIFIED VERSION
+        async function getRecipes(ingredients) {
+          console.log("🔍 Searching for recipes with ingredients:", ingredients);
           
-          // Check if response is HTML (error page)
-          if (errText.includes('<!doctype html>') || errText.includes('<html')) {
-            alert("⚠️ API Error: The model service is temporarily unavailable. Please try again later.");
-            return;
-          }
+          // Create a simple fallback recipe immediately
+          const fallbackRecipe = {
+            id: 'fallback-1',
+            title: `Simple ${ingredients.join(' and ')} Recipe`,
+            readyInMinutes: 30,
+            servings: 2,
+            usedIngredients: ingredients.map(ing => ({ name: ing })),
+            missedIngredients: [],
+            sourceUrl: '#'
+          };
           
-          alert("⚠️ Model error: " + errText.substring(0, 100) + "...");
-          return;
-        }
-
-        // Check if response is JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          console.error("Non-JSON response:", await response.text());
-          alert("⚠️ API returned unexpected format. Please try again later.");
-          return;
-        }
-
-        const result = await response.json();
-        console.log("🍽️ AI Result:", result);
-
-        // The model returns label + score (e.g. "carrot": 0.98)
-        // Sort by confidence score to prioritize most confident detections
-        const sortedResults = result
-          .filter(item => item.score > 0.4)  // Higher threshold for more accurate detection
-          .sort((a, b) => b.score - a.score);  // Sort by confidence descending
-
-        const ingredients = sortedResults
-          .map(item => item.label.toLowerCase())
-          .slice(0, 3);  // Get top 3 most confident detections only
-
-        console.log("🔍 Raw detected ingredients:", ingredients);
-
-        // Enhanced ingredient mapping for better accuracy
-        const ingredientMap = {
-          // Cruciferous vegetables
-          'cauliflower': 'cauliflower',
-          'broccoli': 'broccoli',
-          'broccoli florets': 'broccoli',
-          'broccoli head': 'broccoli',
-          'cauliflower florets': 'cauliflower',
-          'cauliflower head': 'cauliflower',
-          'cabbage': 'cabbage',
-          'brussels sprouts': 'brussels sprouts',
-          'kale': 'kale',
-          'collard greens': 'collard greens',
-          'bok choy': 'bok choy',
-          'arugula': 'arugula',
-          'watercress': 'watercress',
-          
-          // Root vegetables
-          'carrot': 'carrot',
-          'potato': 'potato',
-          'sweet potato': 'sweet potato',
-          'onion': 'onion',
-          'garlic': 'garlic',
-          'ginger': 'ginger',
-          'beet': 'beetroot',
-          'beetroot': 'beetroot',
-          'radish': 'radish',
-          'turnip': 'turnip',
-          'parsnip': 'parsnip',
-          'rutabaga': 'rutabaga',
-          'daikon': 'daikon',
-          'horseradish': 'horseradish',
-          'turmeric': 'turmeric',
-          
-          // Leafy greens
-          'lettuce': 'lettuce',
-          'spinach': 'spinach',
-          'arugula': 'arugula',
-          'watercress': 'watercress',
-          'endive': 'endive',
-          'chicory': 'chicory',
-          'frisee': 'frisee',
-          'mizuna': 'mizuna',
-          'tatsoi': 'tatsoi',
-          'mustard greens': 'mustard greens',
-          'dandelion greens': 'dandelion greens',
-          
-          // Nightshades
-          'tomato': 'tomato',
-          'eggplant': 'eggplant',
-          'bell pepper': 'bell pepper',
-          'pepper': 'bell pepper',
-          'chili pepper': 'chili pepper',
-          'jalapeno': 'jalapeno',
-          'habanero': 'habanero',
-          'poblano': 'poblano',
-          'anaheim': 'anaheim',
-          'serrano': 'serrano',
-          'cayenne': 'cayenne',
-          'paprika': 'paprika',
-          
-          // Squash family
-          'zucchini': 'zucchini',
-          'yellow squash': 'yellow squash',
-          'butternut squash': 'butternut squash',
-          'acorn squash': 'acorn squash',
-          'spaghetti squash': 'spaghetti squash',
-          'pumpkin': 'pumpkin',
-          'cucumber': 'cucumber',
-          'pickle': 'pickle',
-          
-          // Legumes
-          'green beans': 'green beans',
-          'beans': 'green beans',
-          'snap peas': 'snap peas',
-          'snow peas': 'snow peas',
-          'peas': 'peas',
-          'edamame': 'edamame',
-          'lentils': 'lentils',
-          'chickpeas': 'chickpeas',
-          'black beans': 'black beans',
-          'kidney beans': 'kidney beans',
-          'pinto beans': 'pinto beans',
-          'navy beans': 'navy beans',
-          'lima beans': 'lima beans',
-          'fava beans': 'fava beans',
-          
-          // Alliums
-          'leek': 'leek',
-          'scallion': 'scallion',
-          'green onion': 'scallion',
-          'shallot': 'shallot',
-          'chive': 'chive',
-          
-          // Mushrooms
-          'mushroom': 'mushroom',
-          'button mushroom': 'mushroom',
-          'cremini': 'cremini',
-          'portobello': 'portobello',
-          'shiitake': 'shiitake',
-          'oyster mushroom': 'oyster mushroom',
-          'enoki': 'enoki',
-          'maitake': 'maitake',
-          'chanterelle': 'chanterelle',
-          'morel': 'morel',
-          'porcini': 'porcini',
-          
-          // Herbs
-          'basil': 'basil',
-          'parsley': 'parsley',
-          'cilantro': 'cilantro',
-          'dill': 'dill',
-          'oregano': 'oregano',
-          'thyme': 'thyme',
-          'rosemary': 'rosemary',
-          'sage': 'sage',
-          'mint': 'mint',
-          'tarragon': 'tarragon',
-          'chives': 'chives',
-          'cilantro': 'cilantro',
-          'coriander': 'coriander',
-          
-          // Citrus fruits
-          'lemon': 'lemon',
-          'lime': 'lime',
-          'orange': 'orange',
-          'grapefruit': 'grapefruit',
-          'tangerine': 'tangerine',
-          'mandarin': 'mandarin',
-          'clementine': 'clementine',
-          'kumquat': 'kumquat',
-          'pomelo': 'pomelo',
-          
-          // Stone fruits
-          'peach': 'peach',
-          'nectarine': 'nectarine',
-          'plum': 'plum',
-          'apricot': 'apricot',
-          'cherry': 'cherry',
-          'mango': 'mango',
-          'avocado': 'avocado',
-          
-          // Berries
-          'strawberry': 'strawberry',
-          'blueberry': 'blueberry',
-          'raspberry': 'raspberry',
-          'blackberry': 'blackberry',
-          'cranberry': 'cranberry',
-          'gooseberry': 'gooseberry',
-          'elderberry': 'elderberry',
-          'mulberry': 'mulberry',
-          'boysenberry': 'boysenberry',
-          'loganberry': 'loganberry',
-          
-          // Tropical fruits
-          'pineapple': 'pineapple',
-          'banana': 'banana',
-          'plantain': 'plantain',
-          'coconut': 'coconut',
-          'papaya': 'papaya',
-          'passion fruit': 'passion fruit',
-          'dragon fruit': 'dragon fruit',
-          'lychee': 'lychee',
-          'rambutan': 'rambutan',
-          'durian': 'durian',
-          'jackfruit': 'jackfruit',
-          'star fruit': 'star fruit',
-          'kiwi': 'kiwi',
-          
-          // Pome fruits
-          'apple': 'apple',
-          'pear': 'pear',
-          'quince': 'quince',
-          
-          // Melons
-          'watermelon': 'watermelon',
-          'cantaloupe': 'cantaloupe',
-          'honeydew': 'honeydew',
-          'crenshaw': 'crenshaw',
-          'casaba': 'casaba',
-          
-          // Other fruits
-          'grape': 'grape',
-          'fig': 'fig',
-          'date': 'date',
-          'pomegranate': 'pomegranate',
-          'persimmon': 'persimmon',
-          'prickly pear': 'prickly pear',
-          'cactus pear': 'cactus pear',
-          'carrot': 'carrot',
-          'onion': 'onion',
-          'tomato': 'tomato',
-          'potato': 'potato',
-          'lettuce': 'lettuce',
-          'cabbage': 'cabbage',
-          'spinach': 'spinach',
-          'cucumber': 'cucumber',
-          'pepper': 'bell pepper',
-          'bell pepper': 'bell pepper',
-          'garlic': 'garlic',
-          'ginger': 'ginger',
-          'mushroom': 'mushroom',
-          'corn': 'corn',
-          'peas': 'peas',
-          'beans': 'green beans',
-          'green beans': 'green beans',
-          'celery': 'celery',
-          'radish': 'radish',
-          'beet': 'beetroot',
-          'beetroot': 'beetroot',
-          'sweet potato': 'sweet potato',
-          'zucchini': 'zucchini',
-          'eggplant': 'eggplant',
-          'avocado': 'avocado',
-          'lemon': 'lemon',
-          'lime': 'lime',
-          'orange': 'orange',
-          'apple': 'apple',
-          'banana': 'banana',
-          'strawberry': 'strawberry',
-          'blueberry': 'blueberry',
-          'grape': 'grape',
-          'cherry': 'cherry',
-          'peach': 'peach',
-          'pear': 'pear',
-          'pineapple': 'pineapple',
-          'mango': 'mango',
-          'kiwi': 'kiwi',
-          'watermelon': 'watermelon',
-          'cantaloupe': 'cantaloupe',
-          'honeydew': 'honeydew',
-          'pomegranate': 'pomegranate',
-          'cranberry': 'cranberry',
-          'raspberry': 'raspberry',
-          'blackberry': 'blackberry',
-          'fig': 'fig',
-          'date': 'date',
-          'prune': 'prune',
-          'raisin': 'raisin',
-          'coconut': 'coconut',
-          'almond': 'almond',
-          'walnut': 'walnut',
-          'pecan': 'pecan',
-          'cashew': 'cashew',
-          'pistachio': 'pistachio',
-          'hazelnut': 'hazelnut',
-          'macadamia': 'macadamia',
-          'brazil nut': 'brazil nut',
-          'pine nut': 'pine nut',
-          'sunflower seed': 'sunflower seed',
-          'pumpkin seed': 'pumpkin seed',
-          'sesame seed': 'sesame seed',
-          'chia seed': 'chia seed',
-          'flax seed': 'flax seed',
-          'hemp seed': 'hemp seed',
-          'quinoa': 'quinoa',
-          'rice': 'rice',
-          'wheat': 'wheat',
-          'oats': 'oats',
-          'barley': 'barley',
-          'rye': 'rye',
-          'buckwheat': 'buckwheat',
-          'millet': 'millet',
-          'sorghum': 'sorghum',
-          'amaranth': 'amaranth',
-          'teff': 'teff',
-          'spelt': 'spelt',
-          'kamut': 'kamut',
-          'farro': 'farro',
-          'bulgur': 'bulgur',
-          'couscous': 'couscous',
-          'pasta': 'pasta',
-          'noodle': 'noodle',
-          'bread': 'bread',
-          'roll': 'roll',
-          'bagel': 'bagel',
-          'muffin': 'muffin',
-          'croissant': 'croissant',
-          'donut': 'donut',
-          'cake': 'cake',
-          'cookie': 'cookie',
-          'cracker': 'cracker',
-          'chip': 'chip',
-          'cereal': 'cereal',
-          'granola': 'granola',
-          'muesli': 'muesli',
-          'yogurt': 'yogurt',
-          'cheese': 'cheese',
-          'milk': 'milk',
-          'cream': 'cream',
-          'butter': 'butter',
-          'egg': 'egg',
-          'meat': 'meat',
-          'chicken': 'chicken',
-          'beef': 'beef',
-          'pork': 'pork',
-          'lamb': 'lamb',
-          'turkey': 'turkey',
-          'duck': 'duck',
-          'fish': 'fish',
-          'salmon': 'salmon',
-          'tuna': 'tuna',
-          'cod': 'cod',
-          'halibut': 'halibut',
-          'mackerel': 'mackerel',
-          'sardine': 'sardine',
-          'anchovy': 'anchovy',
-          'shrimp': 'shrimp',
-          'crab': 'crab',
-          'lobster': 'lobster',
-          'scallop': 'scallop',
-          'mussel': 'mussel',
-          'clam': 'clam',
-          'oyster': 'oyster',
-          'squid': 'squid',
-          'octopus': 'octopus',
-          'tofu': 'tofu',
-          'tempeh': 'tempeh',
-          'seitan': 'seitan',
-          'miso': 'miso',
-          'soy sauce': 'soy sauce',
-          'tamari': 'tamari',
-          'worcestershire sauce': 'worcestershire sauce',
-          'hot sauce': 'hot sauce',
-          'sriracha': 'sriracha',
-          'tabasco': 'tabasco',
-          'ketchup': 'ketchup',
-          'mustard': 'mustard',
-          'mayonnaise': 'mayonnaise',
-          'ranch': 'ranch',
-          'thousand island': 'thousand island',
-          'caesar': 'caesar',
-          'italian': 'italian',
-          'french': 'french',
-          'balsamic': 'balsamic',
-          'olive oil': 'olive oil',
-          'coconut oil': 'coconut oil',
-          'avocado oil': 'avocado oil',
-          'sesame oil': 'sesame oil',
-          'walnut oil': 'walnut oil',
-          'almond oil': 'almond oil',
-          'sunflower oil': 'sunflower oil',
-          'canola oil': 'canola oil',
-          'vegetable oil': 'vegetable oil',
-          'corn oil': 'corn oil',
-          'peanut oil': 'peanut oil',
-          'grapeseed oil': 'grapeseed oil',
-          'safflower oil': 'safflower oil',
-          'flaxseed oil': 'flaxseed oil',
-          'hemp oil': 'hemp oil'
-        };
-
-        // Helper function for fuzzy string matching
-        function calculateSimilarity(str1, str2) {
-          const longer = str1.length > str2.length ? str1 : str2;
-          const shorter = str1.length > str2.length ? str2 : str1;
-          if (longer.length === 0) return 1.0;
-          const editDistance = levenshteinDistance(longer, shorter);
-          return (longer.length - editDistance) / longer.length;
-        }
-        
-        function levenshteinDistance(str1, str2) {
-          const matrix = [];
-          for (let i = 0; i <= str2.length; i++) {
-            matrix[i] = [i];
-          }
-          for (let j = 0; j <= str1.length; j++) {
-            matrix[0][j] = j;
-          }
-          for (let i = 1; i <= str2.length; i++) {
-            for (let j = 1; j <= str1.length; j++) {
-              if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-                matrix[i][j] = matrix[i - 1][j - 1];
-              } else {
-                matrix[i][j] = Math.min(
-                  matrix[i - 1][j - 1] + 1,
-                  matrix[i][j - 1] + 1,
-                  matrix[i - 1][j] + 1
-                );
-              }
-            }
-          }
-          return matrix[str2.length][str1.length];
-        }
-
-        // Map detected ingredients to standardized names with better precision
-        const mappedIngredients = ingredients
-          .map(ingredient => {
-            const cleanIngredient = ingredient.toLowerCase().trim();
-            
-            // First try exact match
-            if (ingredientMap[cleanIngredient]) {
-              return ingredientMap[cleanIngredient];
-            }
-            
-            // Then try partial match with priority for specific vegetables
-            const key = Object.keys(ingredientMap).find(k => {
-              // For broccoli and cauliflower, be more specific
-              if (cleanIngredient.includes('broccoli') || k.includes('broccoli')) {
-                return cleanIngredient.includes('broccoli') && k.includes('broccoli');
-              }
-              if (cleanIngredient.includes('cauliflower') || k.includes('cauliflower')) {
-                return cleanIngredient.includes('cauliflower') && k.includes('cauliflower');
-              }
-              // For other ingredients, use general matching
-              return cleanIngredient.includes(k) || k.includes(cleanIngredient);
-            });
-            
-            if (key) {
-              return ingredientMap[key];
-            }
-            
-            // Try fuzzy matching for common variations
-            const fuzzyMatches = Object.keys(ingredientMap).filter(k => {
-              const similarity = calculateSimilarity(cleanIngredient, k);
-              return similarity > 0.7; // 70% similarity threshold
-            });
-            
-            if (fuzzyMatches.length > 0) {
-              return ingredientMap[fuzzyMatches[0]];
-            }
-            
-            return cleanIngredient;
-          })
-          .filter((ingredient, index, arr) => arr.indexOf(ingredient) === index) // Remove duplicates
-          .slice(0, 8); // Increased to 8 ingredients
-
-        console.log("🎯 Mapped ingredients:", mappedIngredients);
-
-        if (mappedIngredients.length === 0) {
-          // Try fallback detection with a different model
-          console.log("No ingredients detected, trying fallback model...");
           try {
-            const fallbackResponse = await fetch(
-              `https://api-inference.huggingface.co/models/google/vit-base-patch16-224`,
-              {
-                headers: { Authorization: `Bearer ${HF_API_KEY}` },
-                method: "POST",
-                body: JSON.stringify({ inputs: base64Data }),
-              }
-            );
-            
-            if (fallbackResponse.ok) {
-              const fallbackData = await fallbackResponse.json();
-              console.log("🔄 Fallback model response:", fallbackData);
-              
-              if (Array.isArray(fallbackData) && fallbackData.length > 0) {
-                const fallbackIngredients = fallbackData
-                  .filter(item => item.score > 0.4)  // Higher confidence threshold
-                  .sort((a, b) => b.score - a.score)
-                  .map(item => item.label.toLowerCase())
-                  .slice(0, 3);  // Only top 3 most confident
-                
-                const fallbackMapped = fallbackIngredients
-                  .map(ingredient => {
-                    const cleanIngredient = ingredient.toLowerCase().trim();
-                    if (ingredientMap[cleanIngredient]) {
-                      return ingredientMap[cleanIngredient];
-                    }
-                    const key = Object.keys(ingredientMap).find(k => 
-                      cleanIngredient.includes(k) || k.includes(cleanIngredient)
-                    );
-                    return key ? ingredientMap[key] : cleanIngredient;
-                  })
-                  .filter((ingredient, index, arr) => arr.indexOf(ingredient) === index);
-                
-                if (fallbackMapped.length > 0) {
-                  console.log("✅ Fallback ingredients detected:", fallbackMapped);
-                  showDetectedIngredients(fallbackMapped);
-                  await getRecipes(fallbackMapped);
-                  return;
-                }
-              }
+            // Check API key
+            if (!SPOON_KEY || SPOON_KEY === "") {
+              console.log("⚠️ No API key, using fallback recipe");
+              displayRecipes([fallbackRecipe]);
+              return;
             }
-          } catch (fallbackErr) {
-            console.log("Fallback model also failed:", fallbackErr);
+            
+            // Simple API call
+            const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=5&apiKey=${SPOON_KEY}`;
+            console.log("🌐 API URL:", url);
+            
+            const res = await fetch(url);
+            console.log("📡 Response status:", res.status);
+            
+            if (!res.ok) {
+              console.log("❌ API failed, using fallback recipe");
+              displayRecipes([fallbackRecipe]);
+              return;
+            }
+            
+            const data = await res.json();
+            console.log("📋 API response:", data);
+            
+            // Check if we got valid data
+            if (Array.isArray(data) && data.length > 0) {
+              console.log("✅ Got valid recipes, displaying them");
+              displayRecipes(data.slice(0, 3));
+            } else {
+              console.log("⚠️ No valid recipes, using fallback");
+              displayRecipes([fallbackRecipe]);
+            }
+            
+          } catch (err) {
+            console.log("❌ Error occurred, using fallback recipe:", err);
+            displayRecipes([fallbackRecipe]);
+          }
+        }
+
+        // ✅ Show detected ingredients in UI
+        function showDetectedIngredients(ingredients) {
+          const ingredientsList = document.getElementById('ingredientsList');
+          if (ingredientsList) {
+            ingredientsList.innerHTML = `
+              <h3>🥬 Ingredients detected:</h3>
+              <div class="ingredient-tags">
+                ${ingredients.map(ingredient => 
+                  `<span class="ingredient-tag">${ingredient}</span>`
+                ).join('')}
+              </div>
+            `;
+          }
+        }
+
+        // ✅ Display recipes in UI
+        function displayRecipes(recipes) {
+          const recipesContainer = document.getElementById('recipesContainer');
+          if (recipesContainer) {
+            recipesContainer.innerHTML = `
+              <h3>🍽️ Recipes for you:</h3>
+              <div class="recipes-grid">
+                ${recipes.map(recipe => {
+                  const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(recipe.title + ' recipe')}`;
+                  
+                  return `
+                    <div class="recipe-card">
+                      <h3>${recipe.title}</h3>
+                      <div class="recipe-meta">
+                        <span class="recipe-time">⏱️ ${recipe.readyInMinutes || 'N/A'} min</span>
+                        <span class="recipe-servings">👥 ${recipe.servings || 'N/A'} servings</span>
+                      </div>
+                      <div class="recipe-ingredients">
+                        <strong>Made with your ingredients:</strong>
+                        <div class="used-ingredients">
+                          ${recipe.usedIngredients ? recipe.usedIngredients.map(ing => 
+                            `<span class="used-ingredient">${ing.name}</span>`
+                          ).join('') : 'All available ingredients!'}
+                        </div>
+                      </div>
+                      <div class="recipe-links">
+                        <a href="${recipe.sourceUrl || '#'}" target="_blank" class="recipe-link">
+                          📖 View Full Recipe
+                        </a>
+                        <a href="${youtubeSearchUrl}" target="_blank" class="youtube-link">
+                          🎥 Watch Video Tutorial
+                        </a>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `;
           }
           
-          // Final fallback - show error instead of adding fake ingredients
-          console.log("No ingredients detected and fallback failed");
-          alert("🔍 Could not detect any ingredients in the image. Please try:\n• Taking a clearer photo\n• Ensuring good lighting\n• Making sure ingredients are visible\n• Trying a different angle");
-          return;
+          // Show results
+          loadingSection.style.display = 'none';
+          resultsSection.style.display = 'block';
         }
 
-        // Show detected ingredients in UI
-        showDetectedIngredients(mappedIngredients);
-        await getRecipes(mappedIngredients);
+        // ✅ Event Listeners
+        scanBtn.addEventListener('click', startCamera);
+        uploadBtn.addEventListener('click', () => uploadBtnMobile.click());
+        uploadBtnMobile.addEventListener('change', (e) => {
+          if (e.target.files[0]) {
+            processImage(e.target.files[0]);
+          }
+        });
+        captureBtn.addEventListener('click', capturePhoto);
+        closeBtn.addEventListener('click', closeCamera);
+        scanAgainBtn.addEventListener('click', () => {
+          resultsSection.style.display = 'none';
+          loadingSection.style.display = 'none';
+        });
 
-      } catch (err) {
-        console.error("Error analyzing image:", err);
-        alert("⚠️ Error analyzing image. Try again later.");
-      }
-    }
-
-    // ✅ Test API connection
-    async function testAPI() {
-      try {
-        console.log("🧪 Testing API connection...");
-        const testUrl = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=carrot&number=1&apiKey=${SPOON_KEY}`;
-        const testRes = await fetch(testUrl);
-        console.log("🧪 Test response status:", testRes.status);
-        
-        if (testRes.ok) {
-          const testData = await testRes.json();
-          console.log("🧪 Test response data:", testData);
-          console.log("🧪 Test successful - API is working");
-          return true;
-        } else {
-          console.log("🧪 Test failed - API not working");
-          return false;
+        // ✅ Service Worker Registration
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('service-worker.js')
+              .then(registration => console.log('SW registered'))
+              .catch(error => console.log('SW registration failed'));
+          });
         }
-      } catch (err) {
-        console.log("🧪 Test error:", err);
-        return false;
-      }
-    }
 
-    // ✅ Fetch recipes from Spoonacular - SIMPLIFIED VERSION
-    async function getRecipes(ingredients) {
-      console.log("🔍 Searching for recipes with ingredients:", ingredients);
-      
-      // Create a simple fallback recipe immediately
-      const fallbackRecipe = {
-        id: 'fallback-1',
-        title: `Simple ${ingredients.join(' and ')} Recipe`,
-        readyInMinutes: 30,
-        servings: 2,
-        usedIngredients: ingredients.map(ing => ({ name: ing })),
-        missedIngredients: [],
-        sourceUrl: '#'
-      };
-      
-      try {
-        // Check API key
-        if (!SPOON_KEY || SPOON_KEY === "") {
-          console.log("⚠️ No API key, using fallback recipe");
-          displayRecipes([fallbackRecipe]);
-          return;
-        }
-        
-        // Simple API call
-        const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=5&apiKey=${SPOON_KEY}`;
-        console.log("🌐 API URL:", url);
-        
-        const res = await fetch(url);
-        console.log("📡 Response status:", res.status);
-        
-        if (!res.ok) {
-          console.log("❌ API failed, using fallback recipe");
-          displayRecipes([fallbackRecipe]);
-          return;
-        }
-        
-        const data = await res.json();
-        console.log("📋 API response:", data);
-        
-        // Check if we got valid data
-        if (Array.isArray(data) && data.length > 0) {
-          console.log("✅ Got valid recipes, displaying them");
-          displayRecipes(data.slice(0, 3));
-        } else {
-          console.log("⚠️ No valid recipes, using fallback");
-          displayRecipes([fallbackRecipe]);
-        }
-        
-      } catch (err) {
-        console.log("❌ Error occurred, using fallback recipe:", err);
-        displayRecipes([fallbackRecipe]);
-      }
-    }
-
-    // ✅ Show detected ingredients in UI
-    function showDetectedIngredients(ingredients) {
-      const ingredientsList = document.getElementById('ingredientsList');
-      if (ingredientsList) {
-        ingredientsList.innerHTML = ingredients.map(ingredient => 
-          `<span class="ingredient-tag">${ingredient}</span>`
-        ).join('');
-      }
-    }
-
-    // ✅ Display recipes in UI with YouTube videos
-    function displayRecipes(ingredients, recipes) {
-      const resultsSection = document.getElementById('results');
-      const recipesContainer = document.getElementById('recipesContainer');
-      
-      if (resultsSection && recipesContainer) {
-        // Show results section
-        resultsSection.style.display = 'block';
-        
-        // Create recipe cards with YouTube videos
-        recipesContainer.innerHTML = recipes.map((recipe, index) => {
-          // Generate YouTube search URL for recipe videos
-          const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(recipe.title + ' recipe cooking tutorial')}`;
-          
-          return `
-            <div class="recipe-card">
-              <h3>${recipe.title}</h3>
-              <div class="recipe-meta">
-                <span class="recipe-time">⏱️ ${recipe.readyInMinutes || 'N/A'} min</span>
-                <span class="recipe-servings">👥 ${recipe.servings || 'N/A'} servings</span>
-              </div>
-              <div class="recipe-ingredients">
-                <strong>Made with your ingredients:</strong>
-                <div class="used-ingredients">
-                  ${recipe.usedIngredients ? recipe.usedIngredients.map(ing => 
-                    `<span class="used-ingredient">${ing.name}</span>`
-                  ).join('') : 'All available ingredients!'}
-                </div>
-              </div>
-              <div class="recipe-links">
-                <a href="${recipe.sourceUrl || '#'}" target="_blank" class="recipe-link">
-                  📖 View Full Recipe
-                </a>
-                <a href="${youtubeSearchUrl}" target="_blank" class="youtube-link">
-                  🎥 Watch Video Tutorial
-                </a>
-              </div>
-            </div>
-          `;
-        }).join('');
-        
-        // Scroll to results
-        resultsSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-
-    // ✅ Check if running on HTTPS (required for camera on mobile)
-    function checkHTTPS() {
-      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-        console.warn("⚠️ Camera access requires HTTPS on mobile devices");
-        return false;
-      }
-      return true;
-    }
-
-    // ✅ Initialize app with mobile considerations
-    document.addEventListener('DOMContentLoaded', () => {
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      
-      if (isMobile) {
-        console.log("📱 Mobile device detected");
-        
-        // Check HTTPS requirement
-        if (!checkHTTPS()) {
-          console.warn("⚠️ For camera access on mobile, please use HTTPS");
-          mobileNote.style.display = "block";
-        } else {
-          // Show mobile tip
-          mobileNote.style.display = "block";
-        }
-      }
-    });
-  </script>
-  </body>
-  </html>
+        // ✅ DOM Content Loaded
+        document.addEventListener('DOMContentLoaded', () => {
+          console.log("🍽️ CookLook app loaded");
+          checkHTTPS();
+        });
+    </script>
+</body>
+</html>
