@@ -946,9 +946,24 @@
         
         const recipes = await res.json();
         console.log("📋 Raw API response:", recipes);
+        console.log("📊 Type of response:", typeof recipes);
+        console.log("📊 Is array:", Array.isArray(recipes));
+        
+        // Validate that we got an array of recipes
+        if (!Array.isArray(recipes)) {
+          console.error("❌ API response is not an array:", recipes);
+          
+          // Check if it's an error object from the API
+          if (recipes && typeof recipes === 'object' && recipes.error) {
+            throw new Error(`API Error: ${recipes.error}`);
+          } else if (recipes && typeof recipes === 'object' && recipes.message) {
+            throw new Error(`API Error: ${recipes.message}`);
+          } else {
+            throw new Error(`Invalid API response format. Expected array, got ${typeof recipes}. Response: ${JSON.stringify(recipes)}`);
+          }
+        }
+        
         console.log("📊 Number of recipes found:", recipes.length);
-
-        console.log("Recipes:", recipes);
 
         if (!recipes.length) {
           alert("🍽️ No recipes found for: " + ingredients.join(", "));
@@ -999,12 +1014,14 @@
               }
               
               const individualRecipes = await individualRes.json();
+              console.log(`📋 Individual response for ${ingredient}:`, individualRecipes);
               
-              if (individualRecipes && individualRecipes.length > 0) {
+              // Validate individual response
+              if (Array.isArray(individualRecipes) && individualRecipes.length > 0) {
                 individualSearches.push(...individualRecipes);
                 console.log(`✅ Found ${individualRecipes.length} recipes for ${ingredient}`);
               } else {
-                console.log(`⚠️ No recipes found for ${ingredient}`);
+                console.log(`⚠️ No valid recipes found for ${ingredient} (type: ${typeof individualRecipes})`);
               }
             } catch (err) {
               console.log(`❌ Individual search error for ${ingredient}:`, err);
