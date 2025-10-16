@@ -920,6 +920,29 @@
       }
     }
 
+    // ✅ Test API connection
+    async function testAPI() {
+      try {
+        console.log("🧪 Testing API connection...");
+        const testUrl = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=carrot&number=1&apiKey=${SPOON_KEY}`;
+        const testRes = await fetch(testUrl);
+        console.log("🧪 Test response status:", testRes.status);
+        
+        if (testRes.ok) {
+          const testData = await testRes.json();
+          console.log("🧪 Test response data:", testData);
+          console.log("🧪 Test successful - API is working");
+          return true;
+        } else {
+          console.log("🧪 Test failed - API not working");
+          return false;
+        }
+      } catch (err) {
+        console.log("🧪 Test error:", err);
+        return false;
+      }
+    }
+
     // ✅ Fetch recipes from Spoonacular
     async function getRecipes(ingredients) {
       try {
@@ -932,11 +955,18 @@
           throw new Error("Spoonacular API key is missing. Please check config.json");
         }
         
+        // Test API connection first
+        const apiWorking = await testAPI();
+        if (!apiWorking) {
+          throw new Error("API test failed. Please check your internet connection and API key.");
+        }
+        
         const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=20&ranking=2&apiKey=${SPOON_KEY}`;
         console.log("🌐 API URL:", url);
         
         const res = await fetch(url);
         console.log("📡 API Response status:", res.status, res.statusText);
+        console.log("📡 API Response headers:", res.headers);
         
         if (!res.ok) {
           const errorText = await res.text();
@@ -944,10 +974,28 @@
           throw new Error(`API Error ${res.status}: ${errorText}`);
         }
         
-        const recipes = await res.json();
-        console.log("📋 Raw API response:", recipes);
-        console.log("📊 Type of response:", typeof recipes);
-        console.log("📊 Is array:", Array.isArray(recipes));
+        // Check if response is JSON
+        const contentType = res.headers.get('content-type');
+        console.log("📄 Content-Type:", contentType);
+        
+        if (!contentType || !contentType.includes('application/json')) {
+          const textResponse = await res.text();
+          console.error("❌ Non-JSON response:", textResponse);
+          throw new Error(`Expected JSON response, got ${contentType}. Response: ${textResponse}`);
+        }
+        
+        let recipes;
+        try {
+          recipes = await res.json();
+          console.log("📋 Raw API response:", recipes);
+          console.log("📊 Type of response:", typeof recipes);
+          console.log("📊 Is array:", Array.isArray(recipes));
+        } catch (jsonError) {
+          console.error("❌ JSON parsing error:", jsonError);
+          const textResponse = await res.text();
+          console.error("❌ Raw response text:", textResponse);
+          throw new Error(`Failed to parse JSON response: ${jsonError.message}. Raw response: ${textResponse}`);
+        }
         
         // Validate that we got an array of recipes
         if (!Array.isArray(recipes)) {
@@ -970,6 +1018,14 @@
           return;
         }
 
+        // Final safety check before processing
+        if (!recipes || !Array.isArray(recipes)) {
+          console.error("❌ Final safety check failed - recipes is not an array:", recipes);
+          throw new Error("Recipes data is invalid or not an array");
+        }
+        
+        console.log("✅ Safety check passed - processing", recipes.length, "recipes");
+        
         // Filter recipes to show those with reasonable missing ingredients
         const filteredRecipes = recipes
           .filter(recipe => {
