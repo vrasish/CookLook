@@ -924,10 +924,27 @@
     async function getRecipes(ingredients) {
       try {
         console.log("🔍 Searching for recipes with ingredients:", ingredients);
-        const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=20&ranking=2&apiKey=${SPOON_KEY}`;
-        const res = await fetch(url);
-        const recipes = await res.json();
+        console.log("🔑 Using Spoonacular API key:", SPOON_KEY ? "Present" : "Missing");
+        console.log("🔑 API key value:", SPOON_KEY);
         
+        // Test API key with a simple request first
+        if (!SPOON_KEY || SPOON_KEY === "") {
+          throw new Error("Spoonacular API key is missing. Please check config.json");
+        }
+        
+        const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=20&ranking=2&apiKey=${SPOON_KEY}`;
+        console.log("🌐 API URL:", url);
+        
+        const res = await fetch(url);
+        console.log("📡 API Response status:", res.status, res.statusText);
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error("❌ API Error Response:", errorText);
+          throw new Error(`API Error ${res.status}: ${errorText}`);
+        }
+        
+        const recipes = await res.json();
         console.log("📋 Raw API response:", recipes);
         console.log("📊 Number of recipes found:", recipes.length);
 
@@ -971,15 +988,26 @@
           for (const ingredient of ingredients) {
             try {
               const individualUrl = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredient}&number=5&ranking=2&apiKey=${SPOON_KEY}`;
+              console.log(`🔍 Individual search for: ${ingredient}`);
+              
               const individualRes = await fetch(individualUrl);
+              console.log(`📡 Individual response status for ${ingredient}:`, individualRes.status);
+              
+              if (!individualRes.ok) {
+                console.log(`❌ Individual search failed for ${ingredient}: ${individualRes.status}`);
+                continue;
+              }
+              
               const individualRecipes = await individualRes.json();
               
               if (individualRecipes && individualRecipes.length > 0) {
                 individualSearches.push(...individualRecipes);
                 console.log(`✅ Found ${individualRecipes.length} recipes for ${ingredient}`);
+              } else {
+                console.log(`⚠️ No recipes found for ${ingredient}`);
               }
             } catch (err) {
-              console.log(`❌ Individual search failed for ${ingredient}:`, err);
+              console.log(`❌ Individual search error for ${ingredient}:`, err);
             }
           }
           
@@ -1001,8 +1029,18 @@
         // Display recipes in UI
         displayRecipes(filteredRecipes);
       } catch (err) {
-        console.error("Error fetching recipes:", err);
-        alert("⚠️ Error fetching recipes. Try again later.");
+        console.error("❌ Error fetching recipes:", err);
+        
+        // Check if it's an API key issue
+        if (err.message.includes('401') || err.message.includes('Unauthorized')) {
+          alert("🔑 API key issue. Please check your Spoonacular API key in config.json");
+        } else if (err.message.includes('429') || err.message.includes('quota')) {
+          alert("⏰ API quota exceeded. Please try again later or check your API limits.");
+        } else if (err.message.includes('NetworkError') || err.message.includes('Failed to fetch')) {
+          alert("🌐 Network error. Please check your internet connection and try again.");
+        } else {
+          alert(`⚠️ Error fetching recipes: ${err.message}\n\nPlease check the console for more details.`);
+        }
       }
     }
 
