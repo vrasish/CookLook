@@ -56,7 +56,17 @@
                 <p>• Make sure you're using HTTPS (not HTTP)</p>
                 <p>• Grant camera permission when prompted</p>
                 <p>• Try the "Upload Photo" button if camera doesn't work</p>
-      </div>
+            </div>
+            
+            <!-- API Setup Tips -->
+            <div class="api-setup-tips" id="apiSetupTips" style="display: none;">
+                <p>🔑 <strong>API Setup for AI Detection:</strong></p>
+                <p>• Get your OpenAI API key from <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #4caf50;">platform.openai.com</a></p>
+                <p>• Update <code>config.json</code> with your actual API key</p>
+                <p>• Replace <code>"your-openai-api-key-here"</code> with your real key</p>
+                <p>• Refresh the app to enable AI detection</p>
+                <p style="color: #ff6b35; font-size: 14px; margin-top: 10px;"><strong>Note:</strong> Currently using color-based detection as fallback.</p>
+            </div>
     </div>
   </section>
 
@@ -99,12 +109,25 @@
             SPOON_KEY = config.SPOON_KEY || SPOON_KEY;
             OPENAI_API_KEY = config.OPENAI_API_KEY || "";
             
+            // Check if using placeholder keys
+            if (OPENAI_API_KEY === "your-openai-api-key-here") {
+              console.warn("⚠️ Using placeholder OpenAI API key - replace with real key for AI detection");
+              console.log("💡 To enable AI detection: Update config.json with your actual OpenAI API key");
+              
+              // Show API setup tips
+              const apiSetupTips = document.getElementById('apiSetupTips');
+              if (apiSetupTips) {
+                apiSetupTips.style.display = 'block';
+              }
+            }
+            
             console.log("✅ Config loaded successfully");
             console.log("🔑 API Keys after loading:");
             console.log("- HF_API_KEY:", HF_API_KEY ? "Set" : "Not set");
             console.log("- SPOON_KEY:", SPOON_KEY ? "Set" : "Not set");
             console.log("- OPENAI_API_KEY:", OPENAI_API_KEY ? "Set" : "Not set");
             console.log("- OPENAI_API_KEY length:", OPENAI_API_KEY ? OPENAI_API_KEY.length : 0);
+            console.log("- Using placeholder key:", OPENAI_API_KEY === "your-openai-api-key-here");
           } catch (err) {
             console.error("❌ Config loading failed:", err);
             console.warn("⚠️ Config file not found, using demo mode");
