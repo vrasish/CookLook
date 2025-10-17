@@ -393,6 +393,33 @@ footer {
   cursor: default;
 }
 
+/* CUISINE BADGES */
+.recipe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.cuisine-badge {
+  background: linear-gradient(135deg, #f9b234, #ff6b35);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-left: 10px;
+  box-shadow: 0 2px 8px rgba(249, 178, 52, 0.3);
+}
+
+.recipe-card h3 {
+  margin: 0;
+  flex: 1;
+  font-size: 1.2rem;
+  line-height: 1.3;
+}
+
 /* RECIPE RESULTS */
 .results-section {
   background-color: #444;

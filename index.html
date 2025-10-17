@@ -187,9 +187,9 @@
           analyzeImage(file);
         }
 
-        // ✅ Analyze image - SIMPLIFIED VERSION
+        // ✅ Analyze image - ENHANCED for better accuracy
         async function analyzeImage(file) {
-          console.log("🔍 Analyzing image...");
+          console.log("🔍 Enhanced image analysis...");
           
           try {
             // Load config
@@ -198,7 +198,6 @@
             // Check API key
             if (!HF_API_KEY || HF_API_KEY === "") {
               console.log("⚠️ No API key, using fallback detection");
-              // Use simple fallback detection based on common ingredients
               const fallbackIngredients = ["potato", "carrot", "onion"];
               showDetectedIngredients(fallbackIngredients);
               await getRecipes(fallbackIngredients);
@@ -212,39 +211,133 @@
               reader.readAsDataURL(file);
             });
 
-            // Simple API call
-            const response = await fetch(
-              "https://api-inference.huggingface.co/models/keremberke/food-image-classification",
-              {
-                method: "POST",
-                headers: {
-                  "Authorization": `Bearer ${HF_API_KEY}`,
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ inputs: base64Image })
-              }
-            );
+            // Enhanced ingredient mapping for better accuracy
+            const ingredientMap = {
+              // Vegetables
+              'broccoli': ['broccoli', 'broccoli florets', 'fresh broccoli', 'broccoli head'],
+              'cauliflower': ['cauliflower', 'cauliflower head', 'cauliflower florets', 'white cauliflower'],
+              'carrot': ['carrot', 'carrots', 'fresh carrot', 'orange carrot'],
+              'potato': ['potato', 'potatoes', 'russet potato', 'red potato', 'white potato'],
+              'tomato': ['tomato', 'tomatoes', 'cherry tomato', 'roma tomato', 'beefsteak tomato'],
+              'onion': ['onion', 'onions', 'yellow onion', 'red onion', 'white onion'],
+              'bell pepper': ['bell pepper', 'pepper', 'red pepper', 'green pepper', 'yellow pepper'],
+              'cucumber': ['cucumber', 'cucumbers', 'english cucumber', 'persian cucumber'],
+              'lettuce': ['lettuce', 'leafy greens', 'romaine lettuce', 'iceberg lettuce'],
+              'spinach': ['spinach', 'fresh spinach', 'baby spinach', 'leafy greens'],
+              'mushroom': ['mushroom', 'mushrooms', 'button mushroom', 'cremini mushroom'],
+              'zucchini': ['zucchini', 'courgette', 'summer squash', 'green squash'],
+              'eggplant': ['eggplant', 'aubergine', 'purple eggplant'],
+              'cabbage': ['cabbage', 'green cabbage', 'white cabbage', 'napa cabbage'],
+              'celery': ['celery', 'celery stalks', 'fresh celery'],
+              'corn': ['corn', 'sweet corn', 'corn kernels', 'maize'],
+              'peas': ['peas', 'green peas', 'sweet peas', 'garden peas'],
+              'green beans': ['green beans', 'string beans', 'snap beans', 'haricot verts'],
+              'asparagus': ['asparagus', 'fresh asparagus', 'green asparagus'],
+              'beet': ['beet', 'beets', 'beetroot', 'red beet'],
+              'radish': ['radish', 'radishes', 'red radish', 'daikon'],
+              'turnip': ['turnip', 'turnips', 'white turnip'],
+              'sweet potato': ['sweet potato', 'yam', 'sweet potatoes', 'orange sweet potato'],
+              
+              // Fruits
+              'apple': ['apple', 'apples', 'red apple', 'green apple', 'gala apple'],
+              'banana': ['banana', 'bananas', 'yellow banana'],
+              'orange': ['orange', 'oranges', 'navel orange', 'valencia orange'],
+              'lemon': ['lemon', 'lemons', 'fresh lemon', 'yellow lemon'],
+              'lime': ['lime', 'limes', 'fresh lime', 'green lime'],
+              'strawberry': ['strawberry', 'strawberries', 'red strawberry'],
+              'blueberry': ['blueberry', 'blueberries', 'fresh blueberries'],
+              'grape': ['grape', 'grapes', 'green grapes', 'red grapes'],
+              'peach': ['peach', 'peaches', 'fresh peach'],
+              'pear': ['pear', 'pears', 'green pear', 'bosc pear'],
+              'cherry': ['cherry', 'cherries', 'red cherry'],
+              'pineapple': ['pineapple', 'pineapples', 'fresh pineapple'],
+              'mango': ['mango', 'mangoes', 'ripe mango'],
+              'avocado': ['avocado', 'avocados', 'ripe avocado', 'hass avocado'],
+              'kiwi': ['kiwi', 'kiwis', 'kiwi fruit', 'green kiwi'],
+              'watermelon': ['watermelon', 'fresh watermelon'],
+              'cantaloupe': ['cantaloupe', 'melon', 'muskmelon'],
+              'honeydew': ['honeydew', 'honeydew melon'],
+              'pomegranate': ['pomegranate', 'pomegranates', 'red pomegranate'],
+              'coconut': ['coconut', 'coconuts', 'coconut meat', 'fresh coconut']
+            };
 
-            if (!response.ok) {
-              console.log("❌ API failed, using fallback detection");
+            // Try multiple AI models for better accuracy
+            const models = [
+              'keremberke/food-image-classification',
+              'google/vit-base-patch16-224',
+              'microsoft/beit-base-patch16-224'
+            ];
+            
+            let bestResults = [];
+            let bestScore = 0;
+            
+            for (const model of models) {
+              try {
+                const response = await fetch(
+                  `https://api-inference.huggingface.co/models/${model}`,
+                  {
+                    method: "POST",
+                    headers: {
+                      "Authorization": `Bearer ${HF_API_KEY}`,
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ inputs: base64Image })
+                  }
+                );
+
+                if (response.ok) {
+                  const result = await response.json();
+                  console.log(`🤖 ${model} Result:`, result);
+                  
+                  // Find the best scoring result
+                  const topResult = result[0];
+                  if (topResult && topResult.score > bestScore) {
+                    bestResults = result;
+                    bestScore = topResult.score;
+                  }
+                }
+              } catch (err) {
+                console.log(`⚠️ Model ${model} failed, trying next...`);
+              }
+            }
+
+            if (bestResults.length === 0) {
+              console.log("❌ All models failed, using fallback detection");
               const fallbackIngredients = ["potato", "carrot", "onion"];
               showDetectedIngredients(fallbackIngredients);
               await getRecipes(fallbackIngredients);
               return;
             }
 
-            const result = await response.json();
-            console.log("🍽️ AI Result:", result);
+            console.log("🍽️ Best AI Result:", bestResults);
 
-            // Simple ingredient extraction
-            const ingredients = result
-              .filter(item => item.score > 0.3)
-              .map(item => item.label.toLowerCase())
-              .slice(0, 3);
+            // Enhanced ingredient extraction with mapping
+            const rawIngredients = bestResults
+              .filter(item => item.score > 0.2) // Lower threshold for more ingredients
+              .slice(0, 5) // Get top 5 most confident results
+              .map(item => item.label.toLowerCase());
 
-            console.log("🔍 Detected ingredients:", ingredients);
+            // Map raw results to proper ingredient names
+            const mappedIngredients = rawIngredients.map(rawIngredient => {
+              // Find best match in ingredient map
+              for (const [key, variations] of Object.entries(ingredientMap)) {
+                if (variations.some(variation => 
+                  rawIngredient.includes(variation) || 
+                  variation.includes(rawIngredient) ||
+                  rawIngredient.includes(key) ||
+                  key.includes(rawIngredient)
+                )) {
+                  return key;
+                }
+              }
+              return rawIngredient; // Return original if no mapping found
+            })
+            .filter((ingredient, index, arr) => arr.indexOf(ingredient) === index) // Remove duplicates
+            .slice(0, 4); // Limit to 4 ingredients
 
-            if (ingredients.length === 0) {
+            console.log("🔍 Enhanced detected ingredients:", mappedIngredients);
+
+            if (mappedIngredients.length === 0) {
               console.log("⚠️ No ingredients detected, using fallback");
               const fallbackIngredients = ["potato", "carrot", "onion"];
               showDetectedIngredients(fallbackIngredients);
@@ -253,8 +346,8 @@
             }
 
             // Show detected ingredients
-            showDetectedIngredients(ingredients);
-            await getRecipes(ingredients);
+            showDetectedIngredients(mappedIngredients);
+            await getRecipes(mappedIngredients);
 
           } catch (err) {
             console.log("❌ Error analyzing image, using fallback:", err);
@@ -265,57 +358,108 @@
           }
         }
 
-        // ✅ Fetch recipes from Spoonacular - SIMPLIFIED VERSION
+        // ✅ Fetch recipes from Spoonacular - ENHANCED with diverse cuisines
         async function getRecipes(ingredients) {
-          console.log("🔍 Searching for recipes with ingredients:", ingredients);
+          console.log("🔍 Searching for diverse cuisine recipes with ingredients:", ingredients);
           
-          // Create a simple fallback recipe immediately
-          const fallbackRecipe = {
-            id: 'fallback-1',
-            title: `Simple ${ingredients.join(' and ')} Recipe`,
-            readyInMinutes: 30,
-            servings: 2,
-            usedIngredients: ingredients.map(ing => ({ name: ing })),
-            missedIngredients: [],
-            sourceUrl: '#'
-          };
+          // Create diverse fallback recipes for different cuisines
+          const fallbackRecipes = [
+            {
+              id: 'fallback-american-1',
+              title: `American ${ingredients.join(' and ')} Stir-Fry`,
+              readyInMinutes: 25,
+              servings: 2,
+              usedIngredients: ingredients.map(ing => ({ name: ing })),
+              missedIngredients: [],
+              sourceUrl: '#',
+              cuisine: 'American'
+            },
+            {
+              id: 'fallback-mexican-1',
+              title: `Mexican ${ingredients.join(' and ')} Tacos`,
+              readyInMinutes: 30,
+              servings: 2,
+              usedIngredients: ingredients.map(ing => ({ name: ing })),
+              missedIngredients: [],
+              sourceUrl: '#',
+              cuisine: 'Mexican'
+            },
+            {
+              id: 'fallback-mediterranean-1',
+              title: `Mediterranean ${ingredients.join(' and ')} Salad`,
+              readyInMinutes: 20,
+              servings: 2,
+              usedIngredients: ingredients.map(ing => ({ name: ing })),
+              missedIngredients: [],
+              sourceUrl: '#',
+              cuisine: 'Mediterranean'
+            },
+            {
+              id: 'fallback-indian-1',
+              title: `Indian ${ingredients.join(' and ')} Curry`,
+              readyInMinutes: 35,
+              servings: 2,
+              usedIngredients: ingredients.map(ing => ({ name: ing })),
+              missedIngredients: [],
+              sourceUrl: '#',
+              cuisine: 'Indian'
+            }
+          ];
           
           try {
             // Check API key
             if (!SPOON_KEY || SPOON_KEY === "") {
-              console.log("⚠️ No API key, using fallback recipe");
-              displayRecipes([fallbackRecipe]);
+              console.log("⚠️ No API key, using fallback recipes");
+              displayRecipes(fallbackRecipes);
               return;
             }
             
-            // Simple API call
-            const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${ingredients.join(",")}&number=5&apiKey=${SPOON_KEY}`;
-            console.log("🌐 API URL:", url);
+            // Search for recipes with different cuisines
+            const cuisines = ['american', 'mexican', 'mediterranean', 'indian'];
+            let allRecipes = [];
             
-            const res = await fetch(url);
-            console.log("📡 Response status:", res.status);
-            
-            if (!res.ok) {
-              console.log("❌ API failed, using fallback recipe");
-              displayRecipes([fallbackRecipe]);
-              return;
+            for (const cuisine of cuisines) {
+              try {
+                const url = `https://api.spoonacular.com/recipes/complexSearch?includeIngredients=${ingredients.join(",")}&cuisine=${cuisine}&number=3&apiKey=${SPOON_KEY}`;
+                console.log(`🌐 ${cuisine} API URL:`, url);
+                
+                const res = await fetch(url);
+                console.log(`📡 ${cuisine} Response status:`, res.status);
+                
+                if (res.ok) {
+                  const data = await res.json();
+                  console.log(`📋 ${cuisine} API response:`, data);
+                  
+                  if (data.results && Array.isArray(data.results) && data.results.length > 0) {
+                    // Add cuisine info to recipes
+                    const cuisineRecipes = data.results.map(recipe => ({
+                      ...recipe,
+                      cuisine: cuisine.charAt(0).toUpperCase() + cuisine.slice(1),
+                      usedIngredients: ingredients.map(ing => ({ name: ing })),
+                      missedIngredients: []
+                    }));
+                    allRecipes = allRecipes.concat(cuisineRecipes);
+                  }
+                }
+              } catch (err) {
+                console.log(`⚠️ ${cuisine} cuisine search failed:`, err);
+              }
             }
             
-            const data = await res.json();
-            console.log("📋 API response:", data);
-            
-            // Check if we got valid data
-            if (Array.isArray(data) && data.length > 0) {
-              console.log("✅ Got valid recipes, displaying them");
-              displayRecipes(data.slice(0, 3));
+            // If we got recipes from API, use them; otherwise use fallback
+            if (allRecipes.length > 0) {
+              console.log("✅ Got diverse cuisine recipes, displaying them");
+              // Mix recipes from different cuisines
+              const shuffled = allRecipes.sort(() => 0.5 - Math.random());
+              displayRecipes(shuffled.slice(0, 4));
             } else {
-              console.log("⚠️ No valid recipes, using fallback");
-              displayRecipes([fallbackRecipe]);
+              console.log("⚠️ No API recipes found, using fallback recipes");
+              displayRecipes(fallbackRecipes);
             }
             
           } catch (err) {
-            console.log("❌ Error occurred, using fallback recipe:", err);
-            displayRecipes([fallbackRecipe]);
+            console.log("❌ Error occurred, using fallback recipes:", err);
+            displayRecipes(fallbackRecipes);
           }
         }
 
@@ -334,19 +478,40 @@
           }
         }
 
-        // ✅ Display recipes in UI
+        // ✅ Get cuisine flag emoji
+        function getCuisineFlag(cuisine) {
+          const flags = {
+            'American': '🇺🇸',
+            'Mexican': '🇲🇽', 
+            'Mediterranean': '🇬🇷',
+            'Indian': '🇮🇳',
+            'Italian': '🇮🇹',
+            'Chinese': '🇨🇳',
+            'Japanese': '🇯🇵',
+            'French': '🇫🇷',
+            'Thai': '🇹🇭',
+            'Korean': '🇰🇷'
+          };
+          return flags[cuisine] || '🌍';
+        }
+
+        // ✅ Display recipes in UI - Enhanced with cuisine info
         function displayRecipes(recipes) {
           const recipesContainer = document.getElementById('recipesContainer');
           if (recipesContainer) {
             recipesContainer.innerHTML = `
-              <h3>🍽️ Recipes for you:</h3>
+              <h3>🍽️ Diverse Cuisine Recipes for you:</h3>
               <div class="recipes-grid">
                 ${recipes.map(recipe => {
                   const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(recipe.title + ' recipe')}`;
+                  const cuisineFlag = recipe.cuisine ? getCuisineFlag(recipe.cuisine) : '🌍';
                   
                   return `
                     <div class="recipe-card">
-                      <h3>${recipe.title}</h3>
+                      <div class="recipe-header">
+                        <h3>${recipe.title}</h3>
+                        <span class="cuisine-badge">${cuisineFlag} ${recipe.cuisine || 'International'}</span>
+                      </div>
                       <div class="recipe-meta">
                         <span class="recipe-time">⏱️ ${recipe.readyInMinutes || 'N/A'} min</span>
                         <span class="recipe-servings">👥 ${recipe.servings || 'N/A'} servings</span>
