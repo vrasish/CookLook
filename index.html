@@ -190,9 +190,9 @@
           analyzeImage(file);
         }
 
-    // ✅ Analyze image - PERFECT COLOR-BASED DETECTION
+    // ✅ Analyze image - IMPROVED COLOR-BASED DETECTION
     async function analyzeImage(file) {
-      console.log("🚀 Using PERFECT color-based detection for maximum accuracy");
+      console.log("🚀 Using IMPROVED color-based detection for better accuracy");
       
       // Show progress indicator
       const loadingSection = document.getElementById('loadingSection');
@@ -202,7 +202,7 @@
           <h2>🔍 Analyzing your ingredients...</h2>
           <p>Our AI is identifying what's in your fridge</p>
           <p style="color: #4caf50; font-size: 14px; margin-top: 20px;">
-            🎯 Perfect color analysis
+            🎯 Improved color analysis with better accuracy
           </p>
         `;
       }
@@ -256,107 +256,143 @@
           const blueVariance = Math.max(...blueValues) - Math.min(...blueValues);
           const totalVariance = redVariance + greenVariance + blueVariance;
           
-          console.log("🎨 PERFECT Color Analysis:", {
+          console.log("🎨 IMPROVED Color Analysis:", {
             rgb: { r: Math.round(avgRed), g: Math.round(avgGreen), b: Math.round(avgBlue) },
             ratios: { red: redRatio.toFixed(3), green: greenRatio.toFixed(3), blue: blueRatio.toFixed(3) },
             brightness: Math.round(brightness),
-            variance: Math.round(totalVariance)
+            variance: Math.round(totalVariance),
+            dominance: {
+              red: isRedDominant,
+              green: isGreenDominant,
+              blue: isBlueDominant,
+              yellow: isYellowish,
+              orange: isOrangeish,
+              purple: isPurpleish
+            }
           });
           
           let detectedIngredient = 'potato'; // Default
           
-          // PERFECT VEGETABLE DETECTION - ORDER MATTERS!
+          // IMPROVED VEGETABLE DETECTION - More accurate color ranges
           
-          // 1. ONION - White/light with high brightness
-          if (brightness > 180 && avgRed > 120 && avgGreen > 120 && avgBlue > 120 && redRatio > 0.3 && greenRatio > 0.3 && blueRatio > 0.3) {
-            detectedIngredient = 'onion';
-          }
-          // 2. CAULIFLOWER - Very light with slight green tint
-          else if (brightness > 170 && avgGreen > avgRed && avgGreen > avgBlue && avgGreen > 100) {
-            detectedIngredient = 'cauliflower';
-          }
-          // 3. CARROT - Orange (high red + green, low blue)
-          else if (avgRed > 140 && avgGreen > 120 && avgBlue < 80 && brightness > 120 && redRatio > 0.4) {
-            detectedIngredient = 'carrot';
-          }
-          // 4. TOMATO - Red with some green
-          else if (avgRed > 120 && avgGreen > 60 && avgGreen < 100 && avgBlue < 70 && brightness > 100 && redRatio > 0.45) {
+          // Calculate color dominance more precisely
+          const isRedDominant = redRatio > 0.45 && avgRed > avgGreen && avgRed > avgBlue;
+          const isGreenDominant = greenRatio > 0.45 && avgGreen > avgRed && avgGreen > avgBlue;
+          const isBlueDominant = blueRatio > 0.45 && avgBlue > avgRed && avgBlue > avgGreen;
+          const isYellowish = redRatio > 0.35 && greenRatio > 0.35 && blueRatio < 0.3;
+          const isOrangeish = redRatio > 0.4 && greenRatio > 0.3 && blueRatio < 0.3;
+          const isPurpleish = redRatio > 0.35 && blueRatio > 0.3 && greenRatio < 0.35;
+          
+          // 1. TOMATO - Bright red with some green
+          if (isRedDominant && avgRed > 140 && avgGreen > 70 && avgGreen < 120 && avgBlue < 80 && brightness > 120) {
             detectedIngredient = 'tomato';
           }
-          // 5. RED BELL PEPPER - Pure red
-          else if (avgRed > 120 && avgGreen < 60 && avgBlue < 60 && brightness > 100 && redRatio > 0.5) {
+          // 2. CARROT - Orange (high red + green, low blue)
+          else if (isOrangeish && avgRed > 150 && avgGreen > 100 && avgBlue < 70 && brightness > 130) {
+            detectedIngredient = 'carrot';
+          }
+          // 3. RED BELL PEPPER - Pure red, very bright
+          else if (isRedDominant && avgRed > 160 && avgGreen < 80 && avgBlue < 80 && brightness > 140) {
             detectedIngredient = 'red bell pepper';
           }
-          // 6. GREEN BELL PEPPER - Bright green
-          else if (avgGreen > 100 && avgRed > 40 && avgRed < 80 && avgBlue < 70 && brightness > 120 && greenRatio > 0.45) {
-            detectedIngredient = 'green bell pepper';
-          }
-          // 7. YELLOW BELL PEPPER - Yellow (high red + green, very bright)
-          else if (avgRed > 130 && avgGreen > 110 && avgBlue < 80 && brightness > 140 && redRatio > 0.4 && greenRatio > 0.4) {
+          // 4. YELLOW BELL PEPPER - Bright yellow
+          else if (isYellowish && avgRed > 160 && avgGreen > 140 && avgBlue < 100 && brightness > 160) {
             detectedIngredient = 'yellow bell pepper';
           }
-          // 8. BROCCOLI - Dark green with texture
-          else if (avgGreen > 80 && avgRed > 40 && avgRed < 80 && avgBlue < 60 && brightness < 120 && greenRatio > 0.4 && totalVariance > 50) {
+          // 5. GREEN BELL PEPPER - Bright green
+          else if (isGreenDominant && avgGreen > 120 && avgRed < 100 && avgBlue < 80 && brightness > 130) {
+            detectedIngredient = 'green bell pepper';
+          }
+          // 6. CUCUMBER - Light green, very bright
+          else if (isGreenDominant && avgGreen > 130 && avgRed > 80 && avgRed < 120 && avgBlue > 80 && brightness > 150) {
+            detectedIngredient = 'cucumber';
+          }
+          // 7. LETTUCE - Light green with blue tones
+          else if (isGreenDominant && avgGreen > 100 && avgRed > 70 && avgRed < 110 && avgBlue > 80 && brightness > 130) {
+            detectedIngredient = 'lettuce';
+          }
+          // 8. BROCCOLI - Dark green with texture variance
+          else if (isGreenDominant && avgGreen > 90 && avgRed < 80 && avgBlue < 70 && brightness < 130 && totalVariance > 60) {
             detectedIngredient = 'broccoli';
           }
           // 9. SPINACH - Dark green, low variance
-          else if (avgGreen > 70 && avgRed < 50 && avgBlue < 50 && brightness < 100 && greenRatio > 0.5 && totalVariance < 40) {
+          else if (isGreenDominant && avgGreen > 80 && avgRed < 60 && avgBlue < 60 && brightness < 120 && totalVariance < 50) {
             detectedIngredient = 'spinach';
           }
-          // 10. KALE - Very dark green
-          else if (avgGreen > 60 && avgRed < 40 && avgBlue < 40 && brightness < 80 && greenRatio > 0.6) {
-            detectedIngredient = 'kale';
-          }
-          // 11. CABBAGE - Medium green, moderate variance
-          else if (avgGreen > 80 && avgRed < 60 && avgBlue < 60 && brightness > 100 && brightness < 140 && greenRatio > 0.5 && totalVariance > 30 && totalVariance < 60) {
+          // 10. CABBAGE - Medium green, moderate variance
+          else if (isGreenDominant && avgGreen > 100 && avgRed < 90 && avgBlue < 80 && brightness > 110 && brightness < 150 && totalVariance > 40 && totalVariance < 80) {
             detectedIngredient = 'cabbage';
           }
-          // 12. LETTUCE - Light green with blue tones
-          else if (avgGreen > 90 && avgRed > 60 && avgRed < 90 && avgBlue > 60 && brightness > 120 && greenRatio > 0.4) {
-            detectedIngredient = 'lettuce';
-          }
-          // 13. GREEN BEANS - Medium green, elongated
-          else if (avgGreen > 90 && avgRed > 50 && avgRed < 80 && avgBlue < 60 && brightness > 100 && greenRatio > 0.45) {
+          // 11. GREEN BEANS - Medium green, moderate brightness
+          else if (isGreenDominant && avgGreen > 110 && avgRed > 60 && avgRed < 100 && avgBlue < 80 && brightness > 120 && brightness < 160) {
             detectedIngredient = 'green beans';
           }
-          // 14. CUCUMBER - Light green, high brightness
-          else if (avgGreen > 100 && avgRed > 60 && avgRed < 90 && avgBlue > 60 && brightness > 130 && greenRatio > 0.4) {
-            detectedIngredient = 'cucumber';
-          }
-          // 15. ASPARAGUS - Green with white tips
-          else if (avgGreen > 80 && avgRed > 60 && avgRed < 100 && avgBlue > 70 && brightness > 110 && greenRatio > 0.4) {
+          // 12. ASPARAGUS - Green with some blue
+          else if (isGreenDominant && avgGreen > 100 && avgRed > 70 && avgRed < 110 && avgBlue > 80 && brightness > 120) {
             detectedIngredient = 'asparagus';
           }
-          // 16. CELERY - Light green/white
-          else if (avgGreen > 90 && avgRed > 70 && avgRed < 110 && avgBlue > 80 && brightness > 140 && greenRatio > 0.35) {
+          // 13. CELERY - Very light green/white
+          else if (avgGreen > 120 && avgRed > 100 && avgRed < 130 && avgBlue > 100 && brightness > 160 && greenRatio > 0.35) {
             detectedIngredient = 'celery';
           }
-          // 17. RADISH - Red with white
-          else if (avgRed > 100 && avgGreen > 80 && avgBlue > 80 && brightness > 140 && redRatio > 0.35) {
+          // 14. ONION - White/very light
+          else if (avgRed > 150 && avgGreen > 150 && avgBlue > 150 && brightness > 180 && redRatio > 0.3 && greenRatio > 0.3 && blueRatio > 0.3) {
+            detectedIngredient = 'onion';
+          }
+          // 15. CAULIFLOWER - Very light with slight green tint
+          else if (avgRed > 140 && avgGreen > 140 && avgBlue > 130 && brightness > 170 && greenRatio > redRatio && greenRatio > blueRatio) {
+            detectedIngredient = 'cauliflower';
+          }
+          // 16. RADISH - Red with white (high brightness)
+          else if (isRedDominant && avgRed > 120 && avgGreen > 100 && avgBlue > 100 && brightness > 150) {
             detectedIngredient = 'radish';
           }
-          // 18. SWEET POTATO - Orange/brown
-          else if (avgRed > 120 && avgGreen > 80 && avgBlue < 60 && brightness > 100 && redRatio > 0.4) {
+          // 17. SWEET POTATO - Orange/brown
+          else if (isOrangeish && avgRed > 130 && avgGreen > 90 && avgBlue < 80 && brightness > 110 && brightness < 150) {
             detectedIngredient = 'sweet potato';
           }
-          // 19. BEETROOT - Deep red/purple
-          else if (avgRed > 100 && avgBlue > 60 && avgGreen < 80 && brightness < 120 && redRatio > 0.4) {
+          // 18. BEETROOT - Deep red/purple
+          else if (isPurpleish && avgRed > 120 && avgBlue > 80 && avgGreen < 100 && brightness < 130) {
             detectedIngredient = 'beetroot';
           }
+          // 19. KALE - Very dark green
+          else if (isGreenDominant && avgGreen > 70 && avgRed < 50 && avgBlue < 50 && brightness < 100) {
+            detectedIngredient = 'kale';
+          }
           // 20. POTATO - Brown/dark (fallback)
-          else if (brightness < 120 || (avgRed < 100 && avgGreen < 100 && avgBlue < 100)) {
+          else if (brightness < 130 && (avgRed < 120 || avgGreen < 120 || avgBlue < 120)) {
             detectedIngredient = 'potato';
           }
           // Final fallback based on dominant color
-          else if (avgGreen > avgRed && avgGreen > avgBlue) {
-            detectedIngredient = 'green bell pepper';
-          } else if (avgRed > avgGreen && avgRed > avgBlue) {
+          else if (isGreenDominant) {
+            detectedIngredient = 'lettuce';
+          } else if (isRedDominant) {
             detectedIngredient = 'tomato';
+          } else if (isYellowish) {
+            detectedIngredient = 'yellow bell pepper';
           } else {
             detectedIngredient = 'potato';
           }
           
-          console.log("🎯 PERFECT Detection Result:", detectedIngredient);
+          console.log("🎯 IMPROVED Detection Result:", detectedIngredient);
+          console.log("🔍 Detection Details:", {
+            finalChoice: detectedIngredient,
+            colorChecks: {
+              isRedDominant,
+              isGreenDominant,
+              isBlueDominant,
+              isYellowish,
+              isOrangeish,
+              isPurpleish
+            },
+            thresholds: {
+              brightness: Math.round(brightness),
+              avgRed: Math.round(avgRed),
+              avgGreen: Math.round(avgGreen),
+              avgBlue: Math.round(avgBlue),
+              totalVariance: Math.round(totalVariance)
+            }
+          });
           
           // Show detected ingredients
           showDetectedIngredients([detectedIngredient]);
@@ -467,7 +503,7 @@
                     `<span class="ingredient-tag">${ingredient}</span>`
                   ).join('')}
                 </div>
-                <p style="color: #4caf50; font-size: 12px; margin-top: 10px;">✓ High confidence detection</p>
+                <p style="color: #4caf50; font-size: 12px; margin-top: 10px;">✓ Improved accuracy detection</p>
               `;
             }
           }
