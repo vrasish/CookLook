@@ -311,6 +311,18 @@
           const blueVariance = blueMax - blueMin;
           const totalVariance = redVariance + greenVariance + blueVariance;
           
+          let detectedIngredient = 'potato'; // Default
+          
+          // IMPROVED VEGETABLE DETECTION - More accurate color ranges
+          
+          // Calculate color dominance more precisely
+          const isRedDominant = redRatio > 0.45 && avgRed > avgGreen && avgRed > avgBlue;
+          const isGreenDominant = greenRatio > 0.45 && avgGreen > avgRed && avgGreen > avgBlue;
+          const isBlueDominant = blueRatio > 0.45 && avgBlue > avgRed && avgBlue > avgGreen;
+          const isYellowish = redRatio > 0.35 && greenRatio > 0.35 && blueRatio < 0.3;
+          const isOrangeish = redRatio > 0.4 && greenRatio > 0.3 && blueRatio < 0.3;
+          const isPurpleish = redRatio > 0.35 && blueRatio > 0.3 && greenRatio < 0.35;
+          
           console.log("🎨 IMPROVED Color Analysis:", {
             rgb: { r: Math.round(avgRed), g: Math.round(avgGreen), b: Math.round(avgBlue) },
             ratios: { red: redRatio.toFixed(3), green: greenRatio.toFixed(3), blue: blueRatio.toFixed(3) },
@@ -325,18 +337,6 @@
               purple: isPurpleish
             }
           });
-          
-          let detectedIngredient = 'potato'; // Default
-          
-          // IMPROVED VEGETABLE DETECTION - More accurate color ranges
-          
-          // Calculate color dominance more precisely
-          const isRedDominant = redRatio > 0.45 && avgRed > avgGreen && avgRed > avgBlue;
-          const isGreenDominant = greenRatio > 0.45 && avgGreen > avgRed && avgGreen > avgBlue;
-          const isBlueDominant = blueRatio > 0.45 && avgBlue > avgRed && avgBlue > avgGreen;
-          const isYellowish = redRatio > 0.35 && greenRatio > 0.35 && blueRatio < 0.3;
-          const isOrangeish = redRatio > 0.4 && greenRatio > 0.3 && blueRatio < 0.3;
-          const isPurpleish = redRatio > 0.35 && blueRatio > 0.3 && greenRatio < 0.35;
           
           // 1. TOMATO - Bright red with some green
           if (isRedDominant && avgRed > 140 && avgGreen > 70 && avgGreen < 120 && avgBlue < 80 && brightness > 120) {
