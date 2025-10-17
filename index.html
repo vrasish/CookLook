@@ -189,6 +189,12 @@
           console.log("🧪 TEST: Starting image processing test...");
           console.log("🧪 TEST: loadingSection element:", loadingSection);
           console.log("🧪 TEST: resultsSection element:", resultsSection);
+          console.log("🧪 TEST: OPENAI_API_KEY status:", {
+            exists: !!OPENAI_API_KEY,
+            length: OPENAI_API_KEY ? OPENAI_API_KEY.length : 0,
+            startsWithSk: OPENAI_API_KEY ? OPENAI_API_KEY.startsWith('sk-') : false,
+            isPlaceholder: OPENAI_API_KEY === "your-openai-api-key-here"
+          });
           
           // Create a simple test image (1x1 pixel)
           const canvas = document.createElement('canvas');
@@ -814,6 +820,14 @@
           console.log("🍽️ CookLook app loaded - Version v3.0-ai-powered");
           console.log("🤖 AI-powered image recognition with OpenAI Vision API");
           console.log("🔧 Fallback to color detection if API unavailable");
+          
+          // Debug API key status
+          console.log("🔑 API Key Status Check:");
+          console.log("- OPENAI_API_KEY exists:", !!OPENAI_API_KEY);
+          console.log("- OPENAI_API_KEY length:", OPENAI_API_KEY ? OPENAI_API_KEY.length : 0);
+          console.log("- OPENAI_API_KEY starts with 'sk':", OPENAI_API_KEY ? OPENAI_API_KEY.startsWith('sk-') : false);
+          console.log("- OPENAI_API_KEY is placeholder:", OPENAI_API_KEY === "your-openai-api-key-here");
+          
           checkHTTPS();
         });
     </script>
