@@ -388,7 +388,7 @@
         async function getRecipes(ingredients) {
           console.log("🔍 Searching for diverse cuisine recipes with ingredients:", ingredients);
           
-          // Create diverse fallback recipes for different cuisines
+          // Create diverse fallback recipes for different cuisines with better search terms
           const fallbackRecipes = [
             {
               id: 'fallback-american-1',
@@ -398,7 +398,8 @@
               usedIngredients: ingredients.map(ing => ({ name: ing })),
               missedIngredients: [],
               sourceUrl: '#',
-              cuisine: 'American'
+              cuisine: 'American',
+              youtubeSearch: `${ingredients.join(' ')} stir fry recipe`
             },
             {
               id: 'fallback-mexican-1',
@@ -408,7 +409,8 @@
               usedIngredients: ingredients.map(ing => ({ name: ing })),
               missedIngredients: [],
               sourceUrl: '#',
-              cuisine: 'Mexican'
+              cuisine: 'Mexican',
+              youtubeSearch: `${ingredients.join(' ')} taco recipe`
             },
             {
               id: 'fallback-mediterranean-1',
@@ -418,7 +420,8 @@
               usedIngredients: ingredients.map(ing => ({ name: ing })),
               missedIngredients: [],
               sourceUrl: '#',
-              cuisine: 'Mediterranean'
+              cuisine: 'Mediterranean',
+              youtubeSearch: `${ingredients.join(' ')} salad recipe`
             },
             {
               id: 'fallback-indian-1',
@@ -428,7 +431,8 @@
               usedIngredients: ingredients.map(ing => ({ name: ing })),
               missedIngredients: [],
               sourceUrl: '#',
-              cuisine: 'Indian'
+              cuisine: 'Indian',
+              youtubeSearch: `${ingredients.join(' ')} curry recipe`
             }
           ];
           
@@ -537,8 +541,25 @@
               <h3>🍽️ Diverse Cuisine Recipes for you:</h3>
               <div class="recipes-grid">
                 ${recipes.map(recipe => {
-                  const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(recipe.title + ' recipe')}`;
+                  // Create more specific YouTube search based on detected ingredients
+                  let youtubeSearchQuery;
+                  
+                  if (recipe.youtubeSearch) {
+                    // Use custom search term for fallback recipes
+                    youtubeSearchQuery = recipe.youtubeSearch;
+                  } else {
+                    // Use detected ingredients + cuisine for API recipes
+                    const detectedIngredients = recipe.usedIngredients ? recipe.usedIngredients.map(ing => ing.name).join(' ') : '';
+                    youtubeSearchQuery = detectedIngredients ? 
+                      `${detectedIngredients} recipe ${recipe.cuisine || ''}`.trim() : 
+                      `${recipe.title} recipe`;
+                  }
+                  
+                  const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(youtubeSearchQuery)}`;
                   const cuisineFlag = recipe.cuisine ? getCuisineFlag(recipe.cuisine) : '🌍';
+                  
+                  // Debug logging for YouTube search terms
+                  console.log(`🎥 YouTube search for "${recipe.title}": "${youtubeSearchQuery}"`);
                   
                   return `
                     <div class="recipe-card">
