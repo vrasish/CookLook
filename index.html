@@ -345,6 +345,7 @@
           // 1. TOMATO - Bright red with some green
           if (isRedDominant && avgRed > 140 && avgGreen > 70 && avgGreen < 120 && avgBlue < 80 && brightness > 120) {
             detectedIngredient = 'tomato';
+            console.log("🍅 TOMATO DETECTED! Values:", { avgRed, avgGreen, avgBlue, brightness, isRedDominant });
           }
           // 2. CARROT - Orange (high red + green, low blue, moderate brightness)
           else if (isOrangeish && avgRed > 140 && avgGreen > 100 && avgBlue < 80 && brightness > 110) {
@@ -422,7 +423,7 @@
           // 20. POTATO - Brown/dark (fallback)
           else if (brightness < 130 && (avgRed < 120 || avgGreen < 120 || avgBlue < 120)) {
             detectedIngredient = 'potato';
-            console.log("🥔 POTATO FALLBACK! Values:", { avgRed, avgGreen, avgBlue, brightness, isOrangeish });
+            console.log("🥔 POTATO FALLBACK! Values:", { avgRed, avgGreen, avgBlue, brightness, isOrangeish, isRedDominant });
           }
           // Final fallback based on dominant color
           else if (isGreenDominant) {
