@@ -200,10 +200,9 @@
             
             // Check API key
             if (!HF_API_KEY || HF_API_KEY === "") {
-              console.log("⚠️ No API key, using conservative fallback detection");
-              const fallbackIngredients = ["carrot"];
-              showDetectedIngredients(fallbackIngredients);
-              await getRecipes(fallbackIngredients);
+              console.log("⚠️ No API key, cannot detect ingredients");
+              showDetectedIngredients([]);
+              await getRecipes([]);
               return;
             }
 
@@ -305,10 +304,9 @@
             }
 
             if (bestResults.length === 0) {
-              console.log("❌ All models failed, using conservative fallback detection");
-              const fallbackIngredients = ["carrot"];
-              showDetectedIngredients(fallbackIngredients);
-              await getRecipes(fallbackIngredients);
+              console.log("❌ All models failed, cannot detect ingredients");
+              showDetectedIngredients([]);
+              await getRecipes([]);
               return;
             }
 
@@ -347,11 +345,45 @@
 
             // Additional validation: only show if we have high confidence
             if (mappedIngredients.length === 0) {
-              console.log("⚠️ No high-confidence ingredients detected, using conservative fallback");
-              // Use only the most common single ingredient as fallback
-              const fallbackIngredients = ["carrot"];
-              showDetectedIngredients(fallbackIngredients);
-              await getRecipes(fallbackIngredients);
+              console.log("⚠️ No high-confidence ingredients detected, trying lower threshold");
+              
+              // Try with lower threshold before giving up
+              const lowConfidenceIngredients = bestResults
+                .filter(item => item.score > 0.2) // Lower threshold
+                .slice(0, 2) // Get top 2 results
+                .map(item => item.label.toLowerCase());
+              
+              console.log("🔍 Low confidence results:", lowConfidenceIngredients);
+              
+              if (lowConfidenceIngredients.length > 0) {
+                // Map low confidence results
+                const lowMappedIngredients = lowConfidenceIngredients.map(rawIngredient => {
+                  for (const [key, variations] of Object.entries(ingredientMap)) {
+                    if (variations.some(variation => 
+                      rawIngredient === variation || 
+                      rawIngredient.includes(variation) && variation.length > 3 ||
+                      variation.includes(rawIngredient) && rawIngredient.length > 3
+                    )) {
+                      return key;
+                    }
+                  }
+                  return rawIngredient.length > 3 ? rawIngredient : null;
+                })
+                .filter(ingredient => ingredient !== null)
+                .slice(0, 1);
+                
+                if (lowMappedIngredients.length > 0) {
+                  console.log("✅ Using low confidence detection:", lowMappedIngredients);
+                  showDetectedIngredients(lowMappedIngredients);
+                  await getRecipes(lowMappedIngredients);
+                  return;
+                }
+              }
+              
+              // Last resort: show generic message
+              console.log("❌ No ingredients detected at any confidence level");
+              showDetectedIngredients([]);
+              await getRecipes([]);
               return;
             }
 
@@ -379,17 +411,33 @@
             await getRecipes(validIngredients);
 
           } catch (err) {
-            console.log("❌ Error analyzing image, using conservative fallback:", err);
-            // Always show something conservative
-            const fallbackIngredients = ["carrot"];
-            showDetectedIngredients(fallbackIngredients);
-            await getRecipes(fallbackIngredients);
+            console.log("❌ Error analyzing image:", err);
+            showDetectedIngredients([]);
+            await getRecipes([]);
           }
         }
 
         // ✅ Fetch recipes from Spoonacular - ENHANCED with diverse cuisines
         async function getRecipes(ingredients) {
           console.log("🔍 Searching for diverse cuisine recipes with ingredients:", ingredients);
+          
+          // Handle empty ingredients
+          if (!ingredients || ingredients.length === 0) {
+            console.log("⚠️ No ingredients provided, showing message");
+            const recipesContainer = document.getElementById('recipesContainer');
+            if (recipesContainer) {
+              recipesContainer.innerHTML = `
+                <h3>🔍 No ingredients detected</h3>
+                <p style="color: #ffa726; font-size: 16px; margin: 20px 0;">
+                  Please try uploading a clearer photo with better lighting, or ensure the food item is clearly visible.
+                </p>
+                <p style="color: #4caf50; font-size: 14px;">
+                  💡 Tips: Make sure the food is well-lit and in focus
+                </p>
+              `;
+            }
+            return;
+          }
           
           // Create diverse fallback recipes for different cuisines with better search terms
           const fallbackRecipes = [
