@@ -1,5 +1,5 @@
 // Service Worker for CookLook PWA
-const CACHE_NAME = 'cooklook-v1';
+const CACHE_NAME = 'cooklook-v2-logo-icons';
 const urlsToCache = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const urlsToCache = [
   './app.js',
   './config.json',
   './manifest.json',
+  './favicon.ico',
   './icon-192.png',
   './icon-512.png',
   './IMG_0460.jpg'
