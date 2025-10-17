@@ -263,7 +263,7 @@
         
         if (Array.isArray(results) && results.length > 0) {
           for (const result of results) {
-            if (result.score > 0.3) { // Confidence threshold
+            if (result.score > 0.1) { // Lower confidence threshold for better detection
               const label = result.label.toLowerCase();
               console.log(`🔍 Checking label: "${label}" (confidence: ${result.score})`);
               
@@ -283,8 +283,54 @@
         
         // Fallback if no ingredients detected
         if (detectedIngredients.length === 0) {
-          console.log("⚠️ No ingredients detected, using fallback");
-          detectedIngredients.push('potato'); // Safe fallback
+          console.log("⚠️ No ingredients detected, trying alternative detection");
+          // Try a different approach - analyze the image for basic color patterns
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const img = new Image();
+          
+          img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            let redSum = 0, greenSum = 0, blueSum = 0;
+            for (let i = 0; i < data.length; i += 4) {
+              redSum += data[i];
+              greenSum += data[i + 1];
+              blueSum += data[i + 2];
+            }
+            
+            const avgRed = redSum / (data.length / 4);
+            const avgGreen = greenSum / (data.length / 4);
+            const avgBlue = blueSum / (data.length / 4);
+            const brightness = (avgRed + avgGreen + avgBlue) / 3;
+            
+            console.log("🎨 Fallback color analysis:", { r: avgRed, g: avgGreen, b: avgBlue, brightness });
+            
+            // Simple fallback based on dominant color
+            if (avgGreen > avgRed && avgGreen > avgBlue && avgGreen > 80) {
+              detectedIngredients.push('cabbage');
+            } else if (avgRed > avgGreen && avgRed > avgBlue && avgRed > 100) {
+              detectedIngredients.push('tomato');
+            } else if (avgRed > 120 && avgGreen > 100 && avgBlue < 80) {
+              detectedIngredients.push('carrot');
+            } else if (brightness > 150) {
+              detectedIngredients.push('onion');
+            } else {
+              detectedIngredients.push('cabbage'); // Better fallback than potato
+            }
+            
+            console.log("🎯 Fallback detected:", detectedIngredients);
+            showDetectedIngredients(detectedIngredients);
+            getRecipes(detectedIngredients);
+          };
+          
+          img.src = URL.createObjectURL(file);
+          return;
         }
         
         console.log("🎯 Final detected ingredients:", detectedIngredients);
@@ -298,8 +344,8 @@
         
         // Fallback to simple detection
         console.log("🔄 Using fallback detection");
-        showDetectedIngredients(['potato']);
-        getRecipes(['potato']);
+        showDetectedIngredients(['cabbage']); // Better fallback than potato
+        getRecipes(['cabbage']);
       }
     }
 
