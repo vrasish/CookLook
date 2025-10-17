@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="version" content="v2.1-fixed">
+    <meta name="version" content="v3.0-ai-powered">
     <title>CookLook - Scan Your Fridge, Cook Great Meals</title>
   <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/png" href="/CookLook/icon-192.png">
@@ -243,10 +243,12 @@
 
     // ✅ Analyze image with OpenAI Vision API
     async function analyzeImage(file) {
-      console.log("🤖 Using OpenAI Vision API for accurate image recognition");
+      console.log("🤖 Starting image analysis...");
+      console.log("🔑 OpenAI API Key available:", !!OPENAI_API_KEY);
       
       // Try OpenAI Vision API first
-      if (OPENAI_API_KEY) {
+      if (OPENAI_API_KEY && OPENAI_API_KEY !== "your-openai-api-key-here") {
+        console.log("🤖 Using OpenAI Vision API for accurate image recognition");
         try {
           const detectedIngredient = await analyzeWithOpenAI(file);
           if (detectedIngredient) {
@@ -258,6 +260,8 @@
         } catch (error) {
           console.warn("⚠️ OpenAI API failed, falling back to color analysis:", error);
         }
+      } else {
+        console.log("⚠️ OpenAI API key not configured, using color detection");
       }
       
       // Fallback to color-based detection
@@ -793,8 +797,9 @@
 
         // ✅ DOM Content Loaded
         document.addEventListener('DOMContentLoaded', () => {
-          console.log("🍽️ CookLook app loaded - Version v2.1-fixed");
-          console.log("🔧 Variable scope issues fixed - isRedDominant should work now");
+          console.log("🍽️ CookLook app loaded - Version v3.0-ai-powered");
+          console.log("🤖 AI-powered image recognition with OpenAI Vision API");
+          console.log("🔧 Fallback to color detection if API unavailable");
           checkHTTPS();
         });
     </script>
