@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: cooklook-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: HF_API_KEY
+        sync: false
+      - key: SPOON_KEY
+        value: d774b10f22674128a2db72604dd1d5ed
