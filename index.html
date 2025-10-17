@@ -476,16 +476,32 @@
               }
             }
             
-            // If we got recipes from API, use them; otherwise use fallback
+            // Always use fallback recipes for better ingredient relevance
+            console.log("🎯 Using custom fallback recipes for better ingredient matching");
+            displayRecipes(fallbackRecipes);
+            
+            // Optional: Also show API recipes if available (commented out for now)
+            /*
             if (allRecipes.length > 0) {
               console.log("✅ Got diverse cuisine recipes, displaying them");
-              // Mix recipes from different cuisines
-              const shuffled = allRecipes.sort(() => 0.5 - Math.random());
-              displayRecipes(shuffled.slice(0, 4));
+              // Mix recipes from different cuisines and add missing data
+              const shuffled = allRecipes.sort(() => 0.5 - Math.random()).slice(0, 4);
+              
+              // Add missing data to API recipes
+              const enhancedRecipes = shuffled.map(recipe => ({
+                ...recipe,
+                readyInMinutes: recipe.readyInMinutes || 30,
+                servings: recipe.servings || 4,
+                usedIngredients: ingredients.map(ing => ({ name: ing })),
+                missedIngredients: []
+              }));
+              
+              displayRecipes(enhancedRecipes);
             } else {
               console.log("⚠️ No API recipes found, using fallback recipes");
               displayRecipes(fallbackRecipes);
             }
+            */
             
           } catch (err) {
             console.log("❌ Error occurred, using fallback recipes:", err);
