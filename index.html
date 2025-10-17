@@ -6,6 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <meta name="version" content="v2.1-fixed">
     <title>CookLook - Scan Your Fridge, Cook Great Meals</title>
   <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/png" href="/CookLook/icon-192.png">
@@ -316,12 +317,14 @@
           // IMPROVED VEGETABLE DETECTION - More accurate color ranges
           
           // Calculate color dominance more precisely
+          console.log("🔧 Calculating color dominance variables...");
           const isRedDominant = redRatio > 0.45 && avgRed > avgGreen && avgRed > avgBlue;
           const isGreenDominant = greenRatio > 0.45 && avgGreen > avgRed && avgGreen > avgBlue;
           const isBlueDominant = blueRatio > 0.45 && avgBlue > avgRed && avgBlue > avgGreen;
           const isYellowish = redRatio > 0.35 && greenRatio > 0.35 && blueRatio < 0.3;
           const isOrangeish = redRatio > 0.4 && greenRatio > 0.3 && blueRatio < 0.3;
           const isPurpleish = redRatio > 0.35 && blueRatio > 0.3 && greenRatio < 0.35;
+          console.log("✅ Color dominance variables calculated successfully");
           
           console.log("🎨 IMPROVED Color Analysis:", {
             rgb: { r: Math.round(avgRed), g: Math.round(avgGreen), b: Math.round(avgBlue) },
@@ -689,7 +692,8 @@
 
         // ✅ DOM Content Loaded
         document.addEventListener('DOMContentLoaded', () => {
-          console.log("🍽️ CookLook app loaded");
+          console.log("🍽️ CookLook app loaded - Version v2.1-fixed");
+          console.log("🔧 Variable scope issues fixed - isRedDominant should work now");
           checkHTTPS();
         });
     </script>
