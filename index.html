@@ -323,15 +323,12 @@
           // IMPROVED VEGETABLE DETECTION - More accurate color ranges
           
           // Calculate color dominance more precisely
-          console.log("🔧 Calculating color dominance variables...");
           const isRedDominant = redRatio > 0.45 && avgRed > avgGreen && avgRed > avgBlue;
           const isGreenDominant = greenRatio > 0.45 && avgGreen > avgRed && avgGreen > avgBlue;
           const isBlueDominant = blueRatio > 0.45 && avgBlue > avgRed && avgBlue > avgGreen;
           const isYellowish = redRatio > 0.35 && greenRatio > 0.35 && blueRatio < 0.3;
           const isOrangeish = redRatio > 0.4 && greenRatio > 0.3 && blueRatio < 0.3;
-          console.log("🔍 Orangeish check:", { redRatio, greenRatio, blueRatio, isOrangeish });
           const isPurpleish = redRatio > 0.35 && blueRatio > 0.3 && greenRatio < 0.35;
-          console.log("✅ Color dominance variables calculated successfully");
           
           console.log("🎨 IMPROVED Color Analysis:", {
             rgb: { r: Math.round(avgRed), g: Math.round(avgGreen), b: Math.round(avgBlue) },
@@ -348,15 +345,13 @@
             }
           });
           
-          // 1. TOMATO - Bright red with some green
-          if (isRedDominant && avgRed > 140 && avgGreen > 70 && avgGreen < 120 && avgBlue < 80 && brightness > 120) {
-            detectedIngredient = 'tomato';
-            console.log("🍅 TOMATO DETECTED! Values:", { avgRed, avgGreen, avgBlue, brightness, isRedDominant });
-          }
-          // 2. CARROT - Orange (high red + green, low blue, moderate brightness)
-          else if (isOrangeish && avgRed > 140 && avgGreen > 100 && avgBlue < 80 && brightness > 110) {
+          // 1. CARROT - Orange (prioritize carrot over tomato for orange colors)
+          if (isOrangeish && avgRed > 140 && avgGreen > 100 && avgBlue < 80 && brightness > 100) {
             detectedIngredient = 'carrot';
-            console.log("🥕 CARROT DETECTED! Values:", { avgRed, avgGreen, avgBlue, brightness, isOrangeish });
+          }
+          // 2. TOMATO - Bright red with some green
+          else if (isRedDominant && avgRed > 140 && avgGreen > 70 && avgGreen < 120 && avgBlue < 80 && brightness > 120) {
+            detectedIngredient = 'tomato';
           }
           // 3. RED BELL PEPPER - Pure red, very bright
           else if (isRedDominant && avgRed > 160 && avgGreen < 80 && avgBlue < 80 && brightness > 140) {
@@ -426,10 +421,9 @@
           else if (isGreenDominant && avgGreen > 70 && avgRed < 50 && avgBlue < 50 && brightness < 100) {
             detectedIngredient = 'kale';
           }
-          // 20. POTATO - Brown/dark (fallback)
-          else if (brightness < 130 && (avgRed < 120 || avgGreen < 120 || avgBlue < 120)) {
+          // 20. POTATO - Very dark or very low color values (fallback)
+          else if (brightness < 100 || (avgRed < 80 && avgGreen < 80 && avgBlue < 80)) {
             detectedIngredient = 'potato';
-            console.log("🥔 POTATO FALLBACK! Values:", { avgRed, avgGreen, avgBlue, brightness, isOrangeish, isRedDominant });
           }
           // Final fallback based on dominant color
           else if (isGreenDominant) {
