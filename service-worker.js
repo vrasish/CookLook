@@ -1,14 +1,15 @@
 // Service Worker for CookLook PWA
 const CACHE_NAME = 'cooklook-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/app.js',
-  '/config.js',
-  '/logo.png',
-  '/logo.svg',
-  '/manifest.json'
+  './',
+  './index.html',
+  './styles.css',
+  './app.js',
+  './config.json',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  './IMG_0460.jpg'
 ];
 
 // Install event - cache resources

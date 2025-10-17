@@ -8,7 +8,7 @@ body {
 
 /* HERO */
 .hero {
-  background: url('chalkboard-bg.jpg') center/cover no-repeat;
+  background: linear-gradient(135deg, #2e2e2e 0%, #1a1a1a 100%);
   text-align: center;
   padding: 100px 20px;
 }
