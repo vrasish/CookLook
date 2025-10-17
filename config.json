@@ -1,5 +1,4 @@
 {
-  "HF_API_KEY": "your-huggingface-api-key-here",
-  "SPOON_KEY": "d774b10f22674128a2db72604dd1d5ed",
-  "OPENAI_API_KEY": "your-openai-api-key-here"
+  "note": "API keys are now securely managed by the backend server",
+  "frontend_uses": "Secure backend API calls only"
 }

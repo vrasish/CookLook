@@ -42,7 +42,6 @@
             
             <!-- Upload Button - Combined Camera and Library -->
             <input type="file" id="uploadBtnMobile" accept="image/*" style="display: none;">
-            
             <!-- Main Action Buttons -->
             <div class="action-buttons">
                 <button id="scanBtn" class="scan-btn">📷 Scan Your Fridge</button>
@@ -184,12 +183,7 @@
           console.log("🧪 TEST: Starting image processing test...");
           console.log("🧪 TEST: loadingSection element:", loadingSection);
           console.log("🧪 TEST: resultsSection element:", resultsSection);
-          console.log("🧪 TEST: OPENAI_API_KEY status:", {
-            exists: !!OPENAI_API_KEY,
-            length: OPENAI_API_KEY ? OPENAI_API_KEY.length : 0,
-            startsWithSk: OPENAI_API_KEY ? OPENAI_API_KEY.startsWith('sk-') : false,
-            isPlaceholder: OPENAI_API_KEY === "your-openai-api-key-here"
-          });
+          console.log("🧪 TEST: Using secure backend API for image analysis");
           
           // Create a simple test image (1x1 pixel)
           const canvas = document.createElement('canvas');
@@ -767,13 +761,12 @@
           console.log("🤖 AI-powered image recognition with OpenAI Vision API");
           console.log("🔧 Fallback to color detection if API unavailable");
           
-          // Wait a moment for config to load, then check API key status
+          // Backend API configuration check
           setTimeout(() => {
-            console.log("🔑 API Key Status Check (after config load):");
-            console.log("- OPENAI_API_KEY exists:", !!OPENAI_API_KEY);
-            console.log("- OPENAI_API_KEY length:", OPENAI_API_KEY ? OPENAI_API_KEY.length : 0);
-            console.log("- OPENAI_API_KEY starts with 'sk':", OPENAI_API_KEY ? OPENAI_API_KEY.startsWith('sk-') : false);
-            console.log("- OPENAI_API_KEY is placeholder:", OPENAI_API_KEY === "your-openai-api-key-here");
+            console.log("🔗 Backend API Configuration:");
+            console.log("- Backend URL:", API_BASE_URL);
+            console.log("- Using secure backend for all API calls");
+            console.log("- No API keys exposed in frontend");
           }, 1000);
           
           checkHTTPS();
