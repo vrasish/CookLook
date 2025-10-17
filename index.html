@@ -323,6 +323,7 @@
           const isBlueDominant = blueRatio > 0.45 && avgBlue > avgRed && avgBlue > avgGreen;
           const isYellowish = redRatio > 0.35 && greenRatio > 0.35 && blueRatio < 0.3;
           const isOrangeish = redRatio > 0.4 && greenRatio > 0.3 && blueRatio < 0.3;
+          console.log("🔍 Orangeish check:", { redRatio, greenRatio, blueRatio, isOrangeish });
           const isPurpleish = redRatio > 0.35 && blueRatio > 0.3 && greenRatio < 0.35;
           console.log("✅ Color dominance variables calculated successfully");
           
@@ -348,6 +349,7 @@
           // 2. CARROT - Orange (high red + green, low blue, good brightness)
           else if (isOrangeish && avgRed > 140 && avgGreen > 100 && avgBlue < 80 && brightness > 120) {
             detectedIngredient = 'carrot';
+            console.log("🥕 CARROT DETECTED! Values:", { avgRed, avgGreen, avgBlue, brightness, isOrangeish });
           }
           // 3. RED BELL PEPPER - Pure red, very bright
           else if (isRedDominant && avgRed > 160 && avgGreen < 80 && avgBlue < 80 && brightness > 140) {
@@ -420,6 +422,7 @@
           // 20. POTATO - Brown/dark (fallback)
           else if (brightness < 130 && (avgRed < 120 || avgGreen < 120 || avgBlue < 120)) {
             detectedIngredient = 'potato';
+            console.log("🥔 POTATO FALLBACK! Values:", { avgRed, avgGreen, avgBlue, brightness, isOrangeish });
           }
           // Final fallback based on dominant color
           else if (isGreenDominant) {
