@@ -212,8 +212,20 @@
           console.log("🔄 Showing loading section...");
           console.log("🔄 loadingSection element:", loadingSection);
           console.log("🔄 resultsSection element:", resultsSection);
-          loadingSection.style.display = 'block';
-          resultsSection.style.display = 'none';
+          
+          if (loadingSection) {
+            loadingSection.style.display = 'block';
+            console.log("✅ Loading section displayed");
+          } else {
+            console.error("❌ Loading section element not found!");
+          }
+          
+          if (resultsSection) {
+            resultsSection.style.display = 'none';
+            console.log("✅ Results section hidden");
+          } else {
+            console.error("❌ Results section element not found!");
+          }
           
           // Analyze image
           console.log("🔄 Calling analyzeImage...");
@@ -280,10 +292,23 @@
           const greenRatio = avgGreen / totalColor;
           const blueRatio = avgBlue / totalColor;
           
-          // Calculate color variance for texture analysis
-          const redVariance = Math.max(...redValues) - Math.min(...redValues);
-          const greenVariance = Math.max(...greenValues) - Math.min(...greenValues);
-          const blueVariance = Math.max(...blueValues) - Math.min(...blueValues);
+          // Calculate color variance for texture analysis (efficient method)
+          let redMin = 255, redMax = 0;
+          let greenMin = 255, greenMax = 0;
+          let blueMin = 255, blueMax = 0;
+          
+          for (let i = 0; i < redValues.length; i++) {
+            redMin = Math.min(redMin, redValues[i]);
+            redMax = Math.max(redMax, redValues[i]);
+            greenMin = Math.min(greenMin, greenValues[i]);
+            greenMax = Math.max(greenMax, greenValues[i]);
+            blueMin = Math.min(blueMin, blueValues[i]);
+            blueMax = Math.max(blueMax, blueValues[i]);
+          }
+          
+          const redVariance = redMax - redMin;
+          const greenVariance = greenMax - greenMin;
+          const blueVariance = blueMax - blueMin;
           const totalVariance = redVariance + greenVariance + blueVariance;
           
           console.log("🎨 IMPROVED Color Analysis:", {
