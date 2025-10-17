@@ -194,6 +194,26 @@
         async function analyzeImage(file) {
           console.log("🔍 Enhanced image analysis...");
           
+          // Show progress indicator
+          const loadingSection = document.getElementById('loadingSection');
+          if (loadingSection) {
+            loadingSection.innerHTML = `
+              <div class="spinner"></div>
+              <h2>🔍 Analyzing your ingredients...</h2>
+              <p>Our AI is identifying what's in your fridge</p>
+              <p style="color: #ffa726; font-size: 14px; margin-top: 20px;">
+                ⏱️ This may take 10-15 seconds...
+              </p>
+            `;
+          }
+          
+          // Add overall timeout
+          const analysisTimeout = setTimeout(() => {
+            console.log("⏰ Analysis timeout - using fallback");
+            showDetectedIngredients([]);
+            getRecipes([]);
+          }, 20000); // 20 second total timeout
+          
           try {
             // Load config
             await loadConfig();
@@ -275,6 +295,10 @@
             
             for (const model of models) {
               try {
+                // Add timeout to prevent hanging
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                
                 const response = await fetch(
                   `https://api-inference.huggingface.co/models/${model}`,
                   {
@@ -283,9 +307,12 @@
                       "Authorization": `Bearer ${HF_API_KEY}`,
                       "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ inputs: base64Image })
+                    body: JSON.stringify({ inputs: base64Image }),
+                    signal: controller.signal
                   }
                 );
+                
+                clearTimeout(timeoutId);
 
                 if (response.ok) {
                   const result = await response.json();
@@ -407,11 +434,13 @@
             }
 
             // Show only the validated ingredients
+            clearTimeout(analysisTimeout);
             showDetectedIngredients(validIngredients);
             await getRecipes(validIngredients);
 
           } catch (err) {
             console.log("❌ Error analyzing image:", err);
+            clearTimeout(analysisTimeout);
             showDetectedIngredients([]);
             await getRecipes([]);
           }
