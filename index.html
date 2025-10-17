@@ -279,12 +279,13 @@
               } else {
                 detectedIngredient = 'cabbage'; // Default green
               }
-            } else if (redRatio > 0.35 && greenRatio > 0.3 && avgRed > 120 && avgGreen > 100) {
+            } else if (redRatio > 0.35 && greenRatio > 0.3 && avgRed > 120 && avgGreen > 100 && brightness > 120) {
               // ORANGE/YELLOW VEGETABLES - Check BEFORE red vegetables (carrots have red+green)
+              // Only check if bright enough (not dark like potatoes)
               if (avgRed > 140 && avgGreen > 120 && avgBlue < 80) {
                 detectedIngredient = 'carrot'; // Orange - CARROT PRIORITY
-              } else if (avgRed > 130 && avgGreen > 110 && redRatio < 0.5) {
-                detectedIngredient = 'yellow bell pepper'; // Yellow - only if not red dominant
+              } else if (avgRed > 130 && avgGreen > 110 && redRatio < 0.5 && brightness > 140) {
+                detectedIngredient = 'yellow bell pepper'; // Yellow - only if bright and not red dominant
               } else if (avgRed > 120 && avgGreen > 100) {
                 detectedIngredient = 'carrot'; // Default orange - CARROT FALLBACK
               } else {
@@ -308,8 +309,11 @@
               // WHITE/LIGHT VEGETABLES
               detectedIngredient = 'onion'; // White/light
             } else if (brightness < 120 && redRatio < 0.4 && greenRatio < 0.4) {
-              // DARK VEGETABLES
-              detectedIngredient = 'potato'; // Brown/dark
+              // DARK VEGETABLES - POTATO PRIORITY
+              detectedIngredient = 'potato'; // Brown/dark - POTATO
+            } else if (brightness < 150 && avgRed < 120 && avgGreen < 120) {
+              // MEDIUM DARK VEGETABLES - POTATO
+              detectedIngredient = 'potato'; // Medium dark - POTATO
             } else {
               // FALLBACK - Analyze dominant color more carefully
               if (avgRed > avgGreen && avgRed > avgBlue) {
@@ -317,7 +321,7 @@
               } else if (avgGreen > avgRed && avgGreen > avgBlue) {
                 detectedIngredient = 'green bell pepper'; // Green dominant
               } else {
-                detectedIngredient = 'potato'; // Default
+                detectedIngredient = 'potato'; // Default - POTATO FALLBACK
               }
             }
                 
