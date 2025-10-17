@@ -312,17 +312,6 @@
           const blueVariance = blueMax - blueMin;
           const totalVariance = redVariance + greenVariance + blueVariance;
           
-          // Calculate texture complexity (how much color variation there is)
-          let textureComplexity = 0;
-          for (let i = 0; i < redValues.length; i += 4) { // Sample every 4th pixel for performance
-            const r = redValues[i];
-            const g = greenValues[i + 1] || greenValues[i];
-            const b = blueValues[i + 2] || blueValues[i];
-            const pixelBrightness = (r + g + b) / 3;
-            textureComplexity += Math.abs(pixelBrightness - brightness);
-          }
-          textureComplexity = textureComplexity / (redValues.length / 4);
-          
           let detectedIngredient = 'potato'; // Default
           
           // IMPROVED VEGETABLE DETECTION - More accurate color ranges
@@ -342,7 +331,6 @@
             ratios: { red: redRatio.toFixed(3), green: greenRatio.toFixed(3), blue: blueRatio.toFixed(3) },
             brightness: Math.round(brightness),
             variance: Math.round(totalVariance),
-            textureComplexity: Math.round(textureComplexity),
             dominance: {
               red: isRedDominant,
               green: isGreenDominant,
@@ -357,20 +345,9 @@
           if (isRedDominant && avgRed > 140 && avgGreen > 70 && avgGreen < 120 && avgBlue < 80 && brightness > 120) {
             detectedIngredient = 'tomato';
           }
-          // 2. CARROT - Bright orange with advanced analysis
-          else if (isOrangeish && avgRed > 160 && avgGreen > 120 && avgBlue < 60 && brightness > 140) {
-            // Advanced carrot detection using multiple factors
-            const orangeIntensity = (avgRed + avgGreen) / 2;
-            const blueSuppression = avgBlue / (avgRed + avgGreen);
-            const colorPurity = Math.min(redRatio, greenRatio) / Math.max(redRatio, greenRatio);
-            
-            // Carrots are typically very bright orange with high color purity and low texture complexity
-            if (orangeIntensity > 140 && blueSuppression < 0.25 && colorPurity > 0.7 && textureComplexity < 30) {
-              detectedIngredient = 'carrot';
-            } else {
-              // Fall through to other orange vegetables
-              detectedIngredient = 'sweet potato';
-            }
+          // 2. CARROT - Bright orange (very specific: high red + green, very low blue, very high brightness)
+          else if (isOrangeish && avgRed > 170 && avgGreen > 130 && avgBlue < 50 && brightness > 150) {
+            detectedIngredient = 'carrot';
           }
           // 3. RED BELL PEPPER - Pure red, very bright
           else if (isRedDominant && avgRed > 160 && avgGreen < 80 && avgBlue < 80 && brightness > 140) {
