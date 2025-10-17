@@ -271,8 +271,7 @@
 
     // ✅ OpenAI Vision API Analysis
     async function analyzeWithOpenAI(file) {
-      const formData = new FormData();
-      formData.append('image', file);
+      console.log("🤖 Calling OpenAI Vision API...");
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -288,7 +287,7 @@
               content: [
                 {
                   type: "text",
-                  text: "Look at this image and identify the main vegetable or food item. Respond with only the name of the vegetable/food item in lowercase (e.g., 'carrot', 'tomato', 'potato', 'broccoli', etc.). If you see multiple items, identify the most prominent one."
+                  text: "Look at this image and identify the main vegetable or food item. Be very specific about the type. For peppers, specify the color (e.g., 'green bell pepper', 'red bell pepper', 'yellow bell pepper'). For other vegetables, use the common name (e.g., 'carrot', 'tomato', 'potato', 'broccoli', 'onion', 'lettuce', 'cucumber', 'cabbage', 'spinach', 'kale', 'celery', 'radish', 'beetroot', 'sweet potato', 'green beans', 'asparagus', 'cauliflower'). Respond with only the vegetable name in lowercase. If you see multiple items, identify the most prominent one."
                 },
                 {
                   type: "image_url",
@@ -304,21 +303,48 @@
       });
       
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`);
+        const errorText = await response.text();
+        console.error("❌ OpenAI API error:", response.status, errorText);
+        throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();
+      console.log("📊 OpenAI API response:", data);
+      
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        throw new Error("Invalid OpenAI API response format");
+      }
+      
       const detectedItem = data.choices[0].message.content.trim().toLowerCase();
       
       // Clean up the response to get just the vegetable name
-      const vegetables = ['carrot', 'tomato', 'potato', 'broccoli', 'onion', 'pepper', 'lettuce', 'cucumber', 'cabbage', 'spinach', 'kale', 'celery', 'radish', 'beetroot', 'sweet potato', 'bell pepper', 'green beans', 'asparagus', 'cauliflower'];
+      console.log("🔍 Raw AI response:", detectedItem);
       
+      const vegetables = [
+        'green bell pepper', 'red bell pepper', 'yellow bell pepper', 'orange bell pepper',
+        'carrot', 'tomato', 'potato', 'broccoli', 'onion', 'lettuce', 'cucumber', 
+        'cabbage', 'spinach', 'kale', 'celery', 'radish', 'beetroot', 'sweet potato', 
+        'green beans', 'asparagus', 'cauliflower', 'pepper'
+      ];
+      
+      // Try exact matches first (for specific peppers)
       for (const veg of vegetables) {
         if (detectedItem.includes(veg)) {
+          console.log("✅ Matched vegetable:", veg);
           return veg;
         }
       }
       
+      // If no match found, try to extract just the main vegetable name
+      const simpleVegetables = ['carrot', 'tomato', 'potato', 'broccoli', 'onion', 'lettuce', 'cucumber', 'cabbage', 'spinach', 'kale', 'celery', 'radish', 'beetroot', 'pepper'];
+      for (const veg of simpleVegetables) {
+        if (detectedItem.includes(veg)) {
+          console.log("✅ Matched simple vegetable:", veg);
+          return veg;
+        }
+      }
+      
+      console.log("⚠️ No vegetable match found, returning raw response:", detectedItem);
       return detectedItem;
     }
 
