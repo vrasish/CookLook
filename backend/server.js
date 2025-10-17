@@ -9,8 +9,15 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: ['https://vrasish.github.io', 'http://localhost:3000', 'http://127.0.0.1:5500'],
-  credentials: true
+  origin: [
+    'https://vrasish.github.io', 
+    'https://cook-look.vercel.app',
+    'http://localhost:3000', 
+    'http://127.0.0.1:5500'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -43,8 +50,10 @@ app.get('/health', (req, res) => {
 app.post('/api/analyze-image', upload.single('image'), async (req, res) => {
   try {
     console.log('🔍 Received image analysis request');
+    console.log('🔑 OpenAI API Key configured:', !!process.env.OPENAI_API_KEY);
     
     if (!req.file) {
+      console.log('❌ No image file provided');
       return res.status(400).json({ 
         error: 'No image file provided',
         success: false 
@@ -53,6 +62,7 @@ app.post('/api/analyze-image', upload.single('image'), async (req, res) => {
 
     const openaiApiKey = process.env.OPENAI_API_KEY;
     if (!openaiApiKey || openaiApiKey === 'your-openai-api-key-here') {
+      console.log('❌ OpenAI API key not configured');
       return res.status(500).json({ 
         error: 'OpenAI API key not configured',
         success: false,
