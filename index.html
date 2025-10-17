@@ -260,7 +260,7 @@
                        avgGreen > avgRed && avgGreen > avgBlue ? 'GREEN' : 'BLUE'
             });
             
-            // ULTRA-PRECISE VEGETABLE DETECTION
+            // ULTRA-PRECISE VEGETABLE DETECTION - ORDER MATTERS!
             if (greenRatio > 0.4 && avgGreen > 100) {
               // GREEN VEGETABLES - Most precise detection
               
@@ -279,8 +279,19 @@
               } else {
                 detectedIngredient = 'cabbage'; // Default green
               }
+            } else if (redRatio > 0.35 && greenRatio > 0.3 && avgRed > 120 && avgGreen > 100) {
+              // ORANGE/YELLOW VEGETABLES - Check BEFORE red vegetables (carrots have red+green)
+              if (avgRed > 140 && avgGreen > 120 && avgBlue < 80) {
+                detectedIngredient = 'carrot'; // Orange - CARROT PRIORITY
+              } else if (avgRed > 130 && avgGreen > 110 && redRatio < 0.5) {
+                detectedIngredient = 'yellow bell pepper'; // Yellow - only if not red dominant
+              } else if (avgRed > 120 && avgGreen > 100) {
+                detectedIngredient = 'carrot'; // Default orange - CARROT FALLBACK
+              } else {
+                detectedIngredient = 'carrot'; // Default to carrot for orange colors
+              }
             } else if (redRatio > 0.4 && avgRed > 100) {
-              // RED VEGETABLES - TOMATO PRIORITY
+              // RED VEGETABLES - TOMATO PRIORITY (after orange/yellow check)
               if (redRatio > 0.4 && avgRed > 100) {
                 // TOMATO - Most common red vegetable, check first
                 if (avgGreen > 50 && avgGreen < 100) {
@@ -292,15 +303,6 @@
                 }
               } else {
                 detectedIngredient = 'tomato'; // Fallback to tomato
-              }
-            } else if (redRatio > 0.35 && greenRatio > 0.3 && avgRed > 120 && avgGreen > 100) {
-              // ORANGE/YELLOW VEGETABLES - Only if NOT red dominant
-              if (avgRed > 140 && avgGreen > 120 && avgBlue < 80) {
-                detectedIngredient = 'carrot'; // Orange
-              } else if (avgRed > 130 && avgGreen > 110 && redRatio < 0.5) {
-                detectedIngredient = 'yellow bell pepper'; // Yellow - only if not red dominant
-              } else {
-                detectedIngredient = 'carrot'; // Default orange
               }
             } else if (brightness > 180 && redRatio > 0.3 && greenRatio > 0.3 && blueRatio > 0.3) {
               // WHITE/LIGHT VEGETABLES
