@@ -345,8 +345,8 @@
           if (isRedDominant && avgRed > 140 && avgGreen > 70 && avgGreen < 120 && avgBlue < 80 && brightness > 120) {
             detectedIngredient = 'tomato';
           }
-          // 2. CARROT - Orange (high red + green, low blue)
-          else if (isOrangeish && avgRed > 150 && avgGreen > 100 && avgBlue < 70 && brightness > 130) {
+          // 2. CARROT - Bright orange (very specific: high red + green, very low blue, very high brightness)
+          else if (isOrangeish && avgRed > 170 && avgGreen > 130 && avgBlue < 50 && brightness > 150) {
             detectedIngredient = 'carrot';
           }
           // 3. RED BELL PEPPER - Pure red, very bright
@@ -405,8 +405,8 @@
           else if (isRedDominant && avgRed > 120 && avgGreen > 100 && avgBlue > 100 && brightness > 150) {
             detectedIngredient = 'radish';
           }
-          // 17. SWEET POTATO - Orange/brown
-          else if (isOrangeish && avgRed > 130 && avgGreen > 90 && avgBlue < 80 && brightness > 110 && brightness < 150) {
+          // 17. SWEET POTATO - Orange/brown (darker, less bright than carrot)
+          else if (isOrangeish && avgRed > 130 && avgGreen > 90 && avgBlue < 80 && brightness > 110 && brightness < 140 && avgRed < 160) {
             detectedIngredient = 'sweet potato';
           }
           // 18. BEETROOT - Deep red/purple
