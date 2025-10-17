@@ -10,18 +10,32 @@
     <title>CookLook - Scan Your Fridge, Cook Great Meals</title>
   <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/png" href="icon-192.png?v=3.6">
+    <link rel="icon" type="image/png" sizes="16x16" href="icon-192.png?v=3.6">
+    <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=3.6">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=3.6">
     <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=3.6">
     <link rel="apple-touch-icon" href="icon-192.png?v=3.6">
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png?v=3.6">
     <link rel="shortcut icon" href="icon-192.png?v=3.6">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f9b234">
+    
+    <!-- Force favicon update -->
+    <script>
+      // Force favicon update for stubborn browsers
+      setTimeout(() => {
+        const favicon = document.querySelector('link[rel="icon"]');
+        if (favicon) {
+          favicon.href = 'icon-192.png?v=' + Date.now();
+        }
+      }, 100);
+    </script>
     
     <!-- iOS PWA support -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="CookLook">
-    <link rel="apple-touch-icon" href="/CookLook/icon-512.png">
+    <link rel="apple-touch-icon" href="icon-512.png?v=3.6">
 </head>
 <body>
     <!-- Hero Section -->
