@@ -190,180 +190,118 @@
           analyzeImage(file);
         }
 
-        // ✅ Analyze image - INSTANT FALLBACK VERSION
-        async function analyzeImage(file) {
-          console.log("🚀 Using instant fallback detection for speed");
-          
-          // Show progress indicator
-          const loadingSection = document.getElementById('loadingSection');
-          if (loadingSection) {
-            loadingSection.innerHTML = `
-              <div class="spinner"></div>
-              <h2>🔍 Analyzing your ingredients...</h2>
-              <p>Our AI is identifying what's in your fridge</p>
-              <p style="color: #4caf50; font-size: 14px; margin-top: 20px;">
-                ⚡ Instant detection mode
-              </p>
-            `;
-          }
-          
-          // INSTANT: Simple image analysis for better detection
-          setTimeout(async () => {
-            console.log("🎯 Using instant smart image analysis");
-            
-            try {
-              // Simple image analysis using canvas
-              const canvas = document.createElement('canvas');
-              const ctx = canvas.getContext('2d');
-              const img = new Image();
+    // ✅ Analyze image - HUGGING FACE API INTEGRATION
+    async function analyzeImage(file) {
+      console.log("🚀 Using Hugging Face API for accurate detection");
+      
+      // Show progress indicator
+      const loadingSection = document.getElementById('loadingSection');
+      if (loadingSection) {
+        loadingSection.innerHTML = `
+          <div class="spinner"></div>
+          <h2>🔍 Analyzing your ingredients...</h2>
+          <p>Our AI is identifying what's in your fridge</p>
+          <p style="color: #4caf50; font-size: 14px; margin-top: 20px;">
+            🤖 AI-powered detection
+          </p>
+        `;
+      }
+      
+      try {
+        // Convert image to base64
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        
+        console.log("📡 Calling Hugging Face API...");
+        
+        // Call Hugging Face API
+        const response = await fetch('https://api-inference.huggingface.co/models/keremberke/food-image-classification', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${config.HF_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ inputs: base64 })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
+        const results = await response.json();
+        console.log("🤖 Hugging Face results:", results);
+        
+        // Process results and map to vegetables
+        const detectedIngredients = [];
+        const ingredientMap = {
+          'potato': ['potato', 'potatoes', 'baked potato', 'mashed potato'],
+          'tomato': ['tomato', 'tomatoes', 'cherry tomato', 'grape tomato'],
+          'carrot': ['carrot', 'carrots', 'baby carrot'],
+          'onion': ['onion', 'onions', 'red onion', 'white onion', 'yellow onion'],
+          'broccoli': ['broccoli', 'broccoli florets'],
+          'cauliflower': ['cauliflower', 'cauliflower head'],
+          'cabbage': ['cabbage', 'green cabbage', 'white cabbage'],
+          'lettuce': ['lettuce', 'iceberg lettuce', 'romaine lettuce'],
+          'spinach': ['spinach', 'baby spinach'],
+          'kale': ['kale', 'curly kale'],
+          'green beans': ['green beans', 'string beans', 'snap beans'],
+          'asparagus': ['asparagus', 'asparagus spears'],
+          'celery': ['celery', 'celery stalks'],
+          'cucumber': ['cucumber', 'cucumbers', 'english cucumber'],
+          'bell pepper': ['bell pepper', 'pepper', 'sweet pepper'],
+          'red bell pepper': ['red bell pepper', 'red pepper'],
+          'green bell pepper': ['green bell pepper', 'green pepper'],
+          'yellow bell pepper': ['yellow bell pepper', 'yellow pepper'],
+          'beetroot': ['beetroot', 'beet', 'beets'],
+          'radish': ['radish', 'radishes'],
+          'sweet potato': ['sweet potato', 'sweet potatoes', 'yam']
+        };
+        
+        if (Array.isArray(results) && results.length > 0) {
+          for (const result of results) {
+            if (result.score > 0.3) { // Confidence threshold
+              const label = result.label.toLowerCase();
+              console.log(`🔍 Checking label: "${label}" (confidence: ${result.score})`);
               
-              img.onload = () => {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                
-                // Get image data for color analysis
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imageData.data;
-                
-                // Analyze dominant colors
-                let redSum = 0, greenSum = 0, blueSum = 0;
-                for (let i = 0; i < data.length; i += 4) {
-                  redSum += data[i];
-                  greenSum += data[i + 1];
-                  blueSum += data[i + 2];
+              // Find matching vegetable
+              for (const [vegetable, keywords] of Object.entries(ingredientMap)) {
+                if (keywords.some(keyword => label.includes(keyword))) {
+                  if (!detectedIngredients.includes(vegetable)) {
+                    detectedIngredients.push(vegetable);
+                    console.log(`✅ Mapped "${label}" to "${vegetable}"`);
+                  }
+                  break;
                 }
-                
-                const avgRed = redSum / (data.length / 4);
-                const avgGreen = greenSum / (data.length / 4);
-                const avgBlue = blueSum / (data.length / 4);
-                
-                console.log("🎨 Color analysis:", { r: avgRed, g: avgGreen, b: avgBlue });
-                
-            // PERFECT VEGETABLE DETECTION - 16 SPECIFIC VEGETABLES
-            let detectedIngredient = 'potato'; // default
-            
-            // Calculate precise color characteristics
-            const totalColor = avgRed + avgGreen + avgBlue;
-            const redRatio = avgRed / totalColor;
-            const greenRatio = avgGreen / totalColor;
-            const blueRatio = avgBlue / totalColor;
-            const brightness = totalColor / 3;
-            const saturation = Math.max(avgRed, avgGreen, avgBlue) - Math.min(avgRed, avgGreen, avgBlue);
-            const colorVariance = Math.abs(avgRed - avgGreen) + Math.abs(avgGreen - avgBlue) + Math.abs(avgBlue - avgRed);
-            
-            console.log("🎯 PERFECT VEGETABLE DETECTION:", {
-              rgb: { r: Math.round(avgRed), g: Math.round(avgGreen), b: Math.round(avgBlue) },
-              ratios: { red: redRatio.toFixed(3), green: greenRatio.toFixed(3), blue: blueRatio.toFixed(3) },
-              brightness: Math.round(brightness),
-              saturation: Math.round(saturation),
-              variance: Math.round(colorVariance)
-            });
-            
-            // PERFECT DETECTION FOR 16 VEGETABLES - ORDER MATTERS!
-            
-            // 1. CARROT - Orange (red + green, low blue)
-            if (avgRed > 140 && avgGreen > 120 && avgBlue < 80 && brightness > 120) {
-              detectedIngredient = 'carrot';
-            }
-            // 2. TOMATO - Red with some green
-            else if (avgRed > 120 && avgGreen > 60 && avgGreen < 100 && avgBlue < 70 && brightness > 100) {
-              detectedIngredient = 'tomato';
-            }
-            // 3. BEETROOT - Deep red/purple
-            else if (avgRed > 100 && avgBlue > 60 && avgGreen < 80 && brightness < 120) {
-              detectedIngredient = 'beetroot';
-            }
-            // 4. RED BELL PEPPER - Pure red
-            else if (avgRed > 120 && avgGreen < 60 && avgBlue < 60 && brightness > 100) {
-              detectedIngredient = 'red bell pepper';
-            }
-            // 5. GREEN BELL PEPPER - Bright green
-            else if (avgGreen > 100 && avgRed > 40 && avgRed < 80 && avgBlue < 70 && brightness > 120) {
-              detectedIngredient = 'green bell pepper';
-            }
-            // 6. YELLOW BELL PEPPER - Yellow (red + green, high brightness)
-            else if (avgRed > 130 && avgGreen > 110 && avgBlue < 80 && brightness > 140) {
-              detectedIngredient = 'yellow bell pepper';
-            }
-            // 7. BROCCOLI - Dark green with texture
-            else if (avgGreen > 80 && avgRed > 40 && avgRed < 80 && avgBlue < 60 && brightness < 120) {
-              detectedIngredient = 'broccoli';
-            }
-            // 8. CAULIFLOWER - White/light with green hints
-            else if (brightness > 160 && avgGreen > 80 && avgRed > 80 && avgBlue > 80) {
-              detectedIngredient = 'cauliflower';
-            }
-            // 9. SPINACH - Dark green
-            else if (avgGreen > 70 && avgRed < 50 && avgBlue < 50 && brightness < 100) {
-              detectedIngredient = 'spinach';
-            }
-            // 10. KALE - Very dark green
-            else if (avgGreen > 60 && avgRed < 40 && avgBlue < 40 && brightness < 80) {
-              detectedIngredient = 'kale';
-            }
-            // 11. GREEN BEANS - Medium green
-            else if (avgGreen > 90 && avgRed > 50 && avgRed < 80 && avgBlue < 60 && brightness > 100) {
-              detectedIngredient = 'green beans';
-            }
-            // 12. CUCUMBER - Light green
-            else if (avgGreen > 100 && avgRed > 60 && avgRed < 90 && avgBlue > 60 && brightness > 130) {
-              detectedIngredient = 'cucumber';
-            }
-            // 13. ASPARAGUS - Green with white
-            else if (avgGreen > 80 && avgRed > 60 && avgRed < 100 && avgBlue > 70 && brightness > 110) {
-              detectedIngredient = 'asparagus';
-            }
-            // 14. CELERY - Light green/white
-            else if (avgGreen > 90 && avgRed > 70 && avgRed < 110 && avgBlue > 80 && brightness > 140) {
-              detectedIngredient = 'celery';
-            }
-            // 15. ONION - White/light
-            else if (brightness > 180 && avgRed > 100 && avgGreen > 100 && avgBlue > 100) {
-              detectedIngredient = 'onion';
-            }
-            // 16. RADISH - Red with white
-            else if (avgRed > 100 && avgGreen > 80 && avgBlue > 80 && brightness > 140) {
-              detectedIngredient = 'radish';
-            }
-            // 17. SWEET POTATO - Orange/brown
-            else if (avgRed > 120 && avgGreen > 80 && avgBlue < 60 && brightness > 100) {
-              detectedIngredient = 'sweet potato';
-            }
-            // 18. POTATO - Brown/dark (fallback)
-            else if (brightness < 120 || (avgRed < 100 && avgGreen < 100 && avgBlue < 100)) {
-              detectedIngredient = 'potato';
-            }
-            // FALLBACK - Analyze dominant color
-            else {
-              if (avgRed > avgGreen && avgRed > avgBlue) {
-                detectedIngredient = 'tomato'; // Red dominant
-              } else if (avgGreen > avgRed && avgGreen > avgBlue) {
-                detectedIngredient = 'green bell pepper'; // Green dominant
-              } else {
-                detectedIngredient = 'potato'; // Default
               }
             }
-                
-                console.log("🎯 Detected ingredient:", detectedIngredient);
-                
-                // Show detected ingredients
-                showDetectedIngredients([detectedIngredient]);
-                getRecipes([detectedIngredient]);
-              };
-              
-              img.src = URL.createObjectURL(file);
-              
-            } catch (err) {
-              console.log("❌ Image analysis failed, using fallback");
-              // Fallback to cabbage if analysis fails
-              showDetectedIngredients(['cabbage']);
-              getRecipes(['cabbage']);
-            }
-          }, 2000); // 2 second delay to show loading
-          
-          return; // Skip all API code
+          }
         }
+        
+        // Fallback if no ingredients detected
+        if (detectedIngredients.length === 0) {
+          console.log("⚠️ No ingredients detected, using fallback");
+          detectedIngredients.push('potato'); // Safe fallback
+        }
+        
+        console.log("🎯 Final detected ingredients:", detectedIngredients);
+        
+        // Show detected ingredients
+        showDetectedIngredients(detectedIngredients);
+        getRecipes(detectedIngredients);
+        
+      } catch (error) {
+        console.error("❌ Hugging Face API error:", error);
+        
+        // Fallback to simple detection
+        console.log("🔄 Using fallback detection");
+        showDetectedIngredients(['potato']);
+        getRecipes(['potato']);
+      }
+    }
 
         // ✅ Fetch recipes from Spoonacular - ENHANCED with diverse cuisines
         async function getRecipes(ingredients) {
