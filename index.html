@@ -240,12 +240,12 @@
       
       try {
         console.log("🤖 Using secure backend API for accurate image recognition");
-        const detectedIngredient = await analyzeWithBackend(file);
-        console.log("🔍 Backend returned:", detectedIngredient);
-        if (detectedIngredient) {
-          console.log("🎯 Backend Detection Result:", detectedIngredient);
-          showDetectedIngredients([detectedIngredient]);
-          getRecipes([detectedIngredient]);
+        const detectedIngredients = await analyzeWithBackend(file);
+        console.log("🔍 Backend returned:", detectedIngredients);
+        if (detectedIngredients && detectedIngredients.length > 0) {
+          console.log("🎯 Backend Detection Result:", detectedIngredients);
+          showDetectedIngredients(detectedIngredients);
+          getRecipes(detectedIngredients);
           return;
         } else {
           console.log("⚠️ Backend returned empty result, falling back to color detection");
@@ -256,8 +256,17 @@
       }
       
       // Fallback to color-based detection
-      console.log("🚀 Using color-based detection as fallback");
-      analyzeWithColorDetection(file);
+        console.log("🚀 Using color-based detection as fallback");
+        try {
+          const fallbackResult = await analyzeWithColorDetection(file);
+          if (fallbackResult) {
+            showDetectedIngredients([fallbackResult]);
+            getRecipes([fallbackResult]);
+          }
+        } catch (error) {
+          console.error("❌ Color detection also failed:", error);
+          showDetectedIngredients([]);
+        }
     }
 
     // ✅ Secure Backend API Analysis
@@ -285,8 +294,8 @@
         throw new Error(data.error || 'Backend analysis failed');
       }
       
-      console.log("✅ Backend detection successful:", data.detectedIngredient);
-      return data.detectedIngredient;
+      console.log("✅ Backend detection successful:", data.detectedIngredients || [data.detectedIngredient]);
+      return data.detectedIngredients || [data.detectedIngredient];
     }
 
 
@@ -306,7 +315,8 @@
         }
       
       // Use color analysis immediately for perfect detection
-      setTimeout(() => {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         const img = new Image();
@@ -506,22 +516,21 @@
             }
           });
           
-          // Show detected ingredients
-          console.log("🔄 About to call showDetectedIngredients and getRecipes...");
-          showDetectedIngredients([detectedIngredient]);
-          getRecipes([detectedIngredient]);
-          console.log("✅ showDetectedIngredients and getRecipes called");
+          // Return the detected ingredient for multi-ingredient support
+          console.log("🔄 Color detection completed, returning result...");
+          resolve(detectedIngredient);
         };
         
         img.onerror = () => {
           console.error("❌ Failed to load image");
           loadingSection.style.display = 'none';
           resultsSection.style.display = 'block';
-          showDetectedIngredients([]);
+          reject(new Error('Failed to load image'));
         };
         
         img.src = URL.createObjectURL(file);
-      }, 1000); // 1 second delay to show loading
+        }, 1000); // 1 second delay to show loading
+      });
     }
 
         // ✅ Fetch recipes from Spoonacular - ENHANCED with diverse cuisines
@@ -637,14 +646,17 @@
                 <p style="color: #ffa726; font-size: 14px;">No clear ingredients detected. Please try a clearer photo with better lighting.</p>
               `;
             } else {
+              const ingredientCount = ingredients.length;
+              const title = ingredientCount === 1 ? "🥬 Ingredient detected:" : `🥬 ${ingredientCount} Ingredients detected:`;
+              
               ingredientsList.innerHTML = `
-                <h3>🥬 Ingredients detected:</h3>
+                <h3>${title}</h3>
                 <div class="ingredient-tags">
                   ${ingredients.map(ingredient => 
                     `<span class="ingredient-tag">${ingredient}</span>`
                   ).join('')}
                 </div>
-                <p style="color: #4caf50; font-size: 12px; margin-top: 10px;">✓ Improved accuracy detection</p>
+                <p style="color: #4caf50; font-size: 12px; margin-top: 10px;">✓ AI-powered multi-ingredient detection</p>
               `;
             }
           }
