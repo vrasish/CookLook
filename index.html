@@ -263,14 +263,19 @@
             // ULTRA-PRECISE VEGETABLE DETECTION
             if (greenRatio > 0.4 && avgGreen > 100) {
               // GREEN VEGETABLES - Most precise detection
-              if (greenRatio > 0.5 && avgGreen > 120 && avgRed < 80 && avgBlue < 80) {
+              
+              // GREEN BELL PEPPER - Check first with very specific conditions
+              if (greenRatio > 0.4 && greenRatio < 0.5 && avgGreen > 90 && avgGreen < 130 && 
+                  avgRed > 40 && avgRed < 80 && avgBlue < 70) {
+                detectedIngredient = 'green bell pepper'; // Specific green bell pepper range
+              } else if (greenRatio > 0.5 && avgGreen > 120 && avgRed < 80 && avgBlue < 80) {
                 detectedIngredient = 'cabbage'; // Very green, low other colors
               } else if (greenRatio > 0.45 && avgGreen > 110 && avgRed > 60 && avgRed < 90) {
                 detectedIngredient = 'broccoli'; // Green with some red
-              } else if (greenRatio > 0.42 && avgGreen > 100 && avgBlue > 70) {
-                detectedIngredient = 'lettuce'; // Green with blue tones
-              } else if (greenRatio > 0.4 && avgGreen > 90 && avgRed > 50 && avgRed < 80) {
-                detectedIngredient = 'green bell pepper'; // Green with slight red
+              } else if (greenRatio > 0.42 && avgGreen > 100 && avgBlue > 70 && avgRed < 60) {
+                detectedIngredient = 'lettuce'; // Green with blue tones, low red
+              } else if (greenRatio > 0.4 && avgGreen > 90) {
+                detectedIngredient = 'green bell pepper'; // Fallback for green bell pepper
               } else {
                 detectedIngredient = 'cabbage'; // Default green
               }
