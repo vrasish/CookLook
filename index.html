@@ -240,30 +240,55 @@
                 
                 console.log("🎨 Color analysis:", { r: avgRed, g: avgGreen, b: avgBlue });
                 
-                // Simple color-based ingredient detection
+                // Improved color-based ingredient detection
                 let detectedIngredient = 'potato'; // default
                 
-                if (avgGreen > avgRed && avgGreen > avgBlue) {
-                  // Green dominant - likely vegetables
-                  if (avgRed > 100) detectedIngredient = 'broccoli';
-                  else if (avgBlue > 80) detectedIngredient = 'lettuce';
-                  else detectedIngredient = 'cabbage';
-                } else if (avgRed > avgGreen && avgRed > avgBlue) {
-                  // Red dominant - likely tomatoes or apples
-                  if (avgGreen > 100) detectedIngredient = 'tomato';
-                  else detectedIngredient = 'apple';
-                } else if (avgBlue > avgRed && avgBlue > avgGreen) {
-                  // Blue dominant - unlikely for food, default to potato
-                  detectedIngredient = 'potato';
-                } else if (avgRed > 150 && avgGreen > 150 && avgBlue < 100) {
-                  // Yellow/orange dominant
+                console.log("🔍 Color ratios:", {
+                  green: avgGreen,
+                  red: avgRed, 
+                  blue: avgBlue,
+                  greenDominant: avgGreen > avgRed && avgGreen > avgBlue,
+                  greenRatio: avgGreen / (avgRed + avgBlue + 1)
+                });
+                
+                // Check for green vegetables first (most common)
+                if (avgGreen > avgRed && avgGreen > avgBlue && avgGreen > 80) {
+                  // Green dominant - analyze green intensity
+                  if (avgGreen > 120 && avgRed < 100 && avgBlue < 100) {
+                    detectedIngredient = 'cabbage'; // Dark green
+                  } else if (avgGreen > 100 && avgRed > 80 && avgBlue < 80) {
+                    detectedIngredient = 'broccoli'; // Green with some red
+                  } else if (avgGreen > 90 && avgBlue > 60) {
+                    detectedIngredient = 'lettuce'; // Light green
+                  } else {
+                    detectedIngredient = 'cabbage'; // Default green vegetable
+                  }
+                } else if (avgRed > avgGreen && avgRed > avgBlue && avgRed > 100) {
+                  // Red dominant
+                  if (avgGreen > 80 && avgRed > 120) {
+                    detectedIngredient = 'tomato'; // Red with green
+                  } else {
+                    detectedIngredient = 'apple'; // Pure red
+                  }
+                } else if (avgRed > 150 && avgGreen > 120 && avgBlue < 80) {
+                  // Orange/yellow dominant
                   detectedIngredient = 'carrot';
-                } else if (avgRed > 200 && avgGreen > 200 && avgBlue > 200) {
+                } else if (avgRed > 180 && avgGreen > 180 && avgBlue > 180) {
                   // White/light dominant
                   detectedIngredient = 'onion';
-                } else {
-                  // Brown/neutral - likely potato
+                } else if (avgRed < 100 && avgGreen < 100 && avgBlue < 100) {
+                  // Dark colors - likely brown potato
                   detectedIngredient = 'potato';
+                } else {
+                  // Default fallback - try to guess based on overall brightness
+                  const brightness = (avgRed + avgGreen + avgBlue) / 3;
+                  if (brightness > 150) {
+                    detectedIngredient = 'onion'; // Bright
+                  } else if (brightness > 100) {
+                    detectedIngredient = 'cabbage'; // Medium - likely green
+                  } else {
+                    detectedIngredient = 'potato'; // Dark
+                  }
                 }
                 
                 console.log("🎯 Detected ingredient:", detectedIngredient);
