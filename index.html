@@ -207,24 +207,80 @@
             `;
           }
           
-          // INSTANT: Skip all API calls and use smart fallback
-          setTimeout(() => {
-            console.log("🎯 Using instant smart fallback detection");
+          // INSTANT: Simple image analysis for better detection
+          setTimeout(async () => {
+            console.log("🎯 Using instant smart image analysis");
             
-            // Smart fallback based on common ingredients
-            const commonIngredients = [
-              'potato', 'carrot', 'onion', 'tomato', 'broccoli', 
-              'apple', 'banana', 'orange', 'lemon', 'lettuce'
-            ];
-            
-            // Pick a random ingredient for demo purposes
-            const detectedIngredient = commonIngredients[Math.floor(Math.random() * commonIngredients.length)];
-            
-            console.log("🎲 Detected ingredient:", detectedIngredient);
-            
-            // Show detected ingredients
-            showDetectedIngredients([detectedIngredient]);
-            getRecipes([detectedIngredient]);
+            try {
+              // Simple image analysis using canvas
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              const img = new Image();
+              
+              img.onload = () => {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                
+                // Get image data for color analysis
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                
+                // Analyze dominant colors
+                let redSum = 0, greenSum = 0, blueSum = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                  redSum += data[i];
+                  greenSum += data[i + 1];
+                  blueSum += data[i + 2];
+                }
+                
+                const avgRed = redSum / (data.length / 4);
+                const avgGreen = greenSum / (data.length / 4);
+                const avgBlue = blueSum / (data.length / 4);
+                
+                console.log("🎨 Color analysis:", { r: avgRed, g: avgGreen, b: avgBlue });
+                
+                // Simple color-based ingredient detection
+                let detectedIngredient = 'potato'; // default
+                
+                if (avgGreen > avgRed && avgGreen > avgBlue) {
+                  // Green dominant - likely vegetables
+                  if (avgRed > 100) detectedIngredient = 'broccoli';
+                  else if (avgBlue > 80) detectedIngredient = 'lettuce';
+                  else detectedIngredient = 'cabbage';
+                } else if (avgRed > avgGreen && avgRed > avgBlue) {
+                  // Red dominant - likely tomatoes or apples
+                  if (avgGreen > 100) detectedIngredient = 'tomato';
+                  else detectedIngredient = 'apple';
+                } else if (avgBlue > avgRed && avgBlue > avgGreen) {
+                  // Blue dominant - unlikely for food, default to potato
+                  detectedIngredient = 'potato';
+                } else if (avgRed > 150 && avgGreen > 150 && avgBlue < 100) {
+                  // Yellow/orange dominant
+                  detectedIngredient = 'carrot';
+                } else if (avgRed > 200 && avgGreen > 200 && avgBlue > 200) {
+                  // White/light dominant
+                  detectedIngredient = 'onion';
+                } else {
+                  // Brown/neutral - likely potato
+                  detectedIngredient = 'potato';
+                }
+                
+                console.log("🎯 Detected ingredient:", detectedIngredient);
+                
+                // Show detected ingredients
+                showDetectedIngredients([detectedIngredient]);
+                getRecipes([detectedIngredient]);
+              };
+              
+              img.src = URL.createObjectURL(file);
+              
+            } catch (err) {
+              console.log("❌ Image analysis failed, using fallback");
+              // Fallback to cabbage if analysis fails
+              showDetectedIngredients(['cabbage']);
+              getRecipes(['cabbage']);
+            }
           }, 2000); // 2 second delay to show loading
           
           return; // Skip all API code
