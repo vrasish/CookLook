@@ -46,6 +46,7 @@
             <div class="action-buttons">
                 <button id="scanBtn" class="scan-btn">📷 Scan Your Fridge</button>
                 <button id="uploadBtn" class="upload-btn">📁 Upload Photo</button>
+                <button id="testBtn" class="scan-btn" style="background-color: #ff6b35; margin-top: 10px;">🧪 Test Image Processing</button>
       </div>
             
             <!-- Mobile Tips -->
@@ -102,6 +103,7 @@
         const scanBtn = document.getElementById('scanBtn');
         const uploadBtn = document.getElementById('uploadBtn');
         const uploadBtnMobile = document.getElementById('uploadBtnMobile');
+        const testBtn = document.getElementById('testBtn');
         const cameraContainer = document.getElementById('cameraContainer');
         const camera = document.getElementById('camera');
         const captureBtn = document.getElementById('captureBtn');
@@ -177,6 +179,27 @@
           }
           cameraContainer.style.display = 'none';
           document.body.style.overflow = 'auto';
+        }
+
+        // ✅ Test function to debug image processing
+        function testImageProcessing() {
+          console.log("🧪 TEST: Starting image processing test...");
+          console.log("🧪 TEST: loadingSection element:", loadingSection);
+          console.log("🧪 TEST: resultsSection element:", resultsSection);
+          
+          // Create a simple test image (1x1 pixel)
+          const canvas = document.createElement('canvas');
+          canvas.width = 1;
+          canvas.height = 1;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ff0000'; // Red pixel
+          ctx.fillRect(0, 0, 1, 1);
+          
+          canvas.toBlob((blob) => {
+            const file = new File([blob], 'test-image.jpg', { type: 'image/jpeg' });
+            console.log("🧪 TEST: Created test file:", file);
+            processImage(file);
+          }, 'image/jpeg');
         }
 
         // ✅ Process image
@@ -617,6 +640,7 @@
         // ✅ Event Listeners
         scanBtn.addEventListener('click', startCamera);
         uploadBtn.addEventListener('click', () => uploadBtnMobile.click());
+        testBtn.addEventListener('click', testImageProcessing);
         uploadBtnMobile.addEventListener('change', (e) => {
           if (e.target.files[0]) {
             processImage(e.target.files[0]);
