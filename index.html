@@ -9,14 +9,14 @@
     <meta name="version" content="v3.6-logo-fix-1737062600">
     <title>CookLook - Scan Your Fridge, Cook Great Meals</title>
   <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/png" href="icon-192.png?v=3.6">
-    <link rel="icon" type="image/png" sizes="16x16" href="icon-192.png?v=3.6">
-    <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png?v=3.6">
-    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=3.6">
-    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=3.6">
-    <link rel="apple-touch-icon" href="icon-192.png?v=3.6">
-    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png?v=3.6">
-    <link rel="shortcut icon" href="icon-192.png?v=3.6">
+    <link rel="icon" type="image/png" href="favicon-new.png?v=3.7">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-new.png?v=3.7">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-new.png?v=3.7">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=3.7">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=3.7">
+    <link rel="apple-touch-icon" href="icon-192.png?v=3.7">
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png?v=3.7">
+    <link rel="shortcut icon" href="favicon-new.png?v=3.7">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f9b234">
     
@@ -26,8 +26,14 @@
       setTimeout(() => {
         const favicon = document.querySelector('link[rel="icon"]');
         if (favicon) {
-          favicon.href = 'icon-192.png?v=' + Date.now();
+          favicon.href = 'favicon-new.png?v=' + Date.now();
         }
+        // Also try to create a new favicon element
+        const newFavicon = document.createElement('link');
+        newFavicon.rel = 'icon';
+        newFavicon.type = 'image/png';
+        newFavicon.href = 'favicon-new.png?v=' + Date.now();
+        document.head.appendChild(newFavicon);
       }, 100);
     </script>
     

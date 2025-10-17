@@ -8,6 +8,7 @@ const urlsToCache = [
   './config.json',
   './manifest.json',
   './favicon.ico',
+  './favicon-new.png',
   './icon-192.png',
   './icon-512.png',
   './IMG_0460.jpg'
