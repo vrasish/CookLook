@@ -194,8 +194,7 @@
     async function analyzeImage(file) {
       console.log("🚀 Using IMPROVED color-based detection for better accuracy");
       
-      // Show progress indicator
-      const loadingSection = document.getElementById('loading');
+      // Show progress indicator (use global loadingSection variable)
       if (loadingSection) {
         loadingSection.innerHTML = `
           <div class="spinner"></div>
@@ -396,8 +395,10 @@
           });
           
           // Show detected ingredients
+          console.log("🔄 About to call showDetectedIngredients and getRecipes...");
           showDetectedIngredients([detectedIngredient]);
           getRecipes([detectedIngredient]);
+          console.log("✅ showDetectedIngredients and getRecipes called");
         };
         
         img.onerror = () => {
@@ -485,7 +486,9 @@
             // FORCE: Always use fallback recipes - disable API completely
             console.log("🎯 FORCING custom fallback recipes - API disabled");
             console.log("📋 Fallback recipes:", fallbackRecipes);
+            console.log("🔄 About to call displayRecipes...");
             displayRecipes(fallbackRecipes);
+            console.log("✅ displayRecipes called successfully");
             return;
             
           } catch (err) {
@@ -599,6 +602,7 @@
           }
           
           // Show results
+          console.log("🎯 Hiding loading section and showing results");
           loadingSection.style.display = 'none';
           resultsSection.style.display = 'block';
         }
