@@ -197,8 +197,8 @@
             
             // Check API key
             if (!HF_API_KEY || HF_API_KEY === "") {
-              console.log("⚠️ No API key, using fallback detection");
-              const fallbackIngredients = ["potato", "carrot", "onion"];
+              console.log("⚠️ No API key, using conservative fallback detection");
+              const fallbackIngredients = ["carrot"];
               showDetectedIngredients(fallbackIngredients);
               await getRecipes(fallbackIngredients);
               return;
@@ -302,8 +302,8 @@
             }
 
             if (bestResults.length === 0) {
-              console.log("❌ All models failed, using fallback detection");
-              const fallbackIngredients = ["potato", "carrot", "onion"];
+              console.log("❌ All models failed, using conservative fallback detection");
+              const fallbackIngredients = ["carrot"];
               showDetectedIngredients(fallbackIngredients);
               await getRecipes(fallbackIngredients);
               return;
@@ -311,10 +311,10 @@
 
             console.log("🍽️ Best AI Result:", bestResults);
 
-            // Enhanced ingredient extraction with mapping
+            // Enhanced ingredient extraction with mapping - MORE PRECISE
             const rawIngredients = bestResults
-              .filter(item => item.score > 0.2) // Lower threshold for more ingredients
-              .slice(0, 5) // Get top 5 most confident results
+              .filter(item => item.score > 0.4) // Higher threshold for more precision
+              .slice(0, 3) // Get only top 3 most confident results
               .map(item => item.label.toLowerCase());
 
             // Map raw results to proper ingredient names
@@ -333,13 +333,14 @@
               return rawIngredient; // Return original if no mapping found
             })
             .filter((ingredient, index, arr) => arr.indexOf(ingredient) === index) // Remove duplicates
-            .slice(0, 4); // Limit to 4 ingredients
+            .slice(0, 2); // Limit to 2 ingredients for precision
 
             console.log("🔍 Enhanced detected ingredients:", mappedIngredients);
 
             if (mappedIngredients.length === 0) {
-              console.log("⚠️ No ingredients detected, using fallback");
-              const fallbackIngredients = ["potato", "carrot", "onion"];
+              console.log("⚠️ No ingredients detected, using conservative fallback");
+              // Use only the most common single ingredient as fallback
+              const fallbackIngredients = ["carrot"];
               showDetectedIngredients(fallbackIngredients);
               await getRecipes(fallbackIngredients);
               return;
@@ -350,9 +351,9 @@
             await getRecipes(mappedIngredients);
 
           } catch (err) {
-            console.log("❌ Error analyzing image, using fallback:", err);
-            // Always show something
-            const fallbackIngredients = ["potato", "carrot", "onion"];
+            console.log("❌ Error analyzing image, using conservative fallback:", err);
+            // Always show something conservative
+            const fallbackIngredients = ["carrot"];
             showDetectedIngredients(fallbackIngredients);
             await getRecipes(fallbackIngredients);
           }
