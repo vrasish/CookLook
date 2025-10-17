@@ -195,7 +195,7 @@
       console.log("🚀 Using IMPROVED color-based detection for better accuracy");
       
       // Show progress indicator
-      const loadingSection = document.getElementById('loadingSection');
+      const loadingSection = document.getElementById('loading');
       if (loadingSection) {
         loadingSection.innerHTML = `
           <div class="spinner"></div>
@@ -214,6 +214,7 @@
         const img = new Image();
         
         img.onload = () => {
+          console.log("📸 Image loaded successfully, starting analysis...");
           canvas.width = img.width;
           canvas.height = img.height;
           ctx.drawImage(img, 0, 0);
@@ -397,6 +398,13 @@
           // Show detected ingredients
           showDetectedIngredients([detectedIngredient]);
           getRecipes([detectedIngredient]);
+        };
+        
+        img.onerror = () => {
+          console.error("❌ Failed to load image");
+          loadingSection.style.display = 'none';
+          resultsSection.style.display = 'block';
+          showDetectedIngredients([]);
         };
         
         img.src = URL.createObjectURL(file);
