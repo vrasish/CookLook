@@ -86,7 +86,7 @@ app.post('/api/analyze-image', upload.single('image'), async (req, res) => {
           content: [
             {
               type: "text",
-              text: "Look at this image and identify the main vegetable or food item. Be very specific about the type. For peppers, specify the color (e.g., 'green bell pepper', 'red bell pepper', 'yellow bell pepper'). For other vegetables, use the common name (e.g., 'carrot', 'tomato', 'potato', 'broccoli', 'onion', 'lettuce', 'cucumber', 'cabbage', 'spinach', 'kale', 'celery', 'radish', 'beetroot', 'sweet potato', 'green beans', 'asparagus', 'cauliflower'). Respond with only the vegetable name in lowercase. If you see multiple items, identify the most prominent one."
+              text: "Look at this image and identify ALL vegetables or food items you can see. Be very specific about the type. For peppers, specify the color (e.g., 'green bell pepper', 'red bell pepper', 'yellow bell pepper'). For other vegetables, use the common name (e.g., 'carrot', 'tomato', 'potato', 'broccoli', 'onion', 'lettuce', 'cucumber', 'cabbage', 'spinach', 'kale', 'celery', 'radish', 'beetroot', 'sweet potato', 'green beans', 'asparagus', 'cauliflower'). If you see multiple items, list them all separated by commas. Respond with only the vegetable names in lowercase, separated by commas."
             },
             {
               type: "image_url",
@@ -109,10 +109,10 @@ app.post('/api/analyze-image', upload.single('image'), async (req, res) => {
       throw new Error('Invalid OpenAI API response format');
     }
 
-    const detectedItem = response.data.choices[0].message.content.trim().toLowerCase();
+    const detectedItems = response.data.choices[0].message.content.trim().toLowerCase();
     
-    // Clean up the response to get just the vegetable name
-    console.log('🔍 Raw AI response:', detectedItem);
+    // Clean up the response to get vegetable names
+    console.log('🔍 Raw AI response:', detectedItems);
     
     const vegetables = [
       'green bell pepper', 'red bell pepper', 'yellow bell pepper', 'orange bell pepper',
@@ -121,35 +121,49 @@ app.post('/api/analyze-image', upload.single('image'), async (req, res) => {
       'green beans', 'asparagus', 'cauliflower', 'pepper'
     ];
     
-    // Try exact matches first (for specific peppers)
-    let finalVegetable = null;
-    for (const veg of vegetables) {
-      if (detectedItem.includes(veg)) {
-        finalVegetable = veg;
-        break;
-      }
-    }
+    // Split by commas and clean up each item
+    let detectedIngredients = detectedItems.split(',').map(item => item.trim());
     
-    // If no match found, try to extract just the main vegetable name
-    if (!finalVegetable) {
-      const simpleVegetables = ['carrot', 'tomato', 'potato', 'broccoli', 'onion', 'lettuce', 'cucumber', 'cabbage', 'spinach', 'kale', 'celery', 'radish', 'beetroot', 'pepper'];
-      for (const veg of simpleVegetables) {
-        if (detectedItem.includes(veg)) {
-          finalVegetable = veg;
+    // Filter and validate detected ingredients
+    const validIngredients = [];
+    for (const ingredient of detectedIngredients) {
+      // Try exact matches first (for specific peppers)
+      let found = false;
+      for (const veg of vegetables) {
+        if (ingredient.includes(veg)) {
+          validIngredients.push(veg);
+          found = true;
           break;
         }
       }
+      
+      // If no exact match, try simple vegetables
+      if (!found) {
+        const simpleVegetables = ['carrot', 'tomato', 'potato', 'broccoli', 'onion', 'lettuce', 'cucumber', 'cabbage', 'spinach', 'kale', 'celery', 'radish', 'beetroot', 'pepper'];
+        for (const veg of simpleVegetables) {
+          if (ingredient.includes(veg)) {
+            validIngredients.push(veg);
+            found = true;
+            break;
+          }
+        }
+      }
+      
+      // If still no match, add the raw ingredient if it looks like a vegetable
+      if (!found && ingredient.length > 2) {
+        validIngredients.push(ingredient);
+      }
     }
     
-    if (!finalVegetable) {
-      finalVegetable = detectedItem; // Return raw response if no match
-    }
-
-    console.log('✅ Final detection result:', finalVegetable);
+    // Remove duplicates
+    const uniqueIngredients = [...new Set(validIngredients)];
+    
+    console.log('✅ Final detection results:', uniqueIngredients);
 
     res.json({
       success: true,
-      detectedIngredient: finalVegetable,
+      detectedIngredients: uniqueIngredients,
+      detectedIngredient: uniqueIngredients[0] || 'unknown', // Keep for backward compatibility
       confidence: 'high',
       method: 'openai-vision',
       timestamp: new Date().toISOString()
