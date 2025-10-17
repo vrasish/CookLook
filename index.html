@@ -236,18 +236,23 @@
     async function analyzeImage(file) {
       console.log("🤖 Starting image analysis...");
       console.log("🔗 Using backend API:", API_BASE_URL);
+      console.log("🔗 Backend URL check:", API_BASE_URL === 'https://cooklook-backend.vercel.app');
       
       try {
         console.log("🤖 Using secure backend API for accurate image recognition");
         const detectedIngredient = await analyzeWithBackend(file);
+        console.log("🔍 Backend returned:", detectedIngredient);
         if (detectedIngredient) {
           console.log("🎯 Backend Detection Result:", detectedIngredient);
           showDetectedIngredients([detectedIngredient]);
           getRecipes([detectedIngredient]);
           return;
+        } else {
+          console.log("⚠️ Backend returned empty result, falling back to color detection");
         }
       } catch (error) {
-        console.warn("⚠️ Backend API failed, falling back to color analysis:", error);
+        console.error("❌ Backend API failed, falling back to color analysis:", error);
+        console.error("❌ Error details:", error.message);
       }
       
       // Fallback to color-based detection
