@@ -216,10 +216,10 @@
           reader.readAsDataURL(file);
         });
         
-        console.log("📡 Calling Hugging Face API...");
+        console.log("📡 Calling Hugging Face API with nateraw/food model (Food-101 dataset)...");
         
-        // Call Hugging Face API
-        const response = await fetch('https://api-inference.huggingface.co/models/keremberke/food-image-classification', {
+        // Call Hugging Face API with better food model
+        const response = await fetch('https://api-inference.huggingface.co/models/nateraw/food', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${config.HF_API_KEY}`,
@@ -235,30 +235,30 @@
         const results = await response.json();
         console.log("🤖 Hugging Face results:", results);
         
-        // Process results and map to vegetables
+        // Process results and map to vegetables using Food-101 dataset labels
         const detectedIngredients = [];
         const ingredientMap = {
-          'potato': ['potato', 'potatoes', 'baked potato', 'mashed potato'],
-          'tomato': ['tomato', 'tomatoes', 'cherry tomato', 'grape tomato'],
-          'carrot': ['carrot', 'carrots', 'baby carrot'],
-          'onion': ['onion', 'onions', 'red onion', 'white onion', 'yellow onion'],
-          'broccoli': ['broccoli', 'broccoli florets'],
-          'cauliflower': ['cauliflower', 'cauliflower head'],
-          'cabbage': ['cabbage', 'green cabbage', 'white cabbage'],
-          'lettuce': ['lettuce', 'iceberg lettuce', 'romaine lettuce'],
-          'spinach': ['spinach', 'baby spinach'],
-          'kale': ['kale', 'curly kale'],
-          'green beans': ['green beans', 'string beans', 'snap beans'],
-          'asparagus': ['asparagus', 'asparagus spears'],
-          'celery': ['celery', 'celery stalks'],
-          'cucumber': ['cucumber', 'cucumbers', 'english cucumber'],
-          'bell pepper': ['bell pepper', 'pepper', 'sweet pepper'],
-          'red bell pepper': ['red bell pepper', 'red pepper'],
-          'green bell pepper': ['green bell pepper', 'green pepper'],
-          'yellow bell pepper': ['yellow bell pepper', 'yellow pepper'],
+          'potato': ['baked_potato', 'french_fries', 'mashed_potato', 'potato'],
+          'tomato': ['tomato', 'cherry_tomato', 'grape_tomato'],
+          'carrot': ['carrot', 'baby_carrot'],
+          'onion': ['onion', 'red_onion', 'white_onion', 'yellow_onion'],
+          'broccoli': ['broccoli', 'broccoli_florets'],
+          'cauliflower': ['cauliflower', 'cauliflower_head'],
+          'cabbage': ['cabbage', 'green_cabbage', 'white_cabbage'],
+          'lettuce': ['lettuce', 'iceberg_lettuce', 'romaine_lettuce'],
+          'spinach': ['spinach', 'baby_spinach'],
+          'kale': ['kale', 'curly_kale'],
+          'green beans': ['green_beans', 'string_beans', 'snap_beans'],
+          'asparagus': ['asparagus', 'asparagus_spears'],
+          'celery': ['celery', 'celery_stalks'],
+          'cucumber': ['cucumber', 'english_cucumber'],
+          'bell pepper': ['bell_pepper', 'pepper', 'sweet_pepper'],
+          'red bell pepper': ['red_bell_pepper', 'red_pepper'],
+          'green bell pepper': ['green_bell_pepper', 'green_pepper'],
+          'yellow bell pepper': ['yellow_bell_pepper', 'yellow_pepper'],
           'beetroot': ['beetroot', 'beet', 'beets'],
           'radish': ['radish', 'radishes'],
-          'sweet potato': ['sweet potato', 'sweet potatoes', 'yam']
+          'sweet potato': ['sweet_potato', 'sweet_potatoes', 'yam']
         };
         
         if (Array.isArray(results) && results.length > 0) {
