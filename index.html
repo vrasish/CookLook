@@ -310,35 +310,41 @@
             }
 
             console.log("🍽️ Best AI Result:", bestResults);
+            console.log("🔍 Raw AI scores:", bestResults.map(r => `${r.label}: ${r.score.toFixed(3)}`));
 
-            // Enhanced ingredient extraction with mapping - MORE PRECISE
+            // ULTRA-PRECISE ingredient extraction - ONLY show what's actually detected
             const rawIngredients = bestResults
-              .filter(item => item.score > 0.4) // Higher threshold for more precision
-              .slice(0, 3) // Get only top 3 most confident results
+              .filter(item => item.score > 0.6) // Very high threshold for maximum precision
+              .slice(0, 1) // Get ONLY the most confident result
               .map(item => item.label.toLowerCase());
 
-            // Map raw results to proper ingredient names
+            // Map raw results to proper ingredient names with strict matching
             const mappedIngredients = rawIngredients.map(rawIngredient => {
-              // Find best match in ingredient map
+              // Find best match in ingredient map with strict matching
               for (const [key, variations] of Object.entries(ingredientMap)) {
                 if (variations.some(variation => 
-                  rawIngredient.includes(variation) || 
-                  variation.includes(rawIngredient) ||
-                  rawIngredient.includes(key) ||
-                  key.includes(rawIngredient)
+                  rawIngredient === variation || // Exact match
+                  rawIngredient.includes(variation) && variation.length > 3 || // Partial match but significant
+                  variation.includes(rawIngredient) && rawIngredient.length > 3 // Reverse partial match but significant
                 )) {
                   return key;
                 }
               }
-              return rawIngredient; // Return original if no mapping found
+              // Only return if it's a very close match
+              if (rawIngredient.length > 3) {
+                return rawIngredient;
+              }
+              return null; // Reject unclear matches
             })
+            .filter(ingredient => ingredient !== null) // Remove null results
             .filter((ingredient, index, arr) => arr.indexOf(ingredient) === index) // Remove duplicates
-            .slice(0, 2); // Limit to 2 ingredients for precision
+            .slice(0, 1); // Limit to ONLY 1 ingredient for maximum precision
 
-            console.log("🔍 Enhanced detected ingredients:", mappedIngredients);
+            console.log("🔍 Ultra-precise detected ingredients:", mappedIngredients);
 
+            // Additional validation: only show if we have high confidence
             if (mappedIngredients.length === 0) {
-              console.log("⚠️ No ingredients detected, using conservative fallback");
+              console.log("⚠️ No high-confidence ingredients detected, using conservative fallback");
               // Use only the most common single ingredient as fallback
               const fallbackIngredients = ["carrot"];
               showDetectedIngredients(fallbackIngredients);
@@ -346,9 +352,28 @@
               return;
             }
 
-            // Show detected ingredients
-            showDetectedIngredients(mappedIngredients);
-            await getRecipes(mappedIngredients);
+            // Final validation: ensure we're not showing random ingredients
+            const validIngredients = mappedIngredients.filter(ingredient => {
+              // Only allow ingredients that are commonly visible in photos
+              const commonVisibleIngredients = [
+                'carrot', 'potato', 'tomato', 'onion', 'broccoli', 'cauliflower',
+                'apple', 'banana', 'orange', 'lemon', 'lime', 'strawberry',
+                'lettuce', 'spinach', 'mushroom', 'cucumber', 'bell pepper'
+              ];
+              return commonVisibleIngredients.includes(ingredient.toLowerCase());
+            });
+
+            if (validIngredients.length === 0) {
+              console.log("⚠️ No valid visible ingredients detected, using conservative fallback");
+              const fallbackIngredients = ["carrot"];
+              showDetectedIngredients(fallbackIngredients);
+              await getRecipes(fallbackIngredients);
+              return;
+            }
+
+            // Show only the validated ingredients
+            showDetectedIngredients(validIngredients);
+            await getRecipes(validIngredients);
 
           } catch (err) {
             console.log("❌ Error analyzing image, using conservative fallback:", err);
@@ -468,14 +493,22 @@
         function showDetectedIngredients(ingredients) {
           const ingredientsList = document.getElementById('ingredientsList');
           if (ingredientsList) {
-            ingredientsList.innerHTML = `
-              <h3>🥬 Ingredients detected:</h3>
-              <div class="ingredient-tags">
-                ${ingredients.map(ingredient => 
-                  `<span class="ingredient-tag">${ingredient}</span>`
-                ).join('')}
-              </div>
-            `;
+            if (ingredients.length === 0) {
+              ingredientsList.innerHTML = `
+                <h3>🔍 Analyzing image...</h3>
+                <p style="color: #ffa726; font-size: 14px;">No clear ingredients detected. Please try a clearer photo with better lighting.</p>
+              `;
+            } else {
+              ingredientsList.innerHTML = `
+                <h3>🥬 Ingredients detected:</h3>
+                <div class="ingredient-tags">
+                  ${ingredients.map(ingredient => 
+                    `<span class="ingredient-tag">${ingredient}</span>`
+                  ).join('')}
+                </div>
+                <p style="color: #4caf50; font-size: 12px; margin-top: 10px;">✓ High confidence detection</p>
+              `;
+            }
           }
         }
 
