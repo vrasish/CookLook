@@ -39,13 +39,13 @@ const upload = multer({
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'healthy', 
-    timestamp: new Date().toISOString(),
-    version: '1.0.2',
-    openai_configured: !!process.env.OPENAI_API_KEY,
-    openai_key_length: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 0
-  });
+        res.json({ 
+          status: 'healthy', 
+          timestamp: new Date().toISOString(),
+          version: '1.0.3-multi-ingredient',
+          openai_configured: !!process.env.OPENAI_API_KEY,
+          openai_key_length: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 0
+        });
 });
 
 // OpenAI Vision API endpoint
