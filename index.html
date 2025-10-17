@@ -440,72 +440,11 @@
           ];
           
           try {
-            // Check API key
-            if (!SPOON_KEY || SPOON_KEY === "") {
-              console.log("⚠️ No API key, using fallback recipes");
-              displayRecipes(fallbackRecipes);
-              return;
-            }
-            
-            // Search for recipes with different cuisines
-            const cuisines = ['american', 'mexican', 'mediterranean', 'indian'];
-            let allRecipes = [];
-            
-            for (const cuisine of cuisines) {
-              try {
-                const url = `https://api.spoonacular.com/recipes/complexSearch?includeIngredients=${ingredients.join(",")}&cuisine=${cuisine}&number=3&apiKey=${SPOON_KEY}`;
-                console.log(`🌐 ${cuisine} API URL:`, url);
-                
-                const res = await fetch(url);
-                console.log(`📡 ${cuisine} Response status:`, res.status);
-                
-                if (res.ok) {
-                  const data = await res.json();
-                  console.log(`📋 ${cuisine} API response:`, data);
-                  
-                  if (data.results && Array.isArray(data.results) && data.results.length > 0) {
-                    // Add cuisine info to recipes
-                    const cuisineRecipes = data.results.map(recipe => ({
-                      ...recipe,
-                      cuisine: cuisine.charAt(0).toUpperCase() + cuisine.slice(1),
-                      usedIngredients: ingredients.map(ing => ({ name: ing })),
-                      missedIngredients: []
-                    }));
-                    allRecipes = allRecipes.concat(cuisineRecipes);
-                  }
-                }
-              } catch (err) {
-                console.log(`⚠️ ${cuisine} cuisine search failed:`, err);
-              }
-            }
-            
-            // Always use fallback recipes for better ingredient relevance
-            console.log("🎯 Using custom fallback recipes for better ingredient matching");
+            // FORCE: Always use fallback recipes - disable API completely
+            console.log("🎯 FORCING custom fallback recipes - API disabled");
             console.log("📋 Fallback recipes:", fallbackRecipes);
             displayRecipes(fallbackRecipes);
-            
-            // Optional: Also show API recipes if available (commented out for now)
-            /*
-            if (allRecipes.length > 0) {
-              console.log("✅ Got diverse cuisine recipes, displaying them");
-              // Mix recipes from different cuisines and add missing data
-              const shuffled = allRecipes.sort(() => 0.5 - Math.random()).slice(0, 4);
-              
-              // Add missing data to API recipes
-              const enhancedRecipes = shuffled.map(recipe => ({
-                ...recipe,
-                readyInMinutes: recipe.readyInMinutes || 30,
-                servings: recipe.servings || 4,
-                usedIngredients: ingredients.map(ing => ({ name: ing })),
-                missedIngredients: []
-              }));
-              
-              displayRecipes(enhancedRecipes);
-            } else {
-              console.log("⚠️ No API recipes found, using fallback recipes");
-              displayRecipes(fallbackRecipes);
-            }
-            */
+            return;
             
           } catch (err) {
             console.log("❌ Error occurred, using fallback recipes:", err);
