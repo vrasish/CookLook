@@ -43,10 +43,14 @@
             <!-- Upload Button for Mobile -->
             <input type="file" id="uploadBtnMobile" accept="image/*" capture="environment" style="display: none;">
             
+            <!-- Mobile-specific upload input for photo library only -->
+            <input type="file" id="uploadBtnLibrary" accept="image/*" style="display: none;">
+            
             <!-- Main Action Buttons -->
             <div class="action-buttons">
                 <button id="scanBtn" class="scan-btn">📷 Scan Your Fridge</button>
                 <button id="uploadBtn" class="upload-btn">📁 Upload Photo</button>
+                <button id="libraryBtn" class="upload-btn" style="background-color: #6c757d; margin-top: 10px;">📚 Choose from Library</button>
                 <button id="testBtn" class="scan-btn" style="background-color: #ff6b35; margin-top: 10px;">🧪 Test Image Processing</button>
       </div>
             
@@ -104,6 +108,8 @@
         const scanBtn = document.getElementById('scanBtn');
         const uploadBtn = document.getElementById('uploadBtn');
         const uploadBtnMobile = document.getElementById('uploadBtnMobile');
+        const libraryBtn = document.getElementById('libraryBtn');
+        const uploadBtnLibrary = document.getElementById('uploadBtnLibrary');
         const testBtn = document.getElementById('testBtn');
         const cameraContainer = document.getElementById('cameraContainer');
         const camera = document.getElementById('camera');
@@ -672,8 +678,14 @@
         // ✅ Event Listeners
         scanBtn.addEventListener('click', startCamera);
         uploadBtn.addEventListener('click', () => uploadBtnMobile.click());
+        libraryBtn.addEventListener('click', () => uploadBtnLibrary.click());
         testBtn.addEventListener('click', testImageProcessing);
         uploadBtnMobile.addEventListener('change', (e) => {
+          if (e.target.files[0]) {
+            processImage(e.target.files[0]);
+          }
+        });
+        uploadBtnLibrary.addEventListener('change', (e) => {
           if (e.target.files[0]) {
             processImage(e.target.files[0]);
           }
