@@ -81,7 +81,7 @@
         // Load API keys from config file
         async function loadConfig() {
           try {
-            const response = await fetch('config.json');
+            const response = await fetch('./config.json');
             if (!response.ok) {
               throw new Error(`HTTP ${response.status}`);
             }
@@ -91,6 +91,7 @@
             console.log("✅ Config loaded successfully");
           } catch (err) {
             console.warn("⚠️ Config file not found, using demo mode");
+            console.log("🔧 App will work in demo mode with fallback recipes");
           }
         }
         
@@ -181,12 +182,18 @@
         // ✅ Process image
         function processImage(file) {
           console.log("📸 Processing image:", file.name);
+          console.log("📸 File size:", file.size, "bytes");
+          console.log("📸 File type:", file.type);
           
           // Show loading
+          console.log("🔄 Showing loading section...");
+          console.log("🔄 loadingSection element:", loadingSection);
+          console.log("🔄 resultsSection element:", resultsSection);
           loadingSection.style.display = 'block';
           resultsSection.style.display = 'none';
           
           // Analyze image
+          console.log("🔄 Calling analyzeImage...");
           analyzeImage(file);
         }
 
