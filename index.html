@@ -280,22 +280,22 @@
                 detectedIngredient = 'cabbage'; // Default green
               }
             } else if (redRatio > 0.4 && avgRed > 100) {
-              // RED VEGETABLES
+              // RED VEGETABLES - Check tomato first
               if (redRatio > 0.5 && avgRed > 120 && avgGreen > 60 && avgGreen < 90) {
-                detectedIngredient = 'tomato'; // Red with some green
+                detectedIngredient = 'tomato'; // Red with some green - TOMATO PRIORITY
               } else if (redRatio > 0.45 && avgRed > 100 && avgGreen < 60) {
                 detectedIngredient = 'red bell pepper'; // Pure red
               } else if (redRatio > 0.4 && avgRed > 90) {
                 detectedIngredient = 'apple'; // Red fruit
               } else {
-                detectedIngredient = 'tomato'; // Default red
+                detectedIngredient = 'tomato'; // Default red - TOMATO FALLBACK
               }
             } else if (redRatio > 0.35 && greenRatio > 0.3 && avgRed > 120 && avgGreen > 100) {
-              // ORANGE/YELLOW VEGETABLES
+              // ORANGE/YELLOW VEGETABLES - Only if NOT red dominant
               if (avgRed > 140 && avgGreen > 120 && avgBlue < 80) {
                 detectedIngredient = 'carrot'; // Orange
-              } else if (avgRed > 130 && avgGreen > 110) {
-                detectedIngredient = 'yellow bell pepper'; // Yellow
+              } else if (avgRed > 130 && avgGreen > 110 && redRatio < 0.5) {
+                detectedIngredient = 'yellow bell pepper'; // Yellow - only if not red dominant
               } else {
                 detectedIngredient = 'carrot'; // Default orange
               }
