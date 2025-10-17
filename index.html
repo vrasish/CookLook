@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>CookLook - Scan Your Fridge, Cook Great Meals</title>
-    <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/png" href="/CookLook/icon-192.png">
     <link rel="manifest" href="/CookLook/manifest.json">
     <meta name="theme-color" content="#f9b234">
@@ -20,10 +20,10 @@
 </head>
 <body>
     <!-- Hero Section -->
-    <section class="hero">
+  <section class="hero">
         <div class="hero-content">
             <img src="IMG_0460.jpg" alt="CookLook Logo" class="logo">
-            <h1>CookLook</h1>
+    <h1>CookLook</h1>
             <p>Scan your food. Cook a great meal.</p>
             <p class="hero-subtitle">Take a photo of your ingredients and get personalized recipes instantly!</p>
             
@@ -37,7 +37,7 @@
                     <button id="captureBtn" class="scan-btn">📸 Scan Ingredients</button>
                     <button id="closeBtn" class="close-btn">✕</button>
                 </div>
-            </div>
+    </div>
             
             <!-- Upload Button for Mobile -->
             <input type="file" id="uploadBtnMobile" accept="image/*" capture="environment" style="display: none;">
@@ -46,7 +46,7 @@
             <div class="action-buttons">
                 <button id="scanBtn" class="scan-btn">📷 Scan Your Fridge</button>
                 <button id="uploadBtn" class="upload-btn">📁 Upload Photo</button>
-            </div>
+      </div>
             
             <!-- Mobile Tips -->
             <div class="mobile-tips" id="mobileTips" style="display: none;">
@@ -54,16 +54,16 @@
                 <p>• Make sure you're using HTTPS (not HTTP)</p>
                 <p>• Grant camera permission when prompted</p>
                 <p>• Try the "Upload Photo" button if camera doesn't work</p>
-            </div>
-        </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
     <!-- Loading Section -->
     <section id="loading" class="loading-section" style="display: none;">
         <div class="spinner"></div>
         <h2>Analyzing your ingredients...</h2>
         <p>Our AI is identifying what's in your fridge</p>
-    </section>
+  </section>
 
     <!-- Results Section -->
     <section id="results" class="results-section" style="display: none;">
@@ -71,7 +71,7 @@
         <div id="ingredientsList" class="ingredients-detected"></div>
         <div id="recipesContainer" class="recipes-container"></div>
         <button id="scanAgainBtn" class="scan-btn">🔄 Scan Again</button>
-    </section>
+  </section>
 
     <script>
         // ✅ API Keys - Load from config
@@ -219,15 +219,13 @@
         // Try multiple models for better accuracy
         const models = [
           'nateraw/food',
-          'keremberke/food-image-classification',
-          'google/vit-base-patch16-224'
+          'keremberke/food-image-classification'
         ];
         
         let detectedIngredients = [];
-        let bestResult = null;
-        let bestScore = 0;
+        let allResults = [];
         
-        // Try each model
+        // Try each model and collect all results
         for (const model of models) {
           try {
             console.log(`📡 Trying model: ${model}`);
@@ -246,11 +244,7 @@
               console.log(`🤖 ${model} results:`, results);
               
               if (Array.isArray(results) && results.length > 0) {
-                const topResult = results[0];
-                if (topResult.score > bestScore) {
-                  bestScore = topResult.score;
-                  bestResult = { model, results };
-                }
+                allResults.push(...results.map(r => ({ ...r, model })));
               }
             }
           } catch (modelError) {
@@ -258,9 +252,13 @@
           }
         }
         
-        // Process best result
-        if (bestResult) {
-          console.log(`🏆 Best result from ${bestResult.model} with score ${bestScore}`);
+        // Sort all results by confidence score
+        allResults.sort((a, b) => b.score - a.score);
+        console.log("🏆 All results sorted by confidence:", allResults);
+        
+        // Process all results for better detection
+        if (allResults.length > 0) {
+          console.log(`🏆 Processing ${allResults.length} results from multiple models`);
           
           const ingredientMap = {
             'potato': ['baked_potato', 'french_fries', 'mashed_potato', 'potato', 'potatoes'],
@@ -285,17 +283,18 @@
             'sweet potato': ['sweet_potato', 'sweet_potatoes', 'yam']
           };
           
-          for (const result of bestResult.results) {
-            if (result.score > 0.05) { // Very low threshold for maximum detection
+          // Process top 5 results from all models
+          for (const result of allResults.slice(0, 5)) {
+            if (result.score > 0.1) { // Higher threshold for better accuracy
               const label = result.label.toLowerCase().replace(/[^a-z]/g, '_');
-              console.log(`🔍 Checking label: "${label}" (confidence: ${result.score})`);
+              console.log(`🔍 Checking label: "${label}" (confidence: ${result.score}, model: ${result.model})`);
               
               // Find matching vegetable
               for (const [vegetable, keywords] of Object.entries(ingredientMap)) {
                 if (keywords.some(keyword => label.includes(keyword) || keyword.includes(label))) {
                   if (!detectedIngredients.includes(vegetable)) {
                     detectedIngredients.push(vegetable);
-                    console.log(`✅ Mapped "${label}" to "${vegetable}"`);
+                    console.log(`✅ Mapped "${label}" to "${vegetable}" (from ${result.model})`);
                   }
                   break;
                 }
@@ -369,8 +368,12 @@
               detectedIngredients.push('sweet potato');
             } else if (brightness < 120 || (avgRed < 100 && avgGreen < 100 && avgBlue < 100)) {
               detectedIngredients.push('potato');
+            } else if (avgGreen > avgRed && avgGreen > avgBlue) {
+              detectedIngredients.push('green bell pepper');
+            } else if (avgRed > avgGreen && avgRed > avgBlue) {
+              detectedIngredients.push('tomato');
             } else {
-              detectedIngredients.push('cabbage');
+              detectedIngredients.push('potato'); // Better fallback than cabbage
             }
             
             console.log("🎯 Color analysis detected:", detectedIngredients);
@@ -565,8 +568,8 @@
                           ${recipe.usedIngredients ? recipe.usedIngredients.map(ing => 
                             `<span class="used-ingredient">${ing.name}</span>`
                           ).join('') : 'All available ingredients!'}
-                        </div>
-                      </div>
+      </div>
+      </div>
                       <div class="recipe-links">
                         ${recipe.sourceUrl && recipe.sourceUrl !== '#' ? 
                           `<a href="${recipe.sourceUrl}" target="_blank" class="recipe-link">
@@ -577,8 +580,8 @@
                         <a href="${youtubeSearchUrl}" target="_blank" class="youtube-link">
                           🎥 Watch Video Tutorial
                         </a>
-                      </div>
-                    </div>
+      </div>
+    </div>
                   `;
                 }).join('')}
               </div>
