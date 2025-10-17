@@ -253,15 +253,26 @@
                 
                 // Check for green vegetables first (most common)
                 if (avgGreen > avgRed && avgGreen > avgBlue && avgGreen > 80) {
-                  // Green dominant - analyze green intensity
-                  if (avgGreen > 120 && avgRed < 100 && avgBlue < 100) {
-                    detectedIngredient = 'cabbage'; // Dark green
-                  } else if (avgGreen > 100 && avgRed > 80 && avgBlue < 80) {
-                    detectedIngredient = 'broccoli'; // Green with some red
+                  // Green dominant - analyze green intensity and color distribution
+                  const greenRatio = avgGreen / (avgRed + avgBlue + 1);
+                  const colorVariance = Math.abs(avgRed - avgBlue);
+                  
+                  console.log("🥬 Green analysis:", {
+                    greenRatio: greenRatio.toFixed(2),
+                    colorVariance: colorVariance.toFixed(2),
+                    avgGreen: avgGreen.toFixed(2)
+                  });
+                  
+                  if (avgGreen > 110 && avgRed < 90 && avgBlue < 90 && greenRatio > 1.5) {
+                    detectedIngredient = 'cabbage'; // Very green, low red/blue, high green ratio
+                  } else if (avgGreen > 100 && avgRed > 70 && avgBlue < 70 && colorVariance > 20) {
+                    detectedIngredient = 'broccoli'; // Green with more red variation
                   } else if (avgGreen > 90 && avgBlue > 60) {
-                    detectedIngredient = 'lettuce'; // Light green
+                    detectedIngredient = 'lettuce'; // Light green with blue
+                  } else if (avgGreen > 100) {
+                    detectedIngredient = 'cabbage'; // Default to cabbage for any strong green
                   } else {
-                    detectedIngredient = 'cabbage'; // Default green vegetable
+                    detectedIngredient = 'lettuce'; // Light green
                   }
                 } else if (avgRed > avgGreen && avgRed > avgBlue && avgRed > 100) {
                   // Red dominant
