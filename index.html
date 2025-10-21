@@ -274,6 +274,8 @@
         if (detectedIngredients && detectedIngredients.length > 0) {
           console.log("🎯 Backend Detection Result:", detectedIngredients);
           console.log("🎯 Multi-ingredient detection working:", detectedIngredients.length > 1 ? "YES" : "NO");
+          console.log("🎯 About to call showDetectedIngredients with:", detectedIngredients);
+          console.log("🎯 About to call getRecipes with:", detectedIngredients);
           showDetectedIngredients(detectedIngredients);
           getRecipes(detectedIngredients);
           return;
