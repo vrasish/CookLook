@@ -231,6 +231,65 @@ app.get('/api/recipes', async (req, res) => {
   } catch (error) {
     console.error('❌ Error fetching recipes:', error.message);
     
+    // Check if it's a quota/payment issue
+    if (error.response && error.response.status === 402) {
+      console.log('💳 Spoonacular API quota exceeded, returning fallback recipes');
+      
+      // Create fallback recipes for the ingredients
+      const ingredientList = ingredients.split(',').map(ing => ing.trim());
+      const fallbackRecipes = [
+        {
+          id: 'fallback-american-1',
+          title: `American ${ingredientList.join(' and ')} Stir-Fry`,
+          readyInMinutes: 25,
+          servings: 2,
+          usedIngredients: ingredientList.map(ing => ({ name: ing })),
+          missedIngredients: [],
+          sourceUrl: '#',
+          cuisine: 'American'
+        },
+        {
+          id: 'fallback-mexican-1',
+          title: `Mexican ${ingredientList.join(' and ')} Tacos`,
+          readyInMinutes: 30,
+          servings: 2,
+          usedIngredients: ingredientList.map(ing => ({ name: ing })),
+          missedIngredients: [],
+          sourceUrl: '#',
+          cuisine: 'Mexican'
+        },
+        {
+          id: 'fallback-mediterranean-1',
+          title: `Mediterranean ${ingredientList.join(' and ')} Salad`,
+          readyInMinutes: 20,
+          servings: 2,
+          usedIngredients: ingredientList.map(ing => ({ name: ing })),
+          missedIngredients: [],
+          sourceUrl: '#',
+          cuisine: 'Mediterranean'
+        },
+        {
+          id: 'fallback-indian-1',
+          title: `Indian ${ingredientList.join(' and ')} Curry`,
+          readyInMinutes: 35,
+          servings: 2,
+          usedIngredients: ingredientList.map(ing => ({ name: ing })),
+          missedIngredients: [],
+          sourceUrl: '#',
+          cuisine: 'Indian'
+        }
+      ];
+      
+      return res.json({
+        success: true,
+        recipes: fallbackRecipes,
+        count: fallbackRecipes.length,
+        fallback: true,
+        message: 'Using fallback recipes due to API quota limit',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
     res.status(500).json({
       success: false,
       error: 'Failed to fetch recipes',
