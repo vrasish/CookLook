@@ -334,10 +334,23 @@
         throw new Error(data.error || 'Backend analysis failed');
       }
       
-      const result = data.detectedIngredients || [data.detectedIngredient];
+      // Prioritize detectedIngredients array over single detectedIngredient
+      let result;
+      if (data.detectedIngredients && Array.isArray(data.detectedIngredients) && data.detectedIngredients.length > 0) {
+        result = data.detectedIngredients;
+        console.log("✅ Using detectedIngredients array:", result);
+      } else if (data.detectedIngredient) {
+        result = [data.detectedIngredient];
+        console.log("✅ Using single detectedIngredient:", result);
+      } else {
+        result = [];
+        console.log("⚠️ No ingredients detected");
+      }
+      
       console.log("✅ Backend detection successful:", result);
       console.log("✅ Final result type:", typeof result);
       console.log("✅ Final result length:", result ? result.length : 'null/undefined');
+      console.log("✅ Multi-ingredient detection:", result.length > 1 ? "YES" : "NO");
       return result;
     }
 
