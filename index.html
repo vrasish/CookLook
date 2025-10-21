@@ -609,7 +609,8 @@
               missedIngredients: [],
               sourceUrl: '#',
               cuisine: 'American',
-              youtubeSearch: `${ingredients.join(' ')} stir fry recipe`
+              youtubeSearch: `${ingredients.join(' ')} stir fry recipe`,
+              description: `Quick and easy stir-fry with your fresh ${ingredients.join(' and ')}`
             },
             {
               id: 'fallback-mexican-1',
@@ -620,7 +621,8 @@
               missedIngredients: [],
               sourceUrl: '#',
               cuisine: 'Mexican',
-              youtubeSearch: `${ingredients.join(' ')} taco recipe`
+              youtubeSearch: `${ingredients.join(' ')} taco recipe`,
+              description: `Flavorful tacos featuring your ${ingredients.join(' and ')}`
             },
             {
               id: 'fallback-mediterranean-1',
@@ -631,7 +633,8 @@
               missedIngredients: [],
               sourceUrl: '#',
               cuisine: 'Mediterranean',
-              youtubeSearch: `${ingredients.join(' ')} salad recipe`
+              youtubeSearch: `${ingredients.join(' ')} salad recipe`,
+              description: `Fresh and healthy salad with ${ingredients.join(' and ')}`
             },
             {
               id: 'fallback-indian-1',
@@ -642,41 +645,15 @@
               missedIngredients: [],
               sourceUrl: '#',
               cuisine: 'Indian',
-              youtubeSearch: `${ingredients.join(' ')} curry recipe`
+              youtubeSearch: `${ingredients.join(' ')} curry recipe`,
+              description: `Aromatic curry with your ${ingredients.join(' and ')}`
             }
           ];
           
-          try {
-            console.log("🔗 Calling backend recipes API...");
-            const response = await fetch(`${API_BASE_URL}/api/recipes?ingredients=${ingredients.join(',')}`);
-            
-            if (!response.ok) {
-              throw new Error(`Backend recipes API error: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            console.log("📊 Backend recipes response:", data);
-            
-            if (!data.success) {
-              throw new Error(data.error || 'Backend recipes failed');
-            }
-            
-            const recipes = data.recipes || [];
-            console.log("📋 Backend recipes:", recipes);
-            
-            if (recipes.length === 0) {
-              console.log("🎯 No recipes found from backend, using fallback");
-              displayRecipes(fallbackRecipes);
-              return;
-            }
-            
-            displayRecipes(recipes);
-            
-          } catch (error) {
-            console.error("❌ Error fetching recipes from backend:", error);
-            console.log("🎯 Using fallback recipes due to error");
-            displayRecipes(fallbackRecipes);
-          }
+          // Skip Spoonacular API to avoid quota issues - use enhanced fallback recipes
+          console.log("🎯 Using enhanced fallback recipes (no API quota issues)");
+          console.log("📋 Fallback recipes:", fallbackRecipes);
+          displayRecipes(fallbackRecipes);
         }
 
         // ✅ Show detected ingredients in UI
