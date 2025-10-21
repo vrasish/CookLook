@@ -334,6 +334,11 @@
         throw new Error(data.error || 'Backend analysis failed');
       }
       
+      console.log("🔍 Raw data.detectedIngredients:", data.detectedIngredients);
+      console.log("🔍 Raw data.detectedIngredient:", data.detectedIngredient);
+      console.log("🔍 Is detectedIngredients an array?", Array.isArray(data.detectedIngredients));
+      console.log("🔍 detectedIngredients length:", data.detectedIngredients ? data.detectedIngredients.length : 'null/undefined');
+      
       // Prioritize detectedIngredients array over single detectedIngredient
       let result;
       if (data.detectedIngredients && Array.isArray(data.detectedIngredients) && data.detectedIngredients.length > 0) {
