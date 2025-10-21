@@ -268,8 +268,12 @@
         console.log("🤖 Using secure backend API for accurate image recognition");
         const detectedIngredients = await analyzeWithBackend(file);
         console.log("🔍 Backend returned:", detectedIngredients);
+        console.log("🔍 Backend result type:", typeof detectedIngredients);
+        console.log("🔍 Backend result length:", detectedIngredients ? detectedIngredients.length : 'null/undefined');
+        
         if (detectedIngredients && detectedIngredients.length > 0) {
           console.log("🎯 Backend Detection Result:", detectedIngredients);
+          console.log("🎯 Multi-ingredient detection working:", detectedIngredients.length > 1 ? "YES" : "NO");
           showDetectedIngredients(detectedIngredients);
           getRecipes(detectedIngredients);
           return;
@@ -279,6 +283,7 @@
       } catch (error) {
         console.error("❌ Backend API failed, falling back to color analysis:", error);
         console.error("❌ Error details:", error.message);
+        console.error("❌ This means multi-ingredient detection will NOT work - only single ingredient fallback");
       }
       
       // Fallback to color-based detection
@@ -298,14 +303,20 @@
     // ✅ Secure Backend API Analysis
     async function analyzeWithBackend(file) {
       console.log("🤖 Calling secure backend API...");
+      console.log("🤖 File details:", { name: file.name, size: file.size, type: file.type });
       
       const formData = new FormData();
       formData.append('image', file);
+      
+      console.log("🤖 Sending request to:", `${API_BASE_URL}/api/analyze-image`);
       
       const response = await fetch(`${API_BASE_URL}/api/analyze-image`, {
         method: 'POST',
         body: formData
       });
+      
+      console.log("🤖 Response status:", response.status);
+      console.log("🤖 Response ok:", response.ok);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
@@ -315,13 +326,19 @@
       
       const data = await response.json();
       console.log("📊 Backend API response:", data);
+      console.log("📊 Response success:", data.success);
+      console.log("📊 Detected ingredients:", data.detectedIngredients);
+      console.log("📊 Detected ingredient (single):", data.detectedIngredient);
       
       if (!data.success) {
         throw new Error(data.error || 'Backend analysis failed');
       }
       
-      console.log("✅ Backend detection successful:", data.detectedIngredients || [data.detectedIngredient]);
-      return data.detectedIngredients || [data.detectedIngredient];
+      const result = data.detectedIngredients || [data.detectedIngredient];
+      console.log("✅ Backend detection successful:", result);
+      console.log("✅ Final result type:", typeof result);
+      console.log("✅ Final result length:", result ? result.length : 'null/undefined');
+      return result;
     }
 
 
