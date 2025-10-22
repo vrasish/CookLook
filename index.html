@@ -672,7 +672,16 @@
           
           try {
             console.log("🔗 Calling backend recipes API...");
-            const response = await fetch(`${API_BASE_URL}/api/recipes?ingredients=${ingredients.join(',')}`);
+            
+            // Add timeout to prevent hanging
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+            
+            const response = await fetch(`${API_BASE_URL}/api/recipes?ingredients=${ingredients.join(',')}`, {
+              signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
             
             if (!response.ok) {
               throw new Error(`Backend recipes API error: ${response.status}`);
@@ -698,7 +707,11 @@
             
           } catch (error) {
             console.error("❌ Error fetching recipes from backend:", error);
-            console.log("🎯 Using fallback recipes due to error");
+            if (error.name === 'AbortError') {
+              console.log("⏰ Recipe API request timed out, using fallback recipes");
+            } else {
+              console.log("🎯 Using fallback recipes due to error");
+            }
             displayRecipes(fallbackRecipes);
           }
         }
