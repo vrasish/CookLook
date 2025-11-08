@@ -783,7 +783,8 @@
         }
 
         function getRatings() {
-          const ratingsJson = localStorage.getItem('recipeRatings');
+          // Use sessionStorage so each person gets their own ratings
+          const ratingsJson = sessionStorage.getItem('recipeRatings');
           return ratingsJson ? JSON.parse(ratingsJson) : {};
         }
 
@@ -796,7 +797,8 @@
           ratings[recipeId].total += rating;
           ratings[recipeId].count += 1;
           ratings[recipeId].average = ratings[recipeId].total / ratings[recipeId].count;
-          localStorage.setItem('recipeRatings', JSON.stringify(ratings));
+          // Use sessionStorage so ratings are unique per person/session
+          sessionStorage.setItem('recipeRatings', JSON.stringify(ratings));
           return ratings[recipeId];
         }
 
@@ -1039,6 +1041,7 @@
           console.log("🤖 AI-powered image recognition with OpenAI Vision API");
           console.log("🔧 Fallback to color detection if API unavailable");
           console.log("⭐ Rating system enabled - Rate recipes to see popular dishes!");
+          console.log("👤 Ratings are session-based - Each person gets their own ratings");
           
           // Backend API configuration check
           setTimeout(() => {
