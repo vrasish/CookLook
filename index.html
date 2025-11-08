@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="version" content="v4.0-rating-system-1737120000">
+    <meta name="version" content="v5.0-voting-system-1737200000">
     <title>CookLook - Scan Your Fridge, Cook Great Meals</title>
     <meta name="msapplication-TileImage" content="icon-192.png">
     <meta name="msapplication-TileColor" content="#f9b234">
@@ -81,7 +81,7 @@
                 <p>• Make sure you're using HTTPS (not HTTP)</p>
                 <p>• Grant camera permission when prompted</p>
                 <p>• Try the "Upload Photo" button if camera doesn't work</p>
-            </div>
+      </div>
             
             <!-- Backend Setup Tips -->
             <div class="api-setup-tips" id="apiSetupTips" style="display: none;">
@@ -95,11 +95,11 @@
             
             <!-- Popular Dishes on Home Page -->
             <div class="home-popular-dishes">
-                <h3>⭐ Popular Dishes (4+ Stars)</h3>
+                <h3>🔥 Top 5 Popular Dishes</h3>
                 <div id="homePopularDishes" class="popular-dishes-list">
-                    <p class="no-ratings">No highly-rated dishes yet. Rate some recipes with 4+ stars to see them here!</p>
+                    <p class="no-ratings">No votes yet. Vote on recipes to see popular dishes!</p>
                 </div>
-            </div>
+      </div>
     </div>
   </section>
 
@@ -114,19 +114,19 @@
     <section id="results" class="results-section" style="display: none;">
         <div class="results-layout">
             <div class="results-main">
-                <h2>🍽️ Here's what we found:</h2>
-                <div id="ingredientsList" class="ingredients-detected"></div>
-                <div id="recipesContainer" class="recipes-container"></div>
-                <button id="scanAgainBtn" class="scan-btn">🔄 Scan Again</button>
+        <h2>🍽️ Here's what we found:</h2>
+        <div id="ingredientsList" class="ingredients-detected"></div>
+        <div id="recipesContainer" class="recipes-container"></div>
+        <button id="scanAgainBtn" class="scan-btn">🔄 Scan Again</button>
             </div>
             <aside class="popular-sidebar">
-                <h3>⭐ Popular Dishes (4+ Stars)</h3>
+                <h3>🔥 Top 5 Popular Dishes</h3>
                 <div id="popularDishes" class="popular-dishes-list">
-                    <p class="no-ratings">No highly-rated dishes yet. Rate some recipes with 4+ stars to see them here!</p>
+                    <p class="no-ratings">No votes yet. Vote on recipes to see popular dishes!</p>
                 </div>
             </aside>
         </div>
-    </section>
+  </section>
 
     <script>
         // ✅ Backend API Configuration
@@ -258,14 +258,14 @@
           console.log("🔄 resultsSection element:", resultsSection);
           
           if (loadingSection) {
-            loadingSection.style.display = 'block';
+          loadingSection.style.display = 'block';
             console.log("✅ Loading section displayed");
           } else {
             console.error("❌ Loading section element not found!");
           }
           
           if (resultsSection) {
-            resultsSection.style.display = 'none';
+          resultsSection.style.display = 'none';
             console.log("✅ Results section hidden");
           } else {
             console.error("❌ Results section element not found!");
@@ -384,20 +384,20 @@
     async function analyzeWithColorDetection(file) {
       
       // Show progress indicator (use global loadingSection variable)
-        if (loadingSection) {
-          loadingSection.innerHTML = `
-            <div class="spinner"></div>
+      if (loadingSection) {
+        loadingSection.innerHTML = `
+          <div class="spinner"></div>
             <h2>🤖 AI Analyzing your ingredients...</h2>
             <p>Our secure backend AI is identifying what's in your fridge</p>
-            <p style="color: #4caf50; font-size: 14px; margin-top: 20px;">
+          <p style="color: #4caf50; font-size: 14px; margin-top: 20px;">
               🎯 Powered by OpenAI Vision API via secure backend
-            </p>
-          `;
-        }
+          </p>
+        `;
+      }
       
       // Use color analysis immediately for perfect detection
       return new Promise((resolve, reject) => {
-        setTimeout(() => {
+      setTimeout(() => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         const img = new Image();
@@ -610,7 +610,7 @@
         };
         
         img.src = URL.createObjectURL(file);
-        }, 1000); // 1 second delay to show loading
+      }, 1000); // 1 second delay to show loading
       });
     }
 
@@ -717,8 +717,8 @@
             
             if (recipes.length === 0) {
               console.log("🎯 No recipes found from backend, using fallback");
-              displayRecipes(fallbackRecipes);
-              return;
+            displayRecipes(fallbackRecipes);
+            return;
             }
             
             displayRecipes(recipes);
@@ -777,75 +777,75 @@
           return flags[cuisine] || '🌍';
         }
 
-        // ✅ Rating System Functions
+        // ✅ Voting System Functions (Thumbs Up/Down)
         function getRecipeId(recipe) {
           return recipe.id || `recipe-${recipe.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
         }
 
-        function getRatings() {
-          // Use sessionStorage so each person gets their own ratings
-          const ratingsJson = sessionStorage.getItem('recipeRatings');
-          return ratingsJson ? JSON.parse(ratingsJson) : {};
+        function getVotes() {
+          // Use localStorage to store votes across all users
+          const votesJson = localStorage.getItem('recipeVotes');
+          return votesJson ? JSON.parse(votesJson) : {};
         }
 
-        function saveRating(recipeId, rating) {
-          const ratings = getRatings();
-          if (!ratings[recipeId]) {
-            ratings[recipeId] = { total: 0, count: 0, ratings: [] };
-          }
-          ratings[recipeId].ratings.push(rating);
-          ratings[recipeId].total += rating;
-          ratings[recipeId].count += 1;
-          ratings[recipeId].average = ratings[recipeId].total / ratings[recipeId].count;
-          // Use sessionStorage so ratings are unique per person/session
-          sessionStorage.setItem('recipeRatings', JSON.stringify(ratings));
-          return ratings[recipeId];
-        }
-
-        function getRecipeRating(recipeId) {
-          const ratings = getRatings();
-          return ratings[recipeId] || null;
-        }
-
-        function renderRatingStars(recipeId, currentRating = 0, interactive = true) {
-          const recipeRating = getRecipeRating(recipeId);
-          const averageRating = recipeRating ? recipeRating.average.toFixed(1) : '0.0';
-          const ratingCount = recipeRating ? recipeRating.count : 0;
-          
-          let starsHtml = '<div class="rating-container">';
-          starsHtml += '<div class="rating-stars">';
-          
-          for (let i = 1; i <= 5; i++) {
-            const starClass = i <= currentRating ? 'star filled' : 'star';
-            const clickHandler = interactive ? `onclick="rateRecipe('${recipeId}', ${i})"` : '';
-            starsHtml += `<span class="${starClass}" ${clickHandler} data-rating="${i}">⭐</span>`;
+        function saveVote(recipeId, voteType) {
+          const votes = getVotes();
+          if (!votes[recipeId]) {
+            votes[recipeId] = { upvotes: 0, downvotes: 0 };
           }
           
-          starsHtml += '</div>';
-          starsHtml += `<div class="rating-info">`;
-          starsHtml += `<span class="rating-average">${averageRating}</span>`;
-          starsHtml += `<span class="rating-count">(${ratingCount} ${ratingCount === 1 ? 'rating' : 'ratings'})</span>`;
-          starsHtml += `</div>`;
-          starsHtml += '</div>';
+          // Increment the vote type
+          if (voteType === 'up') {
+            votes[recipeId].upvotes += 1;
+          } else if (voteType === 'down') {
+            votes[recipeId].downvotes += 1;
+          }
           
-          return starsHtml;
+          // Store in localStorage (shared across all users)
+          localStorage.setItem('recipeVotes', JSON.stringify(votes));
+          return votes[recipeId];
         }
 
-        function rateRecipe(recipeId, rating) {
-          console.log(`⭐ Rating recipe ${recipeId} with ${rating} stars`);
-          const recipeRating = saveRating(recipeId, rating);
+        function getRecipeVotes(recipeId) {
+          const votes = getVotes();
+          return votes[recipeId] || { upvotes: 0, downvotes: 0 };
+        }
+
+        function renderVoteButtons(recipeId) {
+          const votes = getRecipeVotes(recipeId);
+          const upvotes = votes.upvotes || 0;
+          const downvotes = votes.downvotes || 0;
+          const netVotes = upvotes - downvotes;
           
-          // Update the rating display for this recipe with new average
+          let voteHtml = '<div class="vote-container">';
+          voteHtml += '<div class="vote-buttons">';
+          voteHtml += `<button class="vote-btn thumbs-up" onclick="voteRecipe('${recipeId}', 'up')" title="Good recipe!">👍</button>`;
+          voteHtml += `<button class="vote-btn thumbs-down" onclick="voteRecipe('${recipeId}', 'down')" title="Not good">👎</button>`;
+          voteHtml += '</div>';
+          voteHtml += `<div class="vote-info">`;
+          voteHtml += `<span class="vote-count upvotes">👍 ${upvotes}</span>`;
+          voteHtml += `<span class="vote-count downvotes">👎 ${downvotes}</span>`;
+          voteHtml += `<span class="net-votes">Net: ${netVotes >= 0 ? '+' : ''}${netVotes}</span>`;
+          voteHtml += `</div>`;
+          voteHtml += '</div>';
+          
+          return voteHtml;
+        }
+
+        function voteRecipe(recipeId, voteType) {
+          console.log(`👍👎 Voting recipe ${recipeId} with ${voteType === 'up' ? 'thumbs up' : 'thumbs down'}`);
+          const recipeVotes = saveVote(recipeId, voteType);
+          
+          // Update the vote display for this recipe
           const recipeCard = document.querySelector(`[data-recipe-id="${recipeId}"]`);
           if (recipeCard) {
-            const ratingContainer = recipeCard.querySelector('.rating-container');
-            if (ratingContainer) {
-              const newAverage = Math.round(recipeRating.average);
-              ratingContainer.outerHTML = renderRatingStars(recipeId, newAverage, true);
+            const voteContainer = recipeCard.querySelector('.vote-container');
+            if (voteContainer) {
+              voteContainer.outerHTML = renderVoteButtons(recipeId);
             }
           }
           
-          // Update popular dishes sidebar
+          // Update popular dishes
           updatePopularDishes();
         }
 
@@ -853,47 +853,56 @@
           const popularDishesContainer = document.getElementById('popularDishes');
           const homePopularDishesContainer = document.getElementById('homePopularDishes');
           
-          const ratings = getRatings();
+          const votes = getVotes();
           const recipeTitles = {};
           
-          // Get all recipe titles from localStorage (we'll store them when displaying)
+          // Get all recipe titles from localStorage
           const storedRecipes = localStorage.getItem('recipeTitles');
           if (storedRecipes) {
             Object.assign(recipeTitles, JSON.parse(storedRecipes));
           }
           
-          // Convert ratings to array, filter for 4+ stars, and sort by average rating
-          const popularRecipes = Object.entries(ratings)
-            .map(([recipeId, ratingData]) => ({
-              id: recipeId,
-              title: recipeTitles[recipeId] || recipeId.replace(/recipe-|fallback-/g, '').replace(/-/g, ' '),
-              average: ratingData.average,
-              count: ratingData.count
-            }))
-            .filter(recipe => recipe.count > 0 && recipe.average >= 4.0) // Only show 4+ star dishes
-            .sort((a, b) => {
-              // Sort by average rating (descending), then by count (descending)
-              if (b.average !== a.average) {
-                return b.average - a.average;
-              }
-              return b.count - a.count;
+          // Convert votes to array, calculate net votes, and sort
+          const popularRecipes = Object.entries(votes)
+            .map(([recipeId, voteData]) => {
+              const upvotes = voteData.upvotes || 0;
+              const downvotes = voteData.downvotes || 0;
+              const netVotes = upvotes - downvotes;
+              return {
+                id: recipeId,
+                title: recipeTitles[recipeId] || recipeId.replace(/recipe-|fallback-/g, '').replace(/-/g, ' '),
+                upvotes: upvotes,
+                downvotes: downvotes,
+                netVotes: netVotes,
+                totalVotes: upvotes + downvotes
+              };
             })
-            .slice(0, 10); // Top 10 popular dishes
+            .filter(recipe => recipe.totalVotes > 0) // Only show recipes with votes
+            .sort((a, b) => {
+              // Sort by net votes (descending), then by total votes (descending)
+              if (b.netVotes !== a.netVotes) {
+                return b.netVotes - a.netVotes;
+              }
+              return b.totalVotes - a.totalVotes;
+            })
+            .slice(0, 5); // Top 5 popular dishes
           
-          const noRatingsMessage = '<p class="no-ratings">No highly-rated dishes yet. Rate some recipes with 4+ stars to see them here!</p>';
+          const noVotesMessage = '<p class="no-ratings">No votes yet. Vote on recipes to see popular dishes!</p>';
           
           // Update sidebar (results page)
           if (popularDishesContainer) {
             if (popularRecipes.length === 0) {
-              popularDishesContainer.innerHTML = noRatingsMessage;
+              popularDishesContainer.innerHTML = noVotesMessage;
             } else {
               popularDishesContainer.innerHTML = popularRecipes.map((recipe, index) => `
                 <div class="popular-dish-item">
                   <div class="popular-dish-rank">#${index + 1}</div>
                   <div class="popular-dish-info">
                     <div class="popular-dish-title">${recipe.title}</div>
-                    <div class="popular-dish-rating">
-                      ${renderRatingStars(recipe.id, Math.round(recipe.average), false)}
+                    <div class="popular-dish-votes">
+                      <span class="vote-badge upvotes">👍 ${recipe.upvotes}</span>
+                      <span class="vote-badge downvotes">👎 ${recipe.downvotes}</span>
+                      <span class="vote-badge net">Net: ${recipe.netVotes >= 0 ? '+' : ''}${recipe.netVotes}</span>
                     </div>
                   </div>
                 </div>
@@ -904,15 +913,17 @@
           // Update home page popular dishes
           if (homePopularDishesContainer) {
             if (popularRecipes.length === 0) {
-              homePopularDishesContainer.innerHTML = noRatingsMessage;
+              homePopularDishesContainer.innerHTML = noVotesMessage;
             } else {
               homePopularDishesContainer.innerHTML = popularRecipes.map((recipe, index) => `
                 <div class="popular-dish-item">
                   <div class="popular-dish-rank">#${index + 1}</div>
                   <div class="popular-dish-info">
                     <div class="popular-dish-title">${recipe.title}</div>
-                    <div class="popular-dish-rating">
-                      ${renderRatingStars(recipe.id, Math.round(recipe.average), false)}
+                    <div class="popular-dish-votes">
+                      <span class="vote-badge upvotes">👍 ${recipe.upvotes}</span>
+                      <span class="vote-badge downvotes">👎 ${recipe.downvotes}</span>
+                      <span class="vote-badge net">Net: ${recipe.netVotes >= 0 ? '+' : ''}${recipe.netVotes}</span>
                     </div>
                   </div>
                 </div>
@@ -938,8 +949,6 @@
               <div class="recipes-grid">
                 ${recipes.map(recipe => {
                   const recipeId = getRecipeId(recipe);
-                  const recipeRating = getRecipeRating(recipeId);
-                  const averageRating = recipeRating ? Math.round(recipeRating.average) : 0;
                   
                   // Create more specific YouTube search based on detected ingredients
                   let youtubeSearchQuery;
@@ -971,15 +980,15 @@
                         <span class="recipe-time">⏱️ ${recipe.readyInMinutes || 'N/A'} min</span>
                         <span class="recipe-servings">👥 ${recipe.servings || 'N/A'} servings</span>
                       </div>
-                      ${renderRatingStars(recipeId, averageRating, true)}
+                      ${renderVoteButtons(recipeId)}
                       <div class="recipe-ingredients">
                         <strong>Made with your ingredients:</strong>
                         <div class="used-ingredients">
                           ${recipe.usedIngredients ? recipe.usedIngredients.map(ing => 
                             `<span class="used-ingredient">${ing.name}</span>`
                           ).join('') : 'All available ingredients!'}
-                        </div>
-                      </div>
+      </div>
+      </div>
                       <div class="recipe-links">
                         ${recipe.sourceUrl && recipe.sourceUrl !== '#' ? 
                           `<a href="${recipe.sourceUrl}" target="_blank" class="recipe-link">
@@ -990,8 +999,8 @@
                         <a href="${youtubeSearchUrl}" target="_blank" class="youtube-link">
                           🎥 Watch Video Tutorial
                         </a>
-                      </div>
-                    </div>
+      </div>
+    </div>
                   `;
                 }).join('')}
               </div>
@@ -1032,16 +1041,16 @@
           });
         }
 
-        // ✅ Make rateRecipe globally accessible
-        window.rateRecipe = rateRecipe;
+        // ✅ Make voteRecipe globally accessible
+        window.voteRecipe = voteRecipe;
 
         // ✅ DOM Content Loaded
         document.addEventListener('DOMContentLoaded', () => {
-          console.log("🍽️ CookLook app loaded - Version v4.0-rating-system");
+          console.log("🍽️ CookLook app loaded - Version v5.0-voting-system");
           console.log("🤖 AI-powered image recognition with OpenAI Vision API");
           console.log("🔧 Fallback to color detection if API unavailable");
-          console.log("⭐ Rating system enabled - Rate recipes to see popular dishes!");
-          console.log("👤 Ratings are session-based - Each person gets their own ratings");
+          console.log("👍👎 Voting system enabled - Vote on recipes to see popular dishes!");
+          console.log("🔥 Top 5 popular dishes based on upvotes/downvotes");
           
           // Backend API configuration check
           setTimeout(() => {
