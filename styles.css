@@ -368,18 +368,6 @@ footer {
     width: 200px;
   }
   
-  .results-layout {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  
-  .popular-sidebar {
-    position: static;
-    max-height: none;
-    order: -1; /* Show sidebar first on mobile */
-  }
-  
-  .popular-sidebar h3,
   .home-popular-dishes h3 {
     font-size: 1.1rem;
   }
@@ -491,28 +479,6 @@ footer {
   text-align: center;
 }
 
-.results-layout {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 30px;
-  max-width: 1400px;
-  margin: 0 auto;
-  align-items: start;
-}
-
-.results-main {
-  min-width: 0; /* Prevents grid overflow */
-}
-
-.popular-sidebar {
-  background-color: #555;
-  padding: 20px;
-  border-radius: 15px;
-  position: sticky;
-  top: 20px;
-  max-height: calc(100vh - 40px);
-  overflow-y: auto;
-}
 
 .popular-dishes-header {
   display: flex;

@@ -115,24 +115,11 @@
 
     <!-- Results Section -->
     <section id="results" class="results-section" style="display: none;">
-        <div class="results-layout">
-            <div class="results-main">
         <h2>🍽️ Here's what we found:</h2>
         <div id="ingredientsList" class="ingredients-detected"></div>
         <div id="recipesContainer" class="recipes-container"></div>
         <button id="scanAgainBtn" class="scan-btn">🔄 Scan Again</button>
-            </div>
-            <aside class="popular-sidebar">
-                <div class="popular-dishes-header">
-                    <h3>🔥 Top 5 Popular Dishes</h3>
-                    <button id="clearVotesSidebar" class="clear-votes-btn" onclick="clearAllVotes()" title="Clear all votes">🗑️ Clear Votes</button>
-                </div>
-                <div id="popularDishes" class="popular-dishes-list">
-                    <p class="no-ratings">No votes yet. Vote on recipes to see popular dishes!</p>
-                </div>
-            </aside>
-        </div>
-  </section>
+    </section>
 
     <script>
         // ✅ Backend API Configuration
@@ -856,8 +843,9 @@
         }
 
         function updatePopularDishes() {
-          const popularDishesContainer = document.getElementById('popularDishes');
           const homePopularDishesContainer = document.getElementById('homePopularDishes');
+          
+          if (!homePopularDishesContainer) return;
           
           const votes = getVotes();
           const recipeTitles = {};
@@ -895,46 +883,23 @@
           
           const noVotesMessage = '<p class="no-ratings">No votes yet. Vote on recipes to see popular dishes!</p>';
           
-          // Update sidebar (results page)
-          if (popularDishesContainer) {
-            if (popularRecipes.length === 0) {
-              popularDishesContainer.innerHTML = noVotesMessage;
-            } else {
-              popularDishesContainer.innerHTML = popularRecipes.map((recipe, index) => `
-                <div class="popular-dish-item">
-                  <div class="popular-dish-rank">#${index + 1}</div>
-                  <div class="popular-dish-info">
-                    <div class="popular-dish-title">${recipe.title}</div>
-                    <div class="popular-dish-votes">
-                      <span class="vote-badge upvotes">👍 ${recipe.upvotes}</span>
-                      <span class="vote-badge downvotes">👎 ${recipe.downvotes}</span>
-                      <span class="vote-badge net">Net: ${recipe.netVotes >= 0 ? '+' : ''}${recipe.netVotes}</span>
-                    </div>
-                  </div>
-                </div>
-              `).join('');
-            }
-          }
-          
           // Update home page popular dishes
-          if (homePopularDishesContainer) {
-            if (popularRecipes.length === 0) {
-              homePopularDishesContainer.innerHTML = noVotesMessage;
-            } else {
-              homePopularDishesContainer.innerHTML = popularRecipes.map((recipe, index) => `
-                <div class="popular-dish-item">
-                  <div class="popular-dish-rank">#${index + 1}</div>
-                  <div class="popular-dish-info">
-                    <div class="popular-dish-title">${recipe.title}</div>
-                    <div class="popular-dish-votes">
-                      <span class="vote-badge upvotes">👍 ${recipe.upvotes}</span>
-                      <span class="vote-badge downvotes">👎 ${recipe.downvotes}</span>
-                      <span class="vote-badge net">Net: ${recipe.netVotes >= 0 ? '+' : ''}${recipe.netVotes}</span>
-                    </div>
+          if (popularRecipes.length === 0) {
+            homePopularDishesContainer.innerHTML = noVotesMessage;
+          } else {
+            homePopularDishesContainer.innerHTML = popularRecipes.map((recipe, index) => `
+              <div class="popular-dish-item">
+                <div class="popular-dish-rank">#${index + 1}</div>
+                <div class="popular-dish-info">
+                  <div class="popular-dish-title">${recipe.title}</div>
+                  <div class="popular-dish-votes">
+                    <span class="vote-badge upvotes">👍 ${recipe.upvotes}</span>
+                    <span class="vote-badge downvotes">👎 ${recipe.downvotes}</span>
+                    <span class="vote-badge net">Net: ${recipe.netVotes >= 0 ? '+' : ''}${recipe.netVotes}</span>
                   </div>
                 </div>
-              `).join('');
-            }
+              </div>
+            `).join('');
           }
         }
 
