@@ -92,6 +92,14 @@
                 <p>• Your API keys will be completely secure on the backend</p>
                 <p style="color: #4caf50; font-size: 14px; margin-top: 10px;"><strong>✅ Secure:</strong> API keys never exposed to users!</p>
             </div>
+            
+            <!-- Popular Dishes on Home Page -->
+            <div class="home-popular-dishes">
+                <h3>⭐ Popular Dishes (4+ Stars)</h3>
+                <div id="homePopularDishes" class="popular-dishes-list">
+                    <p class="no-ratings">No highly-rated dishes yet. Rate some recipes with 4+ stars to see them here!</p>
+                </div>
+            </div>
     </div>
   </section>
 
@@ -112,9 +120,9 @@
                 <button id="scanAgainBtn" class="scan-btn">🔄 Scan Again</button>
             </div>
             <aside class="popular-sidebar">
-                <h3>⭐ Popular Dishes</h3>
+                <h3>⭐ Popular Dishes (4+ Stars)</h3>
                 <div id="popularDishes" class="popular-dishes-list">
-                    <p class="no-ratings">No ratings yet. Rate some recipes to see popular dishes!</p>
+                    <p class="no-ratings">No highly-rated dishes yet. Rate some recipes with 4+ stars to see them here!</p>
                 </div>
             </aside>
         </div>
@@ -841,7 +849,7 @@
 
         function updatePopularDishes() {
           const popularDishesContainer = document.getElementById('popularDishes');
-          if (!popularDishesContainer) return;
+          const homePopularDishesContainer = document.getElementById('homePopularDishes');
           
           const ratings = getRatings();
           const recipeTitles = {};
@@ -852,7 +860,7 @@
             Object.assign(recipeTitles, JSON.parse(storedRecipes));
           }
           
-          // Convert ratings to array and sort by average rating
+          // Convert ratings to array, filter for 4+ stars, and sort by average rating
           const popularRecipes = Object.entries(ratings)
             .map(([recipeId, ratingData]) => ({
               id: recipeId,
@@ -860,7 +868,7 @@
               average: ratingData.average,
               count: ratingData.count
             }))
-            .filter(recipe => recipe.count > 0)
+            .filter(recipe => recipe.count > 0 && recipe.average >= 4.0) // Only show 4+ star dishes
             .sort((a, b) => {
               // Sort by average rating (descending), then by count (descending)
               if (b.average !== a.average) {
@@ -870,22 +878,45 @@
             })
             .slice(0, 10); // Top 10 popular dishes
           
-          if (popularRecipes.length === 0) {
-            popularDishesContainer.innerHTML = '<p class="no-ratings">No ratings yet. Rate some recipes to see popular dishes!</p>';
-            return;
+          const noRatingsMessage = '<p class="no-ratings">No highly-rated dishes yet. Rate some recipes with 4+ stars to see them here!</p>';
+          
+          // Update sidebar (results page)
+          if (popularDishesContainer) {
+            if (popularRecipes.length === 0) {
+              popularDishesContainer.innerHTML = noRatingsMessage;
+            } else {
+              popularDishesContainer.innerHTML = popularRecipes.map((recipe, index) => `
+                <div class="popular-dish-item">
+                  <div class="popular-dish-rank">#${index + 1}</div>
+                  <div class="popular-dish-info">
+                    <div class="popular-dish-title">${recipe.title}</div>
+                    <div class="popular-dish-rating">
+                      ${renderRatingStars(recipe.id, Math.round(recipe.average), false)}
+                    </div>
+                  </div>
+                </div>
+              `).join('');
+            }
           }
           
-          popularDishesContainer.innerHTML = popularRecipes.map((recipe, index) => `
-            <div class="popular-dish-item">
-              <div class="popular-dish-rank">#${index + 1}</div>
-              <div class="popular-dish-info">
-                <div class="popular-dish-title">${recipe.title}</div>
-                <div class="popular-dish-rating">
-                  ${renderRatingStars(recipe.id, Math.round(recipe.average), false)}
+          // Update home page popular dishes
+          if (homePopularDishesContainer) {
+            if (popularRecipes.length === 0) {
+              homePopularDishesContainer.innerHTML = noRatingsMessage;
+            } else {
+              homePopularDishesContainer.innerHTML = popularRecipes.map((recipe, index) => `
+                <div class="popular-dish-item">
+                  <div class="popular-dish-rank">#${index + 1}</div>
+                  <div class="popular-dish-info">
+                    <div class="popular-dish-title">${recipe.title}</div>
+                    <div class="popular-dish-rating">
+                      ${renderRatingStars(recipe.id, Math.round(recipe.average), false)}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          `).join('');
+              `).join('');
+            }
+          }
         }
 
         // ✅ Display recipes in UI - Enhanced with cuisine info and ratings

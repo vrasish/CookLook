@@ -28,6 +28,25 @@ body {
   font-size: 3rem;
   margin: 20px 0 10px;
 }
+
+.home-popular-dishes {
+  margin-top: 50px;
+  padding: 30px 20px;
+  background-color: #555;
+  border-radius: 15px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.home-popular-dishes h3 {
+  color: #f9b234;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  text-align: center;
+  border-bottom: 2px solid #f9b234;
+  padding-bottom: 10px;
+}
 .tagline {
   font-size: 1.3rem;
   margin-bottom: 25px;
@@ -374,6 +393,15 @@ footer {
   
   .rating-stars .star {
     font-size: 1.3rem;
+  }
+  
+  .home-popular-dishes {
+    margin-top: 30px;
+    padding: 20px 15px;
+  }
+  
+  .home-popular-dishes h3 {
+    font-size: 1.2rem;
   }
 }
 
