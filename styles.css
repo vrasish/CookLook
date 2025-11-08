@@ -745,11 +745,19 @@ footer {
   
   .ingredient-tag {
     font-size: 0.75rem;
-    padding: 5px 10px;
+    padding: 6px 12px;
+    margin: 2px;
+    white-space: nowrap;
+    display: inline-block;
   }
   
   .ingredient-tags {
-    gap: 6px;
+    gap: 8px;
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
   }
   
   /* Results Section */
@@ -956,7 +964,15 @@ footer {
   
   .ingredient-tag {
     font-size: 0.7rem;
-    padding: 4px 8px;
+    padding: 5px 10px;
+    margin: 2px;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  
+  .ingredient-tags {
+    gap: 6px;
+    margin-top: 6px;
   }
 }
 
@@ -1302,6 +1318,16 @@ footer {
   justify-content: center;
 }
 
+.ingredient-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 10px;
+}
+
 .ingredient-tag {
   background-color: #00b874;
   color: white;
@@ -1309,6 +1335,10 @@ footer {
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
+  word-break: keep-all;
+  flex-shrink: 0;
 }
 
 .recipes-container {
