@@ -95,11 +95,14 @@
             
             <!-- Popular Dishes on Home Page -->
             <div class="home-popular-dishes">
-                <h3>🔥 Top 5 Popular Dishes</h3>
+                <div class="popular-dishes-header">
+                    <h3>🔥 Top 5 Popular Dishes</h3>
+                    <button id="clearVotesHome" class="clear-votes-btn" onclick="clearAllVotes()" title="Clear all votes">🗑️ Clear Votes</button>
+                </div>
                 <div id="homePopularDishes" class="popular-dishes-list">
                     <p class="no-ratings">No votes yet. Vote on recipes to see popular dishes!</p>
                 </div>
-      </div>
+            </div>
     </div>
   </section>
 
@@ -120,7 +123,10 @@
         <button id="scanAgainBtn" class="scan-btn">🔄 Scan Again</button>
             </div>
             <aside class="popular-sidebar">
-                <h3>🔥 Top 5 Popular Dishes</h3>
+                <div class="popular-dishes-header">
+                    <h3>🔥 Top 5 Popular Dishes</h3>
+                    <button id="clearVotesSidebar" class="clear-votes-btn" onclick="clearAllVotes()" title="Clear all votes">🗑️ Clear Votes</button>
+                </div>
                 <div id="popularDishes" class="popular-dishes-list">
                     <p class="no-ratings">No votes yet. Vote on recipes to see popular dishes!</p>
                 </div>
@@ -1041,8 +1047,33 @@
           });
         }
 
-        // ✅ Make voteRecipe globally accessible
+        // ✅ Clear all votes function
+        function clearAllVotes() {
+          if (confirm('Are you sure you want to clear all votes? This cannot be undone.')) {
+            // Clear votes from localStorage
+            localStorage.removeItem('recipeVotes');
+            console.log('🗑️ All votes cleared');
+            
+            // Update popular dishes sections
+            updatePopularDishes();
+            
+            // Update all recipe cards to show 0 votes
+            const recipeCards = document.querySelectorAll('[data-recipe-id]');
+            recipeCards.forEach(card => {
+              const recipeId = card.getAttribute('data-recipe-id');
+              const voteContainer = card.querySelector('.vote-container');
+              if (voteContainer) {
+                voteContainer.outerHTML = renderVoteButtons(recipeId);
+              }
+            });
+            
+            alert('All votes have been cleared!');
+          }
+        }
+
+        // ✅ Make voteRecipe and clearAllVotes globally accessible
         window.voteRecipe = voteRecipe;
+        window.clearAllVotes = clearAllVotes;
 
         // ✅ DOM Content Loaded
         document.addEventListener('DOMContentLoaded', () => {

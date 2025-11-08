@@ -39,14 +39,6 @@ body {
   margin-right: auto;
 }
 
-.home-popular-dishes h3 {
-  color: #f9b234;
-  margin-bottom: 20px;
-  font-size: 1.5rem;
-  text-align: center;
-  border-bottom: 2px solid #f9b234;
-  padding-bottom: 10px;
-}
 .tagline {
   font-size: 1.3rem;
   margin-bottom: 25px;
@@ -387,8 +379,21 @@ footer {
     order: -1; /* Show sidebar first on mobile */
   }
   
-  .popular-sidebar h3 {
+  .popular-sidebar h3,
+  .home-popular-dishes h3 {
     font-size: 1.1rem;
+  }
+  
+  .popular-dishes-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .clear-votes-btn {
+    width: 100%;
+    font-size: 0.8rem;
+    padding: 6px 12px;
   }
   
   .vote-btn {
@@ -509,13 +514,44 @@ footer {
   overflow-y: auto;
 }
 
-.popular-sidebar h3 {
-  color: #f9b234;
+.popular-dishes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
-  font-size: 1.3rem;
-  text-align: center;
   border-bottom: 2px solid #f9b234;
   padding-bottom: 10px;
+}
+
+.popular-sidebar h3,
+.home-popular-dishes h3 {
+  color: #f9b234;
+  font-size: 1.3rem;
+  margin: 0;
+  flex: 1;
+}
+
+.clear-votes-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.clear-votes-btn:hover {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.clear-votes-btn:active {
+  transform: translateY(0);
 }
 
 .popular-dishes-list {
