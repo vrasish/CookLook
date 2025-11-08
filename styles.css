@@ -303,6 +303,15 @@ footer {
   margin: 30px 0;
 }
 
+/* Action Buttons Container */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  margin: 30px 0;
+}
+
 #scanBtn {
   background-color: #00b874;
   color: white;
@@ -322,23 +331,27 @@ footer {
   box-shadow: 0 6px 20px rgba(0, 184, 116, 0.4);
 }
 
-#uploadBtnMobile {
+#uploadBtn {
   background-color: #6c757d;
   color: white;
   border: none;
-  padding: 12px 25px;
-  border-radius: 25px;
-  font-size: 1rem;
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
   transition: 0.3s;
   box-shadow: 0 3px 10px rgba(108, 117, 125, 0.3);
 }
 
-#uploadBtnMobile:hover {
+#uploadBtn:hover {
   background-color: #5a6268;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+}
+
+#uploadBtnMobile {
+  display: none;
 }
 
 #preview {
@@ -347,13 +360,56 @@ footer {
   margin-top: 20px;
 }
 
-/* Responsive */
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+/* Tablet and below (768px and below) */
 @media (max-width: 768px) {
+  /* Hero Section */
+  .hero {
+    padding: 60px 15px;
+  }
+  
+  .hero h1 {
+    font-size: 2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+    padding: 0 10px;
+  }
+  
+  .logo {
+    width: 100px;
+    height: 100px;
+  }
+  
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  #scanBtn, #uploadBtn, #testBtn {
+    width: 100%;
+    max-width: 300px;
+    padding: 14px 25px;
+    font-size: 1rem;
+  }
+  
+  /* Feature Grids */
   .feature-grid, .facts-grid {
     flex-direction: column;
     align-items: center;
   }
   
+  /* Scanning Interface */
   .scanning-container {
     padding: 20px;
     margin: 20px;
@@ -362,14 +418,102 @@ footer {
   .camera-controls {
     flex-direction: column;
     align-items: center;
+    gap: 10px;
   }
   
   .camera-controls button {
-    width: 200px;
+    width: 100%;
+    max-width: 250px;
+  }
+  
+  .scan-frame {
+    width: 150px;
+    height: 150px;
+  }
+  
+  /* Results Section */
+  .results-section {
+    padding: 40px 15px;
+  }
+  
+  .results-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+  }
+  
+  /* Recipe Cards */
+  .recipes-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 0 10px;
+  }
+  
+  .recipe-card {
+    padding: 20px;
+  }
+  
+  .recipe-card h3 {
+    font-size: 1.1rem;
+  }
+  
+  .recipe-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .cuisine-badge {
+    margin-left: 0;
+    margin-top: 5px;
+  }
+  
+  .recipe-meta {
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+  
+  /* Ingredients */
+  .ingredients-detected {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .ingredient-tag {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+  
+  /* Vote Buttons */
+  .vote-btn {
+    font-size: 2.5rem;
+    min-width: 70px;
+    min-height: 70px;
+    padding: 12px 20px;
+  }
+  
+  .vote-buttons {
+    gap: 15px;
+  }
+  
+  .vote-info {
+    gap: 8px;
+    font-size: 0.85rem;
+    flex-direction: column;
+  }
+  
+  .vote-count, .net-votes {
+    font-size: 0.9rem;
+  }
+  
+  /* Popular Dishes */
+  .home-popular-dishes {
+    margin-top: 30px;
+    padding: 20px 15px;
   }
   
   .home-popular-dishes h3 {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
   
   .popular-dishes-header {
@@ -384,29 +528,213 @@ footer {
     padding: 6px 12px;
   }
   
-  .vote-btn {
-    font-size: 2.5rem;
-    min-width: 70px;
-    min-height: 70px;
-    padding: 12px 20px;
+  .popular-dish-item {
+    padding: 12px;
   }
   
-  .vote-info {
+  .popular-dish-title {
+    font-size: 0.9rem;
+  }
+  
+  .popular-dish-votes {
+    gap: 6px;
+  }
+  
+  .vote-badge {
+    font-size: 0.75rem;
+    padding: 3px 6px;
+  }
+  
+  /* Recipe Links */
+  .recipe-links {
+    flex-direction: column;
     gap: 10px;
-    font-size: 0.85rem;
   }
   
-  .net-votes {
+  .recipe-link, .youtube-link {
+    width: 100%;
+    text-align: center;
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+  
+  /* Buttons */
+  #scanAgainBtn {
+    width: 100%;
+    max-width: 300px;
+    margin-top: 20px;
+  }
+  
+  /* Typography */
+  .tagline {
+    font-size: 1.1rem;
+  }
+  
+  .problem h2, .features h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Mobile phones (480px and below) */
+@media (max-width: 480px) {
+  /* Hero Section */
+  .hero {
+    padding: 40px 10px;
+  }
+  
+  .hero h1 {
+    font-size: 1.75rem;
+    margin: 15px 0 8px;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  .logo {
+    width: 80px;
+    height: 80px;
+  }
+  
+  /* Action Buttons */
+  #scanBtn, #uploadBtn, #testBtn {
+    padding: 12px 20px;
+    font-size: 0.95rem;
+  }
+  
+  /* Recipe Cards */
+  .recipe-card {
+    padding: 15px;
+  }
+  
+  .recipe-card h3 {
     font-size: 1rem;
+    line-height: 1.2;
   }
   
+  /* Vote Buttons */
+  .vote-btn {
+    font-size: 2rem;
+    min-width: 60px;
+    min-height: 60px;
+    padding: 10px 15px;
+  }
+  
+  .vote-buttons {
+    gap: 10px;
+  }
+  
+  /* Popular Dishes */
   .home-popular-dishes {
-    margin-top: 30px;
-    padding: 20px 15px;
+    padding: 15px 10px;
   }
   
   .home-popular-dishes h3 {
+    font-size: 1.1rem;
+  }
+  
+  .popular-dish-rank {
+    width: 30px;
+    height: 30px;
+    font-size: 0.95rem;
+  }
+  
+  /* Ingredients */
+  .ingredients-detected {
+    padding: 12px;
+  }
+  
+  .ingredients-detected h3 {
+    font-size: 1rem;
+  }
+  
+  .ingredient-tag {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+  }
+  
+  /* Results Section */
+  .results-section {
+    padding: 30px 10px;
+  }
+  
+  .results-section h2 {
+    font-size: 1.3rem;
+  }
+  
+  /* Camera */
+  .scan-frame {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .camera-overlay p {
+    font-size: 0.8rem;
+    padding: 8px 15px;
+  }
+  
+  /* Loading */
+  .loading-section h2 {
     font-size: 1.2rem;
+  }
+  
+  .loading-section p {
+    font-size: 0.9rem;
+  }
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Small mobile phones (360px and below) */
+@media (max-width: 360px) {
+  .hero h1 {
+    font-size: 1.5rem;
+  }
+  
+  .logo {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .vote-btn {
+    font-size: 1.75rem;
+    min-width: 55px;
+    min-height: 55px;
+  }
+  
+  .recipe-card {
+    padding: 12px;
+  }
+  
+  .home-popular-dishes {
+    padding: 12px 8px;
+  }
+}
+
+/* Large screens (1024px and above) */
+@media (min-width: 1024px) {
+  .recipes-container {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+  
+  .home-popular-dishes {
+    max-width: 900px;
+  }
+}
+
+/* Extra large screens (1440px and above) */
+@media (min-width: 1440px) {
+  .recipes-container {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    max-width: 1400px;
+  }
+  
+  .home-popular-dishes {
+    max-width: 1000px;
   }
 }
 
