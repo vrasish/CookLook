@@ -99,16 +99,26 @@
     <section id="loading" class="loading-section" style="display: none;">
         <div class="spinner"></div>
         <h2>Analyzing your ingredients...</h2>
-        <p>Our AI is identifying what's in your fridge</p>t
+        <p>Our AI is identifying what's in your fridge</p>
   </section>
 
     <!-- Results Section -->
     <section id="results" class="results-section" style="display: none;">
-        <h2>🍽️ Here's what we found:</h2>
-        <div id="ingredientsList" class="ingredients-detected"></div>
-        <div id="recipesContainer" class="recipes-container"></div>
-        <button id="scanAgainBtn" class="scan-btn">🔄 Scan Again</button>
-  </section>
+        <div class="results-layout">
+            <div class="results-main">
+                <h2>🍽️ Here's what we found:</h2>
+                <div id="ingredientsList" class="ingredients-detected"></div>
+                <div id="recipesContainer" class="recipes-container"></div>
+                <button id="scanAgainBtn" class="scan-btn">🔄 Scan Again</button>
+            </div>
+            <aside class="popular-sidebar">
+                <h3>⭐ Popular Dishes</h3>
+                <div id="popularDishes" class="popular-dishes-list">
+                    <p class="no-ratings">No ratings yet. Rate some recipes to see popular dishes!</p>
+                </div>
+            </aside>
+        </div>
+    </section>
 
     <script>
         // ✅ Backend API Configuration
@@ -759,14 +769,145 @@
           return flags[cuisine] || '🌍';
         }
 
-        // ✅ Display recipes in UI - Enhanced with cuisine info
+        // ✅ Rating System Functions
+        function getRecipeId(recipe) {
+          return recipe.id || `recipe-${recipe.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+        }
+
+        function getRatings() {
+          const ratingsJson = localStorage.getItem('recipeRatings');
+          return ratingsJson ? JSON.parse(ratingsJson) : {};
+        }
+
+        function saveRating(recipeId, rating) {
+          const ratings = getRatings();
+          if (!ratings[recipeId]) {
+            ratings[recipeId] = { total: 0, count: 0, ratings: [] };
+          }
+          ratings[recipeId].ratings.push(rating);
+          ratings[recipeId].total += rating;
+          ratings[recipeId].count += 1;
+          ratings[recipeId].average = ratings[recipeId].total / ratings[recipeId].count;
+          localStorage.setItem('recipeRatings', JSON.stringify(ratings));
+          return ratings[recipeId];
+        }
+
+        function getRecipeRating(recipeId) {
+          const ratings = getRatings();
+          return ratings[recipeId] || null;
+        }
+
+        function renderRatingStars(recipeId, currentRating = 0, interactive = true) {
+          const recipeRating = getRecipeRating(recipeId);
+          const averageRating = recipeRating ? recipeRating.average.toFixed(1) : '0.0';
+          const ratingCount = recipeRating ? recipeRating.count : 0;
+          
+          let starsHtml = '<div class="rating-container">';
+          starsHtml += '<div class="rating-stars">';
+          
+          for (let i = 1; i <= 5; i++) {
+            const starClass = i <= currentRating ? 'star filled' : 'star';
+            const clickHandler = interactive ? `onclick="rateRecipe('${recipeId}', ${i})"` : '';
+            starsHtml += `<span class="${starClass}" ${clickHandler} data-rating="${i}">⭐</span>`;
+          }
+          
+          starsHtml += '</div>';
+          starsHtml += `<div class="rating-info">`;
+          starsHtml += `<span class="rating-average">${averageRating}</span>`;
+          starsHtml += `<span class="rating-count">(${ratingCount} ${ratingCount === 1 ? 'rating' : 'ratings'})</span>`;
+          starsHtml += `</div>`;
+          starsHtml += '</div>';
+          
+          return starsHtml;
+        }
+
+        function rateRecipe(recipeId, rating) {
+          console.log(`⭐ Rating recipe ${recipeId} with ${rating} stars`);
+          const recipeRating = saveRating(recipeId, rating);
+          
+          // Update the rating display for this recipe with new average
+          const recipeCard = document.querySelector(`[data-recipe-id="${recipeId}"]`);
+          if (recipeCard) {
+            const ratingContainer = recipeCard.querySelector('.rating-container');
+            if (ratingContainer) {
+              const newAverage = Math.round(recipeRating.average);
+              ratingContainer.outerHTML = renderRatingStars(recipeId, newAverage, true);
+            }
+          }
+          
+          // Update popular dishes sidebar
+          updatePopularDishes();
+        }
+
+        function updatePopularDishes() {
+          const popularDishesContainer = document.getElementById('popularDishes');
+          if (!popularDishesContainer) return;
+          
+          const ratings = getRatings();
+          const recipeTitles = {};
+          
+          // Get all recipe titles from localStorage (we'll store them when displaying)
+          const storedRecipes = localStorage.getItem('recipeTitles');
+          if (storedRecipes) {
+            Object.assign(recipeTitles, JSON.parse(storedRecipes));
+          }
+          
+          // Convert ratings to array and sort by average rating
+          const popularRecipes = Object.entries(ratings)
+            .map(([recipeId, ratingData]) => ({
+              id: recipeId,
+              title: recipeTitles[recipeId] || recipeId.replace(/recipe-|fallback-/g, '').replace(/-/g, ' '),
+              average: ratingData.average,
+              count: ratingData.count
+            }))
+            .filter(recipe => recipe.count > 0)
+            .sort((a, b) => {
+              // Sort by average rating (descending), then by count (descending)
+              if (b.average !== a.average) {
+                return b.average - a.average;
+              }
+              return b.count - a.count;
+            })
+            .slice(0, 10); // Top 10 popular dishes
+          
+          if (popularRecipes.length === 0) {
+            popularDishesContainer.innerHTML = '<p class="no-ratings">No ratings yet. Rate some recipes to see popular dishes!</p>';
+            return;
+          }
+          
+          popularDishesContainer.innerHTML = popularRecipes.map((recipe, index) => `
+            <div class="popular-dish-item">
+              <div class="popular-dish-rank">#${index + 1}</div>
+              <div class="popular-dish-info">
+                <div class="popular-dish-title">${recipe.title}</div>
+                <div class="popular-dish-rating">
+                  ${renderRatingStars(recipe.id, Math.round(recipe.average), false)}
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        // ✅ Display recipes in UI - Enhanced with cuisine info and ratings
         function displayRecipes(recipes) {
           const recipesContainer = document.getElementById('recipesContainer');
           if (recipesContainer) {
+            // Store recipe titles for popular dishes sidebar
+            const recipeTitles = {};
+            recipes.forEach(recipe => {
+              const recipeId = getRecipeId(recipe);
+              recipeTitles[recipeId] = recipe.title;
+            });
+            localStorage.setItem('recipeTitles', JSON.stringify(recipeTitles));
+            
             recipesContainer.innerHTML = `
               <h3>🍽️ Diverse Cuisine Recipes for you:</h3>
               <div class="recipes-grid">
                 ${recipes.map(recipe => {
+                  const recipeId = getRecipeId(recipe);
+                  const recipeRating = getRecipeRating(recipeId);
+                  const averageRating = recipeRating ? Math.round(recipeRating.average) : 0;
+                  
                   // Create more specific YouTube search based on detected ingredients
                   let youtubeSearchQuery;
                   
@@ -788,7 +929,7 @@
                   console.log(`🎥 YouTube search for "${recipe.title}": "${youtubeSearchQuery}"`);
                   
                   return `
-                    <div class="recipe-card">
+                    <div class="recipe-card" data-recipe-id="${recipeId}">
                       <div class="recipe-header">
                         <h3>${recipe.title}</h3>
                         <span class="cuisine-badge">${cuisineFlag} ${recipe.cuisine || 'International'}</span>
@@ -797,14 +938,15 @@
                         <span class="recipe-time">⏱️ ${recipe.readyInMinutes || 'N/A'} min</span>
                         <span class="recipe-servings">👥 ${recipe.servings || 'N/A'} servings</span>
                       </div>
+                      ${renderRatingStars(recipeId, averageRating, true)}
                       <div class="recipe-ingredients">
                         <strong>Made with your ingredients:</strong>
                         <div class="used-ingredients">
                           ${recipe.usedIngredients ? recipe.usedIngredients.map(ing => 
                             `<span class="used-ingredient">${ing.name}</span>`
                           ).join('') : 'All available ingredients!'}
-      </div>
-      </div>
+                        </div>
+                      </div>
                       <div class="recipe-links">
                         ${recipe.sourceUrl && recipe.sourceUrl !== '#' ? 
                           `<a href="${recipe.sourceUrl}" target="_blank" class="recipe-link">
@@ -815,13 +957,16 @@
                         <a href="${youtubeSearchUrl}" target="_blank" class="youtube-link">
                           🎥 Watch Video Tutorial
                         </a>
-      </div>
-    </div>
+                      </div>
+                    </div>
                   `;
                 }).join('')}
               </div>
             `;
           }
+          
+          // Update popular dishes sidebar
+          updatePopularDishes();
           
           // Show results
           console.log("🎯 Hiding loading section and showing results");
@@ -854,11 +999,15 @@
           });
         }
 
+        // ✅ Make rateRecipe globally accessible
+        window.rateRecipe = rateRecipe;
+
         // ✅ DOM Content Loaded
         document.addEventListener('DOMContentLoaded', () => {
           console.log("🍽️ CookLook app loaded - Version v3.9-deployment-fix");
           console.log("🤖 AI-powered image recognition with OpenAI Vision API");
           console.log("🔧 Fallback to color detection if API unavailable");
+          console.log("⭐ Rating system enabled - Rate recipes to see popular dishes!");
           
           // Backend API configuration check
           setTimeout(() => {
@@ -867,6 +1016,9 @@
             console.log("- Using secure backend for all API calls");
             console.log("- No API keys exposed in frontend");
           }, 1000);
+          
+          // Initialize popular dishes sidebar
+          updatePopularDishes();
           
           checkHTTPS();
         });
