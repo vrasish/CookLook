@@ -368,39 +368,47 @@ footer {
 @media (max-width: 768px) {
   /* Hero Section */
   .hero {
-    padding: 60px 15px;
+    padding: 50px 15px 60px;
   }
   
   .hero h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
+    margin: 15px 0 8px;
+  }
+  
+  .hero p {
+    font-size: 0.95rem;
+    margin: 6px 0;
   }
   
   .hero-subtitle {
-    font-size: 1rem;
+    font-size: 0.9rem;
     padding: 0 10px;
+    line-height: 1.5;
   }
   
   .logo {
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
   }
   
   /* Action Buttons */
   .action-buttons {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
     align-items: center;
     width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
+    max-width: 350px;
+    margin: 25px auto;
+    padding: 0 10px;
   }
   
   #scanBtn, #uploadBtn, #testBtn {
     width: 100%;
-    max-width: 300px;
+    max-width: 320px;
     padding: 14px 25px;
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
   
   /* Feature Grids */
@@ -577,141 +585,378 @@ footer {
 
 /* Mobile phones (480px and below) */
 @media (max-width: 480px) {
+  /* Base adjustments */
+  body {
+    font-size: 14px;
+  }
+  
   /* Hero Section */
   .hero {
-    padding: 40px 10px;
+    padding: 30px 10px 40px;
+    min-height: auto;
   }
   
   .hero h1 {
-    font-size: 1.75rem;
-    margin: 15px 0 8px;
+    font-size: 1.6rem;
+    margin: 12px 0 6px;
+    line-height: 1.2;
+  }
+  
+  .hero p {
+    font-size: 0.9rem;
+    margin: 8px 0;
+    padding: 0 5px;
   }
   
   .hero-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     line-height: 1.4;
+    padding: 0 5px;
   }
   
   .logo {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
+    margin-bottom: 10px;
   }
   
   /* Action Buttons */
+  .action-buttons {
+    margin: 20px 0;
+    gap: 12px;
+    padding: 0 10px;
+  }
+  
   #scanBtn, #uploadBtn, #testBtn {
-    padding: 12px 20px;
-    font-size: 0.95rem;
+    padding: 14px 20px;
+    font-size: 0.9rem;
+    width: 100%;
+    max-width: 280px;
+    margin: 0;
   }
   
   /* Recipe Cards */
   .recipe-card {
     padding: 15px;
+    margin: 0;
   }
   
   .recipe-card h3 {
-    font-size: 1rem;
-    line-height: 1.2;
+    font-size: 0.95rem;
+    line-height: 1.3;
+    margin-bottom: 12px;
+  }
+  
+  .recipe-meta {
+    font-size: 0.8rem;
+    gap: 6px;
+    margin-bottom: 15px;
   }
   
   /* Vote Buttons */
+  .vote-container {
+    margin: 15px 0;
+    padding: 12px 0;
+  }
+  
   .vote-btn {
     font-size: 2rem;
-    min-width: 60px;
-    min-height: 60px;
+    min-width: 65px;
+    min-height: 65px;
     padding: 10px 15px;
   }
   
   .vote-buttons {
-    gap: 10px;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .vote-info {
+    gap: 6px;
+    font-size: 0.8rem;
+  }
+  
+  .vote-count, .net-votes {
+    font-size: 0.85rem;
+    padding: 4px 8px;
   }
   
   /* Popular Dishes */
   .home-popular-dishes {
+    margin-top: 25px;
     padding: 15px 10px;
   }
   
   .home-popular-dishes h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
+    margin-bottom: 15px;
+  }
+  
+  .popular-dishes-header {
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+  }
+  
+  .popular-dishes-header h3 {
+    font-size: 1rem;
+  }
+  
+  .clear-votes-btn {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+  }
+  
+  .popular-dish-item {
+    padding: 10px;
+    gap: 10px;
   }
   
   .popular-dish-rank {
-    width: 30px;
-    height: 30px;
-    font-size: 0.95rem;
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+  
+  .popular-dish-title {
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+  }
+  
+  .popular-dish-votes {
+    gap: 5px;
+    margin-top: 6px;
+  }
+  
+  .vote-badge {
+    font-size: 0.7rem;
+    padding: 3px 6px;
   }
   
   /* Ingredients */
   .ingredients-detected {
     padding: 12px;
+    margin-bottom: 20px;
   }
   
   .ingredients-detected h3 {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
   }
   
   .ingredient-tag {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     padding: 5px 10px;
+  }
+  
+  .ingredient-tags {
+    gap: 6px;
   }
   
   /* Results Section */
   .results-section {
-    padding: 30px 10px;
+    padding: 25px 10px;
   }
   
   .results-section h2 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+  }
+  
+  .recipes-container {
+    gap: 15px;
+    padding: 0 5px;
+  }
+  
+  .recipes-container h3 {
+    font-size: 1rem;
+    margin-bottom: 15px;
+  }
+  
+  /* Recipe Links */
+  .recipe-links {
+    gap: 8px;
+    margin-top: 12px;
+  }
+  
+  .recipe-link, .youtube-link {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+  
+  /* Buttons */
+  #scanAgainBtn {
+    max-width: 280px;
+    margin-top: 20px;
+    padding: 12px 20px;
+    font-size: 0.9rem;
   }
   
   /* Camera */
+  .camera-container {
+    margin: 15px 0;
+  }
+  
   .scan-frame {
     width: 120px;
     height: 120px;
   }
   
   .camera-overlay p {
-    font-size: 0.8rem;
-    padding: 8px 15px;
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    margin-top: 15px;
+  }
+  
+  .camera-controls {
+    margin-top: 15px;
+    gap: 8px;
+  }
+  
+  .camera-controls button {
+    max-width: 200px;
+    padding: 12px 20px;
+    font-size: 0.9rem;
   }
   
   /* Loading */
+  .loading-section {
+    padding: 20px;
+  }
+  
   .loading-section h2 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
   }
   
   .loading-section p {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
   
   .spinner {
     width: 40px;
     height: 40px;
+    margin-bottom: 15px;
+  }
+  
+  /* Typography */
+  .tagline {
+    font-size: 1rem;
+  }
+  
+  .problem h2, .features h2 {
+    font-size: 1.3rem;
+  }
+  
+  /* Mobile Tips */
+  .mobile-tips, .api-setup-tips {
+    font-size: 0.85rem;
+    padding: 15px;
+    margin: 15px 10px;
+  }
+  
+  .mobile-tips p, .api-setup-tips p {
+    margin: 8px 0;
+    line-height: 1.4;
   }
 }
 
 /* Small mobile phones (360px and below) */
 @media (max-width: 360px) {
+  body {
+    font-size: 13px;
+  }
+  
+  .hero {
+    padding: 25px 8px 35px;
+  }
+  
   .hero h1 {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    margin: 10px 0 5px;
+  }
+  
+  .hero p {
+    font-size: 0.85rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.8rem;
   }
   
   .logo {
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
+  }
+  
+  .action-buttons {
+    margin: 15px 0;
+    gap: 10px;
+    padding: 0 8px;
+  }
+  
+  #scanBtn, #uploadBtn, #testBtn {
+    padding: 12px 18px;
+    font-size: 0.85rem;
+    max-width: 260px;
   }
   
   .vote-btn {
     font-size: 1.75rem;
-    min-width: 55px;
-    min-height: 55px;
+    min-width: 60px;
+    min-height: 60px;
+    padding: 8px 12px;
+  }
+  
+  .vote-buttons {
+    gap: 10px;
   }
   
   .recipe-card {
     padding: 12px;
   }
   
+  .recipe-card h3 {
+    font-size: 0.9rem;
+  }
+  
   .home-popular-dishes {
     padding: 12px 8px;
+    margin-top: 20px;
+  }
+  
+  .home-popular-dishes h3 {
+    font-size: 0.95rem;
+  }
+  
+  .popular-dish-item {
+    padding: 8px;
+  }
+  
+  .popular-dish-rank {
+    width: 25px;
+    height: 25px;
+    font-size: 0.85rem;
+  }
+  
+  .popular-dish-title {
+    font-size: 0.8rem;
+  }
+  
+  .results-section {
+    padding: 20px 8px;
+  }
+  
+  .results-section h2 {
+    font-size: 1.1rem;
+  }
+  
+  .ingredients-detected {
+    padding: 10px;
+  }
+  
+  .ingredient-tag {
+    font-size: 0.7rem;
+    padding: 4px 8px;
   }
 }
 
